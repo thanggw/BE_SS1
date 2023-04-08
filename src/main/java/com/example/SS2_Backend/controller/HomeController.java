@@ -19,4 +19,10 @@ public class HomeController {
     public ResponseEntity<Response> solveGameTheory(@RequestBody GameTheoryProblemDTO gameTheoryProlem) {
         return gameTheorySolver.solveGameTheory(gameTheoryProlem);
     }
+
+    @PostMapping("/problem-result-insights")
+    public ResponseEntity<Response> getProblemResultInsights(@RequestBody GameTheoryProblemDTO gameTheoryProlem) {
+        System.out.println("getProblemResultInsights");
+       return gameTheorySolver.getProblemResultInsights(gameTheoryProlem);
+    }
 }
