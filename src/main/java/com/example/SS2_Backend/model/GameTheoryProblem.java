@@ -65,12 +65,12 @@ public class GameTheoryProblem implements Problem {
 
     public GameTheoryProblem(String path, int startRow) throws IOException {
         super();
+
         if (Objects.equals(path, "")) {
             System.err.println("INVALID INPUT PATH FOUND: Unable to generate Game Theory Problem");
             System.exit(-1);
         }
-        // Load user input data from .xlsx file
-//        load(path, startRow);
+
         eliminateConflictStrategies();
         computeNashEquilibrium();
     }
