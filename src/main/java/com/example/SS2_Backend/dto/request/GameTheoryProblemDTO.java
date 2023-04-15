@@ -19,4 +19,5 @@ public class GameTheoryProblemDTO {
     private List<Conflict> conflictSet = new ArrayList<>();
     private String fitnessFunction;
     private String defaultPayoffFunction;
+    private String algorithm;
 }

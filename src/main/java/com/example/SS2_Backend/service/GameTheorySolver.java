@@ -6,10 +6,13 @@ import com.example.SS2_Backend.model.GameSolution;
 import com.example.SS2_Backend.model.GameSolutionInsights;
 import com.example.SS2_Backend.model.GameTheoryProblem;
 import com.example.SS2_Backend.model.NormalPlayer;
+import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.variable.BinaryIntegerVariable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -18,29 +21,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class GameTheorySolver {
 
-    public ResponseEntity<Response> solveGameTheory(GameTheoryProblemDTO gameTheoryProlem) {
 
+    public ResponseEntity<Response> solveGameTheory(GameTheoryProblemDTO request) {
+
+        log.info("Received request: " + request);
         GameTheoryProblem problem = new GameTheoryProblem();
-        problem.setSpecialPlayer(gameTheoryProlem.getSpecialPlayer());
-        problem.setNormalPlayers(gameTheoryProlem.getNormalPlayers());
-        problem.setFitnessFunction(gameTheoryProlem.getFitnessFunction());
-        problem.setDefaultPayoffFunction(gameTheoryProlem.getDefaultPayoffFunction());
-        problem.setConflictSet(gameTheoryProlem.getConflictSet());
+        problem.setSpecialPlayer(request.getSpecialPlayer());
+        problem.setNormalPlayers(request.getNormalPlayers());
+        problem.setFitnessFunction(request.getFitnessFunction());
+        problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
+        problem.setConflictSet(request.getConflictSet());
+
+        long startTime = System.currentTimeMillis();
+        log.info("Running algorithm: " + request.getAlgorithm() + "...");
 
         // solve using NSGA-II
         NondominatedPopulation results = new Executor()
                 .withProblem(problem)
-                .withAlgorithm("NSGAII")
+                .withAlgorithm(request.getAlgorithm())
                 .withMaxEvaluations(5000)
                 .distributeOnAllCores()
                 .run();
 
+        long endTime = System.currentTimeMillis();
+        double runtime = ((double) (endTime - startTime) / 1000 / 60);
+        runtime = Math.round(runtime * 100.0) / 100.0;
+        log.info("Algorithm: " + request.getAlgorithm() + " finished in " + runtime + " minutes");
         // format the output
         GameSolution gameSolution = formatSolution(problem, results);
-
+        gameSolution.setAlgorithm(request.getAlgorithm());
+        gameSolution.setRuntime(runtime);
         return ResponseEntity.ok(
                 Response.builder()
                         .status(200)
@@ -83,6 +97,7 @@ public class GameTheorySolver {
         }
 
         gameSolution.setPlayers(gameSolutionPlayers);
+
         return gameSolution;
     }
 
@@ -105,7 +120,7 @@ public class GameTheorySolver {
     }
 
     public ResponseEntity<Response> getProblemResultInsights(GameTheoryProblemDTO gameTheoryProblem) {
-
+        log.info("Received request: " + gameTheoryProblem);
         String[] algorithms = {"NSGAII", "eMOEA", "PESA2", "VEGA"};
         GameTheoryProblem problem = new GameTheoryProblem();
         problem.setSpecialPlayer(gameTheoryProblem.getSpecialPlayer());
@@ -118,7 +133,9 @@ public class GameTheorySolver {
         GameSolutionInsights gameSolutionInsights = initGameSolutionInsights(algorithms);
 
         // solve the problem with different algorithms and then evaluate the performance of the algorithms
+        log.info("Start benchmarking the algorithms...");
         for (String algorithm : algorithms) {
+            log.info("Running algorithm: " + algorithm + "...");
             // benchmark the algorithm, by running it 10 times and get the all fitness values and runtimes
             for (int i = 0; i < 10; i++) {
                 long start = System.currentTimeMillis();
@@ -139,6 +156,7 @@ public class GameTheorySolver {
             }
 
         }
+        log.info("Benchmarking finished!");
 
         return ResponseEntity.ok(
                 Response.builder()

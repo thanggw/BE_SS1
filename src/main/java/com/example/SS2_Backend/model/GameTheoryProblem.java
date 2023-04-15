@@ -351,8 +351,8 @@ public class GameTheoryProblem implements Problem {
                 }
             } else {
                 // this conflict is between 2 strategies of the 2 players at the a iteration
-                if (chosenStrategyIndices.get(leftPlayerIndex) == leftPlayerStrategy &&
-                        chosenStrategyIndices.get(rightPlayerIndex) == rightPlayerStrategy) {
+                if (chosenStrategyIndices.get(leftPlayerIndex - 1) == leftPlayerStrategy &&
+                        chosenStrategyIndices.get(rightPlayerIndex - 1) == rightPlayerStrategy) {
                     solution.setConstraint(i, -1); // this solution violates the constraints[i]
                 }
             }

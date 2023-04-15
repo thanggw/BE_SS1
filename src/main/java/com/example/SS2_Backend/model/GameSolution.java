@@ -14,6 +14,8 @@ import java.util.List;
 public class GameSolution {
     private double fitnessValue;
     private List<Player> players;
+    private String algorithm;
+    private double runtime;
 
     @Data
     @NoArgsConstructor
