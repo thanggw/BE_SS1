@@ -2,10 +2,23 @@ package com.example.SS2_Backend.model;
 
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class StringExpressionEvaluator {
+
+
+    public enum DefaultFunction {
+        SUM,
+        AVERAGE,
+        MIN,
+        MAX,
+        PRODUCT,
+        MEDIAN,
+        RANGE
+    }
 
     public static double evaluatePayoffFunctionWithRelativeToOtherPlayers(Strategy strategy,
                                                                           String payoffFunction,
@@ -16,8 +29,9 @@ public class StringExpressionEvaluator {
 
         if (payoffFunction.isBlank()) {
             // the payoff function is the the sum function of all properties by default
-            return calculatePayoffByDefault(strategy);
+            return calculateByDefault(strategy.getProperties(), null);
         } else {
+
             // if there is no relationship in the payoff function, then just evaluate it normally, no need to replace any P placeholder
             if (!payoffFunction.contains("P")) {
                 return evaluatePayoffFunctionNoRelative(strategy, expression);
@@ -60,6 +74,8 @@ public class StringExpressionEvaluator {
 
     }
 
+
+
     public static double evaluatePayoffFunctionNoRelative(Strategy strategy,
                                                           String payoffFunction) {
 
@@ -67,8 +83,12 @@ public class StringExpressionEvaluator {
 
         if (payoffFunction.isBlank()) {
             // the payoff function is the the sum function of all properties by default
-            return calculatePayoffByDefault(strategy);
+            return calculateByDefault(strategy.getProperties(), null);
         } else {
+
+            if (checkIfIsDefaultFunction(payoffFunction)) {
+                return calculateByDefault(strategy.getProperties(), payoffFunction);
+            }
 
             // replace the placeholder for THIS current player's strategy with the actual value
             // example: payoffFunction is a string formula, e.g: p1 + p2 / p3 - P2p3 with p1, p2, p3 are the properties 1, 2, 3 of the strategy chosen by this player
@@ -90,11 +110,85 @@ public class StringExpressionEvaluator {
 
 
     }
-    private static double calculatePayoffByDefault(Strategy strategy) {
-        // sum of all property values of the strategy
-        return strategy.getProperties().stream()
+
+
+    private static boolean checkIfIsDefaultFunction(String function) {
+        return Arrays.stream(DefaultFunction.values()).anyMatch(f -> f.name().equalsIgnoreCase(function));
+    }
+
+    private static double calSum(List<Double> values) {
+        return values.stream()
                 .mapToDouble(Double::doubleValue)
                 .sum();
+    }
+
+    private static double calProduct(List<Double> values) {
+        return values.stream()
+                .reduce(1.0, (a, b) -> a * b);
+    }
+
+    private static double calMax(List<Double> values) {
+        return values.stream()
+                .mapToDouble(Double::doubleValue)
+                .max().getAsDouble();
+    }
+
+    private static double calMin(List<Double> values) {
+        return values.stream()
+                .mapToDouble(Double::doubleValue)
+                .min().getAsDouble();
+    }
+
+    private static double calAverage(List<Double> values) {
+        return values.stream()
+                .mapToDouble(Double::doubleValue)
+                .average().getAsDouble();
+    }
+
+    private static double calMedian(List<Double> values) {
+        double[] arr = values.stream()
+                .mapToDouble(Double::doubleValue)
+                .sorted()
+                .toArray();
+        int n = arr.length;
+        if (n % 2 == 0) {
+            return (arr[n / 2] + arr[n / 2 - 1]) / 2;
+        } else {
+            return arr[n / 2];
+        }
+    }
+
+    private static double calRange(List<Double> values) {
+        double[] arr = values.stream()
+                .mapToDouble(Double::doubleValue)
+                .sorted()
+                .toArray();
+        return arr[arr.length - 1] - arr[0];
+    }
+
+
+    private static double calculateByDefault(List<Double> values, String defaultFunction) {
+        DefaultFunction function = DefaultFunction.valueOf(defaultFunction.toUpperCase());
+
+        switch (function) {
+            case SUM:
+                return calSum(values);
+            case PRODUCT:
+                return calProduct(values);
+            case MAX:
+                return calMax(values);
+            case MIN:
+                return calMin(values);
+            case AVERAGE:
+                return calAverage(values);
+            case MEDIAN:
+                return calMedian(values);
+            case RANGE:
+                return calRange(values);
+            default:
+                return calSum(values);
+        }
+
     }
 
 
@@ -194,15 +288,20 @@ public class StringExpressionEvaluator {
 //
 //    }
 
-    public static double evaluateFitnessValue(double[] payoffs, String fitnessFunction) {
+    public static double evaluateFitnessValue(Double[] payoffs, String fitnessFunction) {
         String expression = fitnessFunction;
+        List<Double> payoffList =  new ArrayList<>(Arrays.asList(payoffs));
 
         if (fitnessFunction.isBlank()) {
-            // if the fitnessFunction is absent,
+            // if the fitnessFunction is absent,qweqweqwe
             // the fitness value is the average of all payoffs of all chosen strategies by default
-            return calculateFitnessValueByDefault(payoffs);
+            return calculateByDefault(payoffList, null);
         } else {
             // replace placeholders for players' payoffs with the actual values
+
+            if (checkIfIsDefaultFunction(fitnessFunction)) {
+                return calculateByDefault(payoffList, fitnessFunction);
+            }
             for (int i = 0; i < payoffs.length; i++) {
                 double playerPayoff = payoffs[i];
 
@@ -214,12 +313,7 @@ public class StringExpressionEvaluator {
         }
     }
 
-    private static double calculateFitnessValueByDefault(double[] payoffs) {
-        // calculate the average of the payoffs
-        return Arrays.stream(payoffs)
-                .average()
-                .orElse(0D);
-    }
+
 }
 
 

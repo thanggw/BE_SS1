@@ -339,7 +339,7 @@ public class GameTheoryProblem implements Problem {
     public void evaluate(Solution solution) {
 //        System.out.println("Evaluating " + count++);
         double[] NashEquilibrium = {computeNashEquilibrium()};
-        double[] payoffs = new double[solution.getNumberOfVariables()];
+        Double[] payoffs = new Double[solution.getNumberOfVariables()];
 
         List<Integer> chosenStrategyIndices = new ArrayList<>();
         // chosenStrategyIndices[0] is the strategy index that normalPlayers[0] has chosen
