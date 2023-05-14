@@ -30,10 +30,10 @@ public class GameTheorySolver {
 
         log.info("Received request: " + request);
         GameTheoryProblem problem = new GameTheoryProblem();
+        problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
+        problem.setFitnessFunction(request.getFitnessFunction());
         problem.setSpecialPlayer(request.getSpecialPlayer());
         problem.setNormalPlayers(request.getNormalPlayers());
-        problem.setFitnessFunction(request.getFitnessFunction());
-        problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
         problem.setConflictSet(request.getConflictSet());
 
         long startTime = System.currentTimeMillis();
@@ -43,7 +43,7 @@ public class GameTheorySolver {
         NondominatedPopulation results = new Executor()
                 .withProblem(problem)
                 .withAlgorithm(request.getAlgorithm())
-                .withMaxEvaluations(5000)
+                .withMaxEvaluations(1)
                 .distributeOnAllCores()
                 .run();
 

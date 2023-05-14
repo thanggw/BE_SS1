@@ -15,10 +15,30 @@ import java.util.stream.Collectors;
 public class NormalPlayer {
     private String name;
     private List<Strategy> strategies;
+    private List<Double> payoffValues;
     private int prevStrategyIndex = -1; // this is for the problem with dynamic data
     private String payoffFunction;
     private double payoff;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setStrategies(List<Strategy> strategies) {
+        this.strategies = strategies;
+    }
+
+    public List<Double> getPayoffValues() {
+        return payoffValues;
+    }
+
+    public void setPayoffValues(List<Double> payoffValues) {
+        this.payoffValues = payoffValues;
+    }
 
     public Strategy getStrategyAt(int index) {
         return strategies.get(index);

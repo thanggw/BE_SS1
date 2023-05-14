@@ -268,6 +268,27 @@ public class GameTheoryProblem implements Problem {
 
     public void setNormalPlayers(List<NormalPlayer> normalPlayers) {
         this.normalPlayers = normalPlayers;
+
+        for (NormalPlayer player : normalPlayers) {
+            String payoffFunction = player.getPayoffFunction();
+            if (payoffFunction == null) {
+                payoffFunction = defaultPayoffFunction;
+            }
+
+            // if the payoff function is relative to other players, then it must be calculated in the evaluation
+            if (payoffFunction.contains("P")) {
+                continue;
+            }
+
+            // if the payoff function is relative to the player itself, then it can be calculated in the initialization
+            List<Double> payoffValues = new ArrayList<>();
+            for (int i = 0; i < player.getStrategies().size(); ++i) {
+                double payoffValue =  evaluatePayoffFunctionNoRelative(player.getStrategies().get(i), payoffFunction);
+                payoffValues.add(payoffValue);
+            }
+            player.setPayoffValues(payoffValues);
+
+        }
     }
 
     public List<Conflict> getConflictSet() {
@@ -370,14 +391,23 @@ public class GameTheoryProblem implements Problem {
             if (payoffFunction == null) {
                 payoffFunction = defaultPayoffFunction;
             }
-            double chosenStrategyPayoff
-                    = evaluatePayoffOfStrategy(chosenStrategy,
+
+            double chosenStrategyPayoff = 0;
+            if (payoffFunction.contains("P")) {
+                // if the payoff function is relative to other players, then it must be calculated in the evaluation
+
+             chosenStrategyPayoff
+                    = evaluatePayoffFunctionWithRelativeToOtherPlayers(chosenStrategy,
                     payoffFunction,
                     normalPlayers,
                     chosenStrategyIndices);
+            }
+            else {
+                // if the payoff function is relative to the player itself, then it can be calculated in the initialization
+                chosenStrategyPayoff = normalPlayer.getPayoffValues().get(chosenStrategyIndices.get(i));
+            }
 
             chosenStrategy.setPayoff(chosenStrategyPayoff);
-
             payoffs[i] = chosenStrategyPayoff;
         }
 

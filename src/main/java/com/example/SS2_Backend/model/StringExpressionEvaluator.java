@@ -6,10 +6,10 @@ import java.util.List;
 
 public class StringExpressionEvaluator {
 
-    public static double evaluatePayoffOfStrategy(Strategy strategy,
-                                                  String payoffFunction,
-                                                  List<NormalPlayer> normalPlayers,
-                                                  List<Integer> chosenStrategyIndices) {
+    public static double evaluatePayoffFunctionWithRelativeToOtherPlayers(Strategy strategy,
+                                                                          String payoffFunction,
+                                                                          List<NormalPlayer> normalPlayers,
+                                                                          List<Integer> chosenStrategyIndices) {
 
         String expression = payoffFunction;
 
@@ -17,6 +17,10 @@ public class StringExpressionEvaluator {
             // the payoff function is the the sum function of all properties by default
             return calculatePayoffByDefault(strategy);
         } else {
+            // if there is no relationship in the payoff function, then just evaluate it normally, no need to replace any P placeholder
+            if (!payoffFunction.contains("P")) {
+                return evaluatePayoffFunctionNoRelative(strategy, expression);
+            }
 
             // replace the placeholder for THIS current player's strategy with the actual value
             // example: payoffFunction is a string formula, e.g: p1 + p2 / p3 - P2p3 with p1, p2, p3 are the properties 1, 2, 3 of the strategy chosen by this player
@@ -41,6 +45,8 @@ public class StringExpressionEvaluator {
                 }
             }
 
+
+
             // evaluate this string expression to get the result
             return eval(expression);
 
@@ -49,6 +55,32 @@ public class StringExpressionEvaluator {
 
     }
 
+    public static double evaluatePayoffFunctionNoRelative(Strategy strategy,
+                                                                          String payoffFunction) {
+
+        String expression = payoffFunction;
+
+        if (payoffFunction.isBlank()) {
+            // the payoff function is the the sum function of all properties by default
+            return calculatePayoffByDefault(strategy);
+        } else {
+
+            // replace the placeholder for THIS current player's strategy with the actual value
+            // example: payoffFunction is a string formula, e.g: p1 + p2 / p3 - P2p3 with p1, p2, p3 are the properties 1, 2, 3 of the strategy chosen by this player
+            for (int i = 0; i < strategy.getProperties().size(); ++i) {
+                double propertyValue = strategy.getProperties().get(i);
+                String placeholder = String.format("\\bp%d\\b", i + 1);
+                expression = expression.replaceAll(placeholder, Double.toString(propertyValue));
+            }
+
+
+            // evaluate this string expression to get the result
+            return eval(expression);
+
+        }
+
+
+    }
     private static double calculatePayoffByDefault(Strategy strategy) {
         // sum of all property values of the strategy
         return strategy.getProperties().stream()
