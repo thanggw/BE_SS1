@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.model;
 
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,8 +27,12 @@ public class StringExpressionEvaluator {
             // example: payoffFunction is a string formula, e.g: p1 + p2 / p3 - P2p3 with p1, p2, p3 are the properties 1, 2, 3 of the strategy chosen by this player
             for (int i = 0; i < strategy.getProperties().size(); ++i) {
                 double propertyValue = strategy.getProperties().get(i);
+
+                DecimalFormat df = new DecimalFormat("#.##############");
+                String formattedNum = df.format(propertyValue);
                 String placeholder = String.format("\\bp%d\\b", i + 1);
-                expression = expression.replaceAll(placeholder, Double.toString(propertyValue));
+
+                expression = expression.replaceAll(placeholder, formattedNum);
             }
 
             // replace the placeholder for OTHER players' strategies with the actual values
@@ -56,7 +61,7 @@ public class StringExpressionEvaluator {
     }
 
     public static double evaluatePayoffFunctionNoRelative(Strategy strategy,
-                                                                          String payoffFunction) {
+                                                          String payoffFunction) {
 
         String expression = payoffFunction;
 
@@ -69,8 +74,12 @@ public class StringExpressionEvaluator {
             // example: payoffFunction is a string formula, e.g: p1 + p2 / p3 - P2p3 with p1, p2, p3 are the properties 1, 2, 3 of the strategy chosen by this player
             for (int i = 0; i < strategy.getProperties().size(); ++i) {
                 double propertyValue = strategy.getProperties().get(i);
+
+                DecimalFormat df = new DecimalFormat("#.##############");
+                String formattedNum = df.format(propertyValue);
                 String placeholder = String.format("\\bp%d\\b", i + 1);
-                expression = expression.replaceAll(placeholder, Double.toString(propertyValue));
+
+                expression = expression.replaceAll(placeholder, formattedNum);
             }
 
 
@@ -146,7 +155,11 @@ public class StringExpressionEvaluator {
                 int startPos = this.pos;
                 if (eat('(')) { // parentheses
                     x = parseExpression();
-                    if (!eat(')')) throw new RuntimeException("Missing ')'");
+                    if (!eat(')')) {
+                        System.out.println("Missing ')");
+                        System.out.println(str);
+                        throw new RuntimeException("Missing ')'");
+                    }
                 } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
                     while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
                     x = Double.parseDouble(str.substring(startPos, this.pos));
@@ -208,5 +221,7 @@ public class StringExpressionEvaluator {
                 .orElse(0D);
     }
 }
+
+
 
 
