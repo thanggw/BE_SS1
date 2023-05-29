@@ -43,7 +43,7 @@ public class GameTheorySolver {
         NondominatedPopulation results = new Executor()
                 .withProblem(problem)
                 .withAlgorithm(request.getAlgorithm())
-                .withMaxEvaluations(1)
+                .withMaxEvaluations(1) //TODO: user can specify the max evaluations
                 .distributeOnAllCores()
                 .run();
 
@@ -124,9 +124,9 @@ public class GameTheorySolver {
         String[] algorithms = {"NSGAII", "eMOEA", "PESA2", "VEGA"};
         GameTheoryProblem problem = new GameTheoryProblem();
         problem.setSpecialPlayer(gameTheoryProblem.getSpecialPlayer());
+        problem.setDefaultPayoffFunction(gameTheoryProblem.getDefaultPayoffFunction());
         problem.setNormalPlayers(gameTheoryProblem.getNormalPlayers());
         problem.setFitnessFunction(gameTheoryProblem.getFitnessFunction());
-        problem.setDefaultPayoffFunction(gameTheoryProblem.getDefaultPayoffFunction());
         problem.setConflictSet(gameTheoryProblem.getConflictSet());
 
 
@@ -138,11 +138,12 @@ public class GameTheorySolver {
             log.info("Running algorithm: " + algorithm + "...");
             // benchmark the algorithm, by running it 10 times and get the all fitness values and runtimes
             for (int i = 0; i < 10; i++) {
+                System.out.println("Iteration: " + i);
                 long start = System.currentTimeMillis();
                 NondominatedPopulation results = new Executor()
                         .withProblem(problem)
                         .withAlgorithm(algorithm)
-                        .withMaxEvaluations(5000)
+                        .withMaxEvaluations(1) //TODO: user can specify the max evaluations
                         .distributeOnAllCores()
                         .run();
                 long end = System.currentTimeMillis();
