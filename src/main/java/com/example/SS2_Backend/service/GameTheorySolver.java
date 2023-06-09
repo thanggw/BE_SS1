@@ -51,6 +51,7 @@ public class GameTheorySolver {
         double runtime = ((double) (endTime - startTime) / 1000 / 60);
         runtime = Math.round(runtime * 100.0) / 100.0;
         log.info("Algorithm: " + request.getAlgorithm() + " finished in " + runtime + " minutes");
+
         // format the output
         GameSolution gameSolution = formatSolution(problem, results);
         gameSolution.setAlgorithm(request.getAlgorithm());
