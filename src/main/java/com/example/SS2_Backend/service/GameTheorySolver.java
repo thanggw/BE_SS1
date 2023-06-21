@@ -6,6 +6,7 @@ import com.example.SS2_Backend.model.GameSolution;
 import com.example.SS2_Backend.model.GameSolutionInsights;
 import com.example.SS2_Backend.model.GameTheoryProblem;
 import com.example.SS2_Backend.model.NormalPlayer;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
@@ -14,6 +15,7 @@ import org.moeaframework.core.variable.BinaryIntegerVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,7 +27,6 @@ import java.util.Map;
 @Service
 public class GameTheorySolver {
 
-
     public ResponseEntity<Response> solveGameTheory(GameTheoryProblemDTO request) {
 
         log.info("Received request: " + request);
@@ -35,6 +36,7 @@ public class GameTheorySolver {
         problem.setSpecialPlayer(request.getSpecialPlayer());
         problem.setNormalPlayers(request.getNormalPlayers());
         problem.setConflictSet(request.getConflictSet());
+        problem.setMaximizing(request.isMaximizing());
 
         long startTime = System.currentTimeMillis();
         log.info("Running algorithm: " + request.getAlgorithm() + "...");
@@ -43,7 +45,7 @@ public class GameTheorySolver {
         NondominatedPopulation results = new Executor()
                 .withProblem(problem)
                 .withAlgorithm(request.getAlgorithm())
-                .withMaxEvaluations(1) //TODO: user can specify the max evaluations
+                .withMaxEvaluations(request.getEvaluation())
                 .distributeOnAllCores()
                 .run();
 
@@ -53,6 +55,7 @@ public class GameTheorySolver {
         log.info("Algorithm: " + request.getAlgorithm() + " finished in " + runtime + " minutes");
 
         // format the output
+        log.info("Preparing the solution ...");
         GameSolution gameSolution = formatSolution(problem, results);
         gameSolution.setAlgorithm(request.getAlgorithm());
         gameSolution.setRuntime(runtime);
@@ -120,31 +123,36 @@ public class GameTheorySolver {
         return strategyName;
     }
 
-    public ResponseEntity<Response> getProblemResultInsights(GameTheoryProblemDTO gameTheoryProblem) {
-        log.info("Received request: " + gameTheoryProblem);
+    public ResponseEntity<Response> getProblemResultInsights(GameTheoryProblemDTO request) {
+        log.info("Received request: " + request);
         String[] algorithms = {"NSGAII", "eMOEA", "PESA2", "VEGA"};
-        GameTheoryProblem problem = new GameTheoryProblem();
-        problem.setSpecialPlayer(gameTheoryProblem.getSpecialPlayer());
-        problem.setDefaultPayoffFunction(gameTheoryProblem.getDefaultPayoffFunction());
-        problem.setNormalPlayers(gameTheoryProblem.getNormalPlayers());
-        problem.setFitnessFunction(gameTheoryProblem.getFitnessFunction());
-        problem.setConflictSet(gameTheoryProblem.getConflictSet());
 
+        //TODO: log and websocket
+        GameTheoryProblem problem = new GameTheoryProblem();
+        problem.setSpecialPlayer(request.getSpecialPlayer());
+        problem.setDefaultPayoffFunction(request.getDefaultPayoffFunction());
+        problem.setNormalPlayers(request.getNormalPlayers());
+        problem.setFitnessFunction(request.getFitnessFunction());
+        problem.setConflictSet(request.getConflictSet());
+        problem.setMaximizing(request.isMaximizing());
 
         GameSolutionInsights gameSolutionInsights = initGameSolutionInsights(algorithms);
 
         // solve the problem with different algorithms and then evaluate the performance of the algorithms
         log.info("Start benchmarking the algorithms...");
+        //TODO: websocket
         for (String algorithm : algorithms) {
             log.info("Running algorithm: " + algorithm + "...");
+            //TODO: websocket
             // benchmark the algorithm, by running it 10 times and get the all fitness values and runtimes
             for (int i = 0; i < 10; i++) {
                 System.out.println("Iteration: " + i);
+                //TODO: websocket
                 long start = System.currentTimeMillis();
                 NondominatedPopulation results = new Executor()
                         .withProblem(problem)
                         .withAlgorithm(algorithm)
-                        .withMaxEvaluations(1) //TODO: user can specify the max evaluations
+                        .withMaxEvaluations(request.getEvaluation())
                         .distributeOnAllCores()
                         .run();
                 long end = System.currentTimeMillis();
@@ -159,6 +167,7 @@ public class GameTheorySolver {
 
         }
         log.info("Benchmarking finished!");
+        //TODO: websocket
 
         return ResponseEntity.ok(
                 Response.builder()

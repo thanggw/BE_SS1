@@ -57,6 +57,7 @@ public class GameTheoryProblem implements Problem {
     private List<Double> playerAvgDiffs;
     private String fitnessFunction;
     private String defaultPayoffFunction;
+    private boolean isMaximizing;
     int[] bestResponses = new int[4];
 
 
@@ -81,30 +82,6 @@ public class GameTheoryProblem implements Problem {
      * @params String path: .xlsx pathname,
      * ________int startRow: start row in xlsx file - where real data inserted
      */
-//    private void load(String path, int startRow) throws IOException {
-//        startRow--; //Since row index start from 0 --> index = startRow-1
-//        InputDataDriver driver = new InputDataDriver(path);
-//        // WARNING: Must not modify these variables
-//        boolean isSpecialPlayerExist = driver.getValueOfCoordinate(startRow, 0) != 0;
-//        // SET UP DATA LOCATION
-//        int NORMAL_PLAYER_START_ROW = isSpecialPlayerExist ? startRow + 3 : startRow + 1;
-//        int numberOfNP = driver.getValueOfCoordinate(NORMAL_PLAYER_START_ROW, 0).intValue();
-//        fitnessFunction = driver.getStringOfCoordinate(NORMAL_PLAYER_START_ROW, 2);
-//        defaultPayoffFunction = driver.getStringOfCoordinate(NORMAL_PLAYER_START_ROW, 3);
-//        int CONFLICT_SET_START_ROW = isSpecialPlayerExist ? startRow + 5 + numberOfNP : startRow + 3 + numberOfNP;
-//        // Load Special Player
-//        if (isSpecialPlayerExist) {
-//            specialPlayer = driver.loadSpecialPlayerFromFile(startRow);
-//        }
-//        List<Double> normalPlayerWeights = driver.loadNormalPlayerWeights(NORMAL_PLAYER_START_ROW);
-//        normalPlayers = driver.loadNormalPlayersFromFile(NORMAL_PLAYER_START_ROW, normalPlayerWeights);
-//        conflictSet = driver.loadConflictSetFromFile(CONFLICT_SET_START_ROW);
-//
-//        if (conflictSet == null) {
-//            conflictSet = new ArrayList<>();
-//        }
-//
-//    }
 
     /**
      * @usage To remove all conflict strategies of conflict set declared in .xlsx file
@@ -168,6 +145,15 @@ public class GameTheoryProblem implements Problem {
         this.playerAvgDiffs = playerAvgDiffs;
 
         return nash;
+    }
+
+
+    public boolean isMaximizing() {
+        return isMaximizing;
+    }
+
+    public void setMaximizing(boolean maximizing) {
+        isMaximizing = maximizing;
     }
 
     public List<NormalPlayer> getNormalPlayers() {
@@ -414,7 +400,12 @@ public class GameTheoryProblem implements Problem {
         double fitnessValue
                 = evaluateFitnessValue(
                 payoffs,
-                fitnessFunction);
+                fitnessFunction
+        );
+
+        if (isMaximizing) {
+            fitnessValue = -fitnessValue; // because the MOEA Framework only support minimization, for maximization problem, we need to negate the fitness value
+        }
 
 
         solution.setObjective(0, fitnessValue);

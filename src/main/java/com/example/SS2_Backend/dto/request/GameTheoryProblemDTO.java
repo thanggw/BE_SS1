@@ -20,4 +20,10 @@ public class GameTheoryProblemDTO {
     private String fitnessFunction;
     private String defaultPayoffFunction;
     private String algorithm;
+    private boolean isMaximizing;
+    private Integer evaluation;
+
+    public String toString() {
+        return "GameTheoryProblemDTO(specialPlayer=" + this.getSpecialPlayer() + ", number of normal players=" + this.getNormalPlayers().size() + ", conflictSet=" + this.getConflictSet() + ", fitnessFunction=" + this.getFitnessFunction() + ", defaultPayoffFunction=" + this.getDefaultPayoffFunction() + ", algorithm=" + this.getAlgorithm() + ", isMaximizing=" + this.isMaximizing() + ", evaluation=" + this.getEvaluation() + ")";
+    }
 }
