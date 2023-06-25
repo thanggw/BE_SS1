@@ -15,14 +15,13 @@ public class HomeController {
     @Autowired
     private GameTheorySolver gameTheorySolver;
 
-   @PostMapping("/game-theory-solver")
-    public ResponseEntity<Response> solveGameTheory(@RequestBody GameTheoryProblemDTO gameTheoryProlem) {
-        return gameTheorySolver.solveGameTheory(gameTheoryProlem);
+    @PostMapping("/game-theory-solver")
+    public ResponseEntity<Response> solveGameTheory(@RequestBody GameTheoryProblemDTO gameTheoryProblem) {
+        return gameTheorySolver.solveGameTheory(gameTheoryProblem);
     }
 
-    @PostMapping("/problem-result-insights")
-    public ResponseEntity<Response> getProblemResultInsights(@RequestBody GameTheoryProblemDTO gameTheoryProlem) {
-        System.out.println("getProblemResultInsights");
-       return gameTheorySolver.getProblemResultInsights(gameTheoryProlem);
+    @PostMapping("/problem-result-insights/{sessionCode}")
+    public ResponseEntity<Response> getProblemResultInsights(@RequestBody GameTheoryProblemDTO gameTheoryProblem, @PathVariable String sessionCode) {
+       return gameTheorySolver.getProblemResultInsights(gameTheoryProblem, sessionCode);
     }
 }
