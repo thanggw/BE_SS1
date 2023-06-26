@@ -10,9 +10,15 @@ import com.example.SS2_Backend.model.NormalPlayer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
+import org.moeaframework.core.Initialization;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
+import org.moeaframework.core.Variation;
+import org.moeaframework.core.operator.InjectedInitialization;
+import org.moeaframework.core.operator.real.PM;
+import org.moeaframework.core.operator.real.SBX;
 import org.moeaframework.core.variable.BinaryIntegerVariable;
+import org.moeaframework.problem.AbstractProblem;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -43,17 +49,18 @@ public class GameTheorySolver {
         long startTime = System.currentTimeMillis();
         log.info("Running algorithm: " + request.getAlgorithm() + "...");
 
-        // solve using NSGA-II
-        NondominatedPopulation results = new Executor()
-                .withProblem(problem)
-                .withAlgorithm(request.getAlgorithm())
-                .withMaxEvaluations(request.getEvaluation())
-                .distributeOnAllCores()
-                .run();
-
+        // solve the problem
+        NondominatedPopulation results = solveProblem(problem,
+                request.getAlgorithm(),
+                request.getGeneration(),
+                request.getPopulationSize(),
+                request.getDistributedCores(),
+                request.getMaxTime()
+        );
         long endTime = System.currentTimeMillis();
         double runtime = ((double) (endTime - startTime) / 1000 / 60);
         runtime = Math.round(runtime * 100.0) / 100.0;
+
         log.info("Algorithm: " + request.getAlgorithm() + " finished in " + runtime + " minutes");
 
         // format the output
@@ -68,6 +75,40 @@ public class GameTheorySolver {
                         .data(gameSolution)
                         .build()
         );
+    }
+
+    private NondominatedPopulation solveProblem(GameTheoryProblem problem,
+                                                String algorithm,
+                                                Integer generation,
+                                                Integer populationSize,
+                                                String distributedCores,
+                                                Integer maxTime)
+    {
+
+        NondominatedPopulation results;
+        if (distributedCores.equals("all")) {
+                 results = new Executor()
+                .withProblem(problem)
+                .withAlgorithm(algorithm)
+                .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                .withProperty("populationSize", populationSize)
+                .withProperty("maxTime", maxTime)
+                .distributeOnAllCores()
+                .run();
+
+
+        } else {
+            int numberOfCores = Integer.parseInt(distributedCores);
+            results = new Executor()
+                    .withProblem(problem)
+                    .withAlgorithm(algorithm)
+                    .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                    .withProperty("populationSize", populationSize)
+                    .withProperty("maxTime", maxTime)
+                    .distributeOn(numberOfCores)
+                    .run();
+        }
+        return results;
     }
 
     private GameSolution formatSolution(GameTheoryProblem problem, NondominatedPopulation result) {
@@ -151,12 +192,15 @@ public class GameTheorySolver {
             for (int i = 0; i < 10; i++) {
                 System.out.println("Iteration: " + i);
                 long start = System.currentTimeMillis();
-                NondominatedPopulation results = new Executor()
-                        .withProblem(problem)
-                        .withAlgorithm(algorithm)
-                        .withMaxEvaluations(request.getEvaluation())
-                        .distributeOnAllCores()
-                        .run();
+
+                NondominatedPopulation results = solveProblem(problem,
+                        request.getAlgorithm(),
+                        request.getGeneration(),
+                        request.getPopulationSize(),
+                        request.getDistributedCores(),
+                        request.getMaxTime()
+                );
+
                 long end = System.currentTimeMillis();
 
                 double runtime = (double) (end - start) / 1000;
