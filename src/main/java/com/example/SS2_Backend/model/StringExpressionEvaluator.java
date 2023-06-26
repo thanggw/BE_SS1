@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.model;
 
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ public class StringExpressionEvaluator {
         MEDIAN,
         RANGE
     }
+    static DecimalFormat decimalFormat = new DecimalFormat("#.##############");
 
     public static double evaluatePayoffFunctionWithRelativeToOtherPlayers(Strategy strategy,
                                                                           String payoffFunction,
@@ -41,12 +43,9 @@ public class StringExpressionEvaluator {
             // example: payoffFunction is a string formula, e.g: p1 + p2 / p3 - P2p3 with p1, p2, p3 are the properties 1, 2, 3 of the strategy chosen by this player
             for (int i = 0; i < strategy.getProperties().size(); ++i) {
                 double propertyValue = strategy.getProperties().get(i);
-
-                DecimalFormat df = new DecimalFormat("#.##############");
-                String formattedNum = df.format(propertyValue);
                 String placeholder = String.format("\\bp%d\\b", i + 1);
 
-                expression = expression.replaceAll(placeholder, formattedNum);
+                expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
             }
 
             // replace the placeholder for OTHER players' strategies with the actual values
@@ -60,7 +59,7 @@ public class StringExpressionEvaluator {
                     // example: P1p1
                     String placeholder = String.format("\\bP%dp%d\\b", i + 1, j + 1);
                     Double propertyValue = otherPlayerStrategy.getProperties().get(j);
-                    expression = expression.replaceAll(placeholder, Double.toString(propertyValue));
+                    expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
                 }
             }
 
@@ -95,11 +94,9 @@ public class StringExpressionEvaluator {
             for (int i = 0; i < strategy.getProperties().size(); ++i) {
                 double propertyValue = strategy.getProperties().get(i);
 
-                DecimalFormat df = new DecimalFormat("#.##############");
-                String formattedNum = df.format(propertyValue);
                 String placeholder = String.format("\\bp%d\\b", i + 1);
 
-                expression = expression.replaceAll(placeholder, formattedNum);
+                expression = expression.replaceAll(placeholder, formatDouble(propertyValue));
             }
 
 
@@ -109,6 +106,37 @@ public class StringExpressionEvaluator {
         }
 
 
+    }
+
+    public static double evaluateFitnessValue(Double[] payoffs, String fitnessFunction) {
+        String expression = fitnessFunction;
+        List<Double> payoffList =  new ArrayList<>(Arrays.asList(payoffs));
+
+        if (fitnessFunction.isBlank()) {
+            // if the fitnessFunction is absent,qweqweqwe
+            // the fitness value is the average of all payoffs of all chosen strategies by default
+            return calculateByDefault(payoffList, null);
+        } else {
+            // replace placeholders for players' payoffs with the actual values
+
+            if (checkIfIsDefaultFunction(fitnessFunction)) {
+                return calculateByDefault(payoffList, fitnessFunction);
+            }
+            for (int i = 0; i < payoffs.length; i++) {
+                double playerPayoff = payoffs[i];
+
+                String placeholder = String.format("\\bu%d\\b", i + 1);
+                expression = expression.replaceAll(placeholder, formatDouble(playerPayoff));
+            }
+
+            return eval(expression);
+        }
+    }
+
+
+    private static String formatDouble(double propertyValue) {
+        // if the property value is too small it can be written as for example 1.0E-4, so we need to format it to 0.0001
+        return decimalFormat.format(propertyValue);
     }
 
 
@@ -288,30 +316,6 @@ public class StringExpressionEvaluator {
 //
 //    }
 
-    public static double evaluateFitnessValue(Double[] payoffs, String fitnessFunction) {
-        String expression = fitnessFunction;
-        List<Double> payoffList =  new ArrayList<>(Arrays.asList(payoffs));
-
-        if (fitnessFunction.isBlank()) {
-            // if the fitnessFunction is absent,qweqweqwe
-            // the fitness value is the average of all payoffs of all chosen strategies by default
-            return calculateByDefault(payoffList, null);
-        } else {
-            // replace placeholders for players' payoffs with the actual values
-
-            if (checkIfIsDefaultFunction(fitnessFunction)) {
-                return calculateByDefault(payoffList, fitnessFunction);
-            }
-            for (int i = 0; i < payoffs.length; i++) {
-                double playerPayoff = payoffs[i];
-
-                String placeholder = String.format("\\bu%d\\b", i + 1);
-                expression = expression.replaceAll(placeholder, Double.toString(playerPayoff));
-            }
-
-            return eval(expression);
-        }
-    }
 
 
 }
