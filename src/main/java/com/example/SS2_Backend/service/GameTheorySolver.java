@@ -175,7 +175,7 @@ public class GameTheorySolver {
                 long start = System.currentTimeMillis();
 
                 NondominatedPopulation results = solveProblem(problem,
-                        request.getAlgorithm(),
+                        algorithm,
                         request.getGeneration(),
                         request.getPopulationSize(),
                         request.getDistributedCores(),
