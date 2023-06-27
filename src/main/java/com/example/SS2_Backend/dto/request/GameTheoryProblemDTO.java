@@ -25,7 +25,21 @@ public class GameTheoryProblemDTO {
     private Integer maxTime;
     private Integer generation;
     private Integer populationSize;
+
+    @Override
     public String toString() {
-        return "GameTheoryProblemDTO(specialPlayer=" + this.getSpecialPlayer() + ", number of normal players=" + this.getNormalPlayers().size() + ", conflictSet=" + this.getConflictSet() + ", fitnessFunction=" + this.getFitnessFunction() + ", defaultPayoffFunction=" + this.getDefaultPayoffFunction() + ", algorithm=" + this.getAlgorithm() + ", isMaximizing=" + this.isMaximizing() + ", evaluation=" + this.getEvaluation() + ")";
+        return "GameTheoryProblemDTO{" +
+                "specialPlayer=" + specialPlayer +
+                ", number of normal players=" + normalPlayers.size() +
+                ", conflictSet=" + conflictSet +
+                ", fitnessFunction='" + fitnessFunction + '\'' +
+                ", defaultPayoffFunction='" + defaultPayoffFunction + '\'' +
+                ", algorithm='" + algorithm + '\'' +
+                ", isMaximizing=" + isMaximizing +
+                ", distributedCores='" + distributedCores + '\'' +
+                ", maxTime=" + maxTime +
+                ", generation=" + generation +
+                ", populationSize=" + populationSize +
+                '}';
     }
 }

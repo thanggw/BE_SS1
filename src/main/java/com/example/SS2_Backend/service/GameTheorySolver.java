@@ -110,7 +110,6 @@ public class GameTheorySolver {
         }
         return results;
     }
-
     private GameSolution formatSolution(GameTheoryProblem problem, NondominatedPopulation result) {
         Solution solution = result.get(0);
         GameSolution gameSolution = new GameSolution();
@@ -146,24 +145,6 @@ public class GameTheorySolver {
         gameSolution.setPlayers(gameSolutionPlayers);
 
         return gameSolution;
-    }
-
-    public  String getPlayerName(NormalPlayer normalPlayer, int index) {
-        String playerName = normalPlayer.getName();
-        if (playerName == null) {
-            playerName = String.format("Player %d", index);
-        }
-
-        return playerName;
-    }
-
-    public String getStrategyName(int chosenStrategyIndex, NormalPlayer normalPlayer, int index) {
-        String strategyName = normalPlayer.getStrategies().get(chosenStrategyIndex).getName();
-        if (strategyName == null) {
-            strategyName = String.format("Strategy %d", index);
-        }
-
-        return strategyName;
     }
 
     public ResponseEntity<Response> getProblemResultInsights(GameTheoryProblemDTO request, String sessionCode) {
@@ -233,6 +214,22 @@ public class GameTheorySolver {
         );
     }
 
+    private GameSolutionInsights initGameSolutionInsights(String[] algorithms) {
+        GameSolutionInsights gameSolutionInsights = new GameSolutionInsights();
+        Map<String, List<Double>> fitnessValueMap = new HashMap<>();
+        Map<String, List<Double>> runtimeMap = new HashMap<>();
+
+        gameSolutionInsights.setFitnessValues(fitnessValueMap);
+        gameSolutionInsights.setRuntimes(runtimeMap);
+
+        for (String algorithm : algorithms) {
+            fitnessValueMap.put(algorithm, new ArrayList<>());
+            runtimeMap.put(algorithm, new ArrayList<>());
+        }
+
+        return gameSolutionInsights;
+    }
+
     private Progress createProgress(String message, Double runtime, Integer generation) {
         return Progress.builder()
                 .inProgress(true) // this object is just to send to the client to show the progress
@@ -249,21 +246,27 @@ public class GameTheorySolver {
                 .message(message)
                 .build();
     }
-    private static GameSolutionInsights initGameSolutionInsights(String[] algorithms) {
-        GameSolutionInsights gameSolutionInsights = new GameSolutionInsights();
-        Map<String, List<Double>> fitnessValueMap = new HashMap<>();
-        Map<String, List<Double>> runtimeMap = new HashMap<>();
 
-        gameSolutionInsights.setFitnessValues(fitnessValueMap);
-        gameSolutionInsights.setRuntimes(runtimeMap);
 
-        for (String algorithm : algorithms) {
-            fitnessValueMap.put(algorithm, new ArrayList<>());
-            runtimeMap.put(algorithm, new ArrayList<>());
+    public  String getPlayerName(NormalPlayer normalPlayer, int index) {
+        String playerName = normalPlayer.getName();
+        if (playerName == null) {
+            playerName = String.format("Player %d", index);
         }
 
-        return gameSolutionInsights;
+        return playerName;
     }
+
+    public String getStrategyName(int chosenStrategyIndex, NormalPlayer normalPlayer, int index) {
+        String strategyName = normalPlayer.getStrategies().get(chosenStrategyIndex).getName();
+        if (strategyName == null) {
+            strategyName = String.format("Strategy %d", index);
+        }
+
+        return strategyName;
+    }
+
+
     private static double getFitnessValue(NondominatedPopulation result) {
 
         Solution solution = result.get(0);
