@@ -12,7 +12,17 @@ import lombok.NoArgsConstructor;
 public class Progress {
     private String message;
     private boolean inProgress;
-    private boolean firstRun;
+    private int minuteLeft;
     private Double runtime;
-    private Integer generation;
+    private Integer percentage;
+
+    public int getMinuteLeft() {
+
+
+        if (minuteLeft == 0) {
+            return 1; // return 1 if the minuteLeft is less than 60 seconds
+        }
+
+        return minuteLeft;
+    }
 }
