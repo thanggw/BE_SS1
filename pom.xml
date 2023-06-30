@@ -80,6 +80,9 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+					<jvmArguments>
+						-Xmx4g
+					</jvmArguments>
 				</configuration>
 			</plugin>
 		</plugins>
