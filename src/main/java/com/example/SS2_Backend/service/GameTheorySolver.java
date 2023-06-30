@@ -174,7 +174,7 @@ public class GameTheorySolver {
 
         public ResponseEntity<Response> getProblemResultInsights (GameTheoryProblemDTO request, String sessionCode){
             log.info("Received request: " + request);
-            String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA", "PAES", "IBEA"};
+            String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA", "IBEA"};
 
 
             simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Initializing the problem..."));
@@ -214,7 +214,7 @@ public class GameTheorySolver {
                     double fitnessValue = getFitnessValue(results);
 
                     // send the progress to the client
-                    String message = "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/10";
+                    String message = "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/" + RUN_COUNT_PER_ALGORITHM;
                     Progress progress = createProgress(message, runtime, runCount, maxRunCount);
                     System.out.println(progress);
                     simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", progress);
