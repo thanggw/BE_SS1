@@ -174,7 +174,7 @@ public class GameTheorySolver {
 
         public ResponseEntity<Response> getProblemResultInsights (GameTheoryProblemDTO request, String sessionCode){
             log.info("Received request: " + request);
-            String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA", "IBEA"};
+            String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA", "PAES", "IBEA"};
 
 
             simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Initializing the problem..."));
