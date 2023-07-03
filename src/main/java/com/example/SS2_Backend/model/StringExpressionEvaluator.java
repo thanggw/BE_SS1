@@ -220,12 +220,16 @@ public class StringExpressionEvaluator {
     }
 
 
-    public static double eval(String str) {
+    public static double eval(String strExpression) {
+//        System.out.println("Evaluating: ");
+//        System.out.println(strExpression);
+        String formattedExpression = strExpression.replaceAll("NaN", "0"); // replace NaN with 0, so that the expression can be evaluated
+
         return new Object() {
             int pos = -1, ch;
 
             void nextChar() {
-                ch = (++pos < str.length()) ? str.charAt(pos) : -1;
+                ch = (++pos < formattedExpression.length()) ? formattedExpression.charAt(pos) : -1;
             }
 
             boolean eat(int charToEat) {
@@ -240,7 +244,7 @@ public class StringExpressionEvaluator {
             double parse() {
                 nextChar();
                 double x = parseExpression();
-                if (pos < str.length()) throw new RuntimeException("Unexpected: " + (char) ch);
+                if (pos < formattedExpression.length()) throw new RuntimeException("Unexpected: " + (char) ch);
                 return x;
             }
 
@@ -279,15 +283,15 @@ public class StringExpressionEvaluator {
                     x = parseExpression();
                     if (!eat(')')) {
                         System.out.println("Missing ')");
-                        System.out.println(str);
+                        System.out.println(formattedExpression);
                         throw new RuntimeException("Missing ')'");
                     }
                 } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
                     while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
-                    x = Double.parseDouble(str.substring(startPos, this.pos));
+                    x = Double.parseDouble(formattedExpression.substring(startPos, this.pos));
                 } else if (ch >= 'a' && ch <= 'z') { // functions
                     while (ch >= 'a' && ch <= 'z') nextChar();
-                    String func = str.substring(startPos, this.pos);
+                    String func = formattedExpression.substring(startPos, this.pos);
                     if (eat('(')) {
                         x = parseExpression();
                         if (!eat(')')) throw new RuntimeException("Missing ')' after argument to " + func);

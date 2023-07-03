@@ -258,7 +258,7 @@ public class GameTheorySolver {
 
         private Progress createProgress (String message, Double runtime, Integer runCount,int maxRunCount){
             int percent = runCount * 100 / maxRunCount;
-            int minuteLeff = (int) ((maxRunCount - runCount) * runtime) / 60; // runtime is in seconds
+            int minuteLeff = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
             return Progress.builder()
                     .inProgress(true) // this object is just to send to the client to show the progress
                     .message(message)
