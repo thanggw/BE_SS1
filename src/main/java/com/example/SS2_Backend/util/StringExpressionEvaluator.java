@@ -1,5 +1,8 @@
-package com.example.SS2_Backend.model;
+package com.example.SS2_Backend.util;
 
+
+import com.example.SS2_Backend.model.NormalPlayer;
+import com.example.SS2_Backend.model.Strategy;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -221,9 +224,11 @@ public class StringExpressionEvaluator {
 
 
     public static double eval(String strExpression) {
-//        System.out.println("Evaluating: ");
-//        System.out.println(strExpression);
-        String formattedExpression = strExpression.replaceAll("NaN", "0"); // replace NaN with 0, so that the expression can be evaluated
+        System.out.println("Evaluating: ");
+        System.out.println(strExpression);
+
+        String formattedExpression = strExpression.replaceAll("NaN", "0")// replace NaN with 0, so that the expression can be evaluated
+                .replaceAll("\u00A0", ""); // Removes all NBSP characters from the string
 
         return new Object() {
             int pos = -1, ch;
@@ -244,7 +249,11 @@ public class StringExpressionEvaluator {
             double parse() {
                 nextChar();
                 double x = parseExpression();
-                if (pos < formattedExpression.length()) throw new RuntimeException("Unexpected: " + (char) ch);
+
+                if (pos < formattedExpression.length()) {
+                    System.out.println("wrong expression: " + formattedExpression);
+                    throw new RuntimeException("Unexpected: " + (char) ch);
+                }
                 return x;
             }
 
@@ -304,6 +313,7 @@ public class StringExpressionEvaluator {
                     else if (func.equals("tan")) x = Math.tan(Math.toRadians(x));
                     else throw new RuntimeException("Unknown function: " + func);
                 } else {
+                    System.out.println("wrong expression: " + formattedExpression);
                     throw new RuntimeException("Unexpected: " + (char) ch);
                 }
 
@@ -313,12 +323,6 @@ public class StringExpressionEvaluator {
             }
         }.parse();
     }
-//
-//    public static double evaluateExpression(String str) {
-//        Expression e = new Expression(str);
-//        return e.calculate();
-//
-//    }
 
 
 
