@@ -1,6 +1,8 @@
 package com.example.SS2_Backend.model;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
@@ -267,9 +269,10 @@ public class GameTheoryProblem implements Problem {
             }
 
             // if the payoff function is relative to the player itself, then it can be calculated in the initialization
-            List<Double> payoffValues = new ArrayList<>();
+            List<BigDecimal> payoffValues = new ArrayList<>();
             for (int i = 0; i < player.getStrategies().size(); ++i) {
-                double payoffValue =  evaluatePayoffFunctionNoRelative(player.getStrategies().get(i), payoffFunction);
+                BigDecimal payoffValue =  evaluatePayoffFunctionNoRelative(player.getStrategies().get(i), payoffFunction);
+                System.out.println("Payoff value: " + payoffValue);
                 payoffValues.add(payoffValue);
             }
             player.setPayoffValues(payoffValues);
@@ -325,7 +328,7 @@ public class GameTheoryProblem implements Problem {
     public void evaluate(Solution solution) {
 //        System.out.println("Evaluating " + count++);
         double[] NashEquilibrium = {computeNashEquilibrium()};
-        Double[] payoffs = new Double[solution.getNumberOfVariables()];
+        double[] payoffs =new double[solution.getNumberOfVariables()];
 
         List<Integer> chosenStrategyIndices = new ArrayList<>();
         // chosenStrategyIndices[0] is the strategy index that normalPlayers[0] has chosen
@@ -378,7 +381,7 @@ public class GameTheoryProblem implements Problem {
                 payoffFunction = defaultPayoffFunction;
             }
 
-            double chosenStrategyPayoff = 0;
+            BigDecimal chosenStrategyPayoff = new BigDecimal(0);
             if (payoffFunction.contains("P")) {
                 // if the payoff function is relative to other players, then it must be calculated in the evaluation
 
@@ -393,22 +396,22 @@ public class GameTheoryProblem implements Problem {
                 chosenStrategyPayoff = normalPlayer.getPayoffValues().get(chosenStrategyIndices.get(i));
             }
 
-            chosenStrategy.setPayoff(chosenStrategyPayoff);
-            payoffs[i] = chosenStrategyPayoff;
+            chosenStrategy.setPayoff(chosenStrategyPayoff.doubleValue());
+            payoffs[i] = chosenStrategyPayoff.doubleValue();
         }
 
-        double fitnessValue
+        BigDecimal fitnessValue
                 = evaluateFitnessValue(
                 payoffs,
                 fitnessFunction
         );
 
         if (isMaximizing) {
-            fitnessValue = -fitnessValue; // because the MOEA Framework only support minimization, for maximization problem, we need to negate the fitness value
+            fitnessValue = fitnessValue.negate(); // because the MOEA Framework only support minimization, for maximization problem, we need to negate the fitness value
         }
 
 
-        solution.setObjective(0, fitnessValue);
+        solution.setObjective(0, fitnessValue.doubleValue());
 
     }
 

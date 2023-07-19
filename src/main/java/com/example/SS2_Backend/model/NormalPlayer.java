@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -15,10 +16,10 @@ import java.util.stream.Collectors;
 public class NormalPlayer {
     private String name;
     private List<Strategy> strategies;
-    private List<Double> payoffValues;
+    private List<BigDecimal> payoffValues;
     private int prevStrategyIndex = -1; // this is for the problem with dynamic data
     private String payoffFunction;
-    private double payoff;
+    private BigDecimal payoff;
 
     public String getName() {
         return name;
@@ -32,11 +33,11 @@ public class NormalPlayer {
         this.strategies = strategies;
     }
 
-    public List<Double> getPayoffValues() {
+    public List<BigDecimal> getPayoffValues() {
         return payoffValues;
     }
 
-    public void setPayoffValues(List<Double> payoffValues) {
+    public void setPayoffValues(List<BigDecimal> payoffValues) {
         this.payoffValues = payoffValues;
     }
 
@@ -74,7 +75,7 @@ public class NormalPlayer {
         return strategies;
     }
 
-    public double getPayoff() {
+    public BigDecimal getPayoff() {
         return payoff;
     }
 
@@ -91,7 +92,7 @@ public class NormalPlayer {
         this.payoffFunction = payoffFunction;
     }
 
-    public void setPayoff(double payoff) {
+    public void setPayoff(BigDecimal payoff) {
         this.payoff = payoff;
     }
 

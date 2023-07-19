@@ -5,10 +5,10 @@ import com.example.SS2_Backend.model.NormalPlayer;
 import com.example.SS2_Backend.model.Strategy;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class StringExpressionEvaluator {
@@ -25,11 +25,12 @@ public class StringExpressionEvaluator {
     }
     static DecimalFormat decimalFormat = new DecimalFormat("#.##############");
 
-    public static double evaluatePayoffFunctionWithRelativeToOtherPlayers(Strategy strategy,
+    public static BigDecimal evaluatePayoffFunctionWithRelativeToOtherPlayers(Strategy strategy,
                                                                           String payoffFunction,
                                                                           List<NormalPlayer> normalPlayers,
                                                                           List<Integer> chosenStrategyIndices) {
 
+        // this method is for some players who take other players' strategies into account when calculating their payoff
         String expression = payoffFunction;
 
         if (payoffFunction.isBlank()) {
@@ -66,10 +67,9 @@ public class StringExpressionEvaluator {
                 }
             }
 
-
-
             // evaluate this string expression to get the result
-            return eval(expression);
+            double val =  eval(expression);
+            return new BigDecimal(val).setScale(10, RoundingMode.HALF_UP);
 
         }
 
@@ -78,8 +78,10 @@ public class StringExpressionEvaluator {
 
 
 
-    public static double evaluatePayoffFunctionNoRelative(Strategy strategy,
+    public static BigDecimal evaluatePayoffFunctionNoRelative(Strategy strategy,
                                                           String payoffFunction) {
+
+        // this method is for some players only take their own strategies into account when calculating their payoff
 
         String expression = payoffFunction;
 
@@ -104,19 +106,22 @@ public class StringExpressionEvaluator {
 
 
             // evaluate this string expression to get the result
-            return eval(expression);
+            double val =  eval(expression);
+            return new BigDecimal(val).setScale(10, RoundingMode.HALF_UP);
 
         }
 
-
     }
 
-    public static double evaluateFitnessValue(Double[] payoffs, String fitnessFunction) {
+    public static BigDecimal evaluateFitnessValue(double[] payoffs, String fitnessFunction) {
         String expression = fitnessFunction;
-        List<Double> payoffList =  new ArrayList<>(Arrays.asList(payoffs));
+        List<Double> payoffList = new ArrayList<>();
+        for (double payoff : payoffs) {
+            payoffList.add(payoff);
+        }
 
         if (fitnessFunction.isBlank()) {
-            // if the fitnessFunction is absent,qweqweqwe
+            // if the fitnessFunction is absent,
             // the fitness value is the average of all payoffs of all chosen strategies by default
             return calculateByDefault(payoffList, null);
         } else {
@@ -132,8 +137,11 @@ public class StringExpressionEvaluator {
                 expression = expression.replaceAll(placeholder, formatDouble(playerPayoff));
             }
 
-            return eval(expression);
+            double val =  eval(expression);
+            return new BigDecimal(val).setScale(10, RoundingMode.HALF_UP);
+
         }
+
     }
 
 
@@ -198,27 +206,37 @@ public class StringExpressionEvaluator {
     }
 
 
-    private static double calculateByDefault(List<Double> values, String defaultFunction) {
+    private static BigDecimal calculateByDefault(List<Double> values, String defaultFunction) {
         DefaultFunction function = DefaultFunction.valueOf(defaultFunction.toUpperCase());
-
+        double val = 0;
         switch (function) {
             case SUM:
-                return calSum(values);
+                val = calSum(values);
+                break;
             case PRODUCT:
-                return calProduct(values);
+                val = calProduct(values);
+                break;
             case MAX:
-                return calMax(values);
+                val = calMax(values);
+                break;
             case MIN:
-                return calMin(values);
+                val = calMin(values);
+                break;
             case AVERAGE:
-                return calAverage(values);
+                val = calAverage(values);
+                break;
             case MEDIAN:
-                return calMedian(values);
+                val = calMedian(values);
+                break;
             case RANGE:
-                return calRange(values);
+                val = calRange(values);
+                break;
             default:
-                return calSum(values);
+                val = calSum(values);
+                break;
         }
+
+        return new BigDecimal(val);
 
     }
 
@@ -228,7 +246,7 @@ public class StringExpressionEvaluator {
         System.out.println(strExpression);
 
         String formattedExpression = strExpression.replaceAll("NaN", "0")// replace NaN with 0, so that the expression can be evaluated
-                .replaceAll("\u00A0", ""); // Removes all NBSP characters from the string
+                .replaceAll("\\s+", ""); // Removes all NBSP characters from the string
 
         return new Object() {
             int pos = -1, ch;
