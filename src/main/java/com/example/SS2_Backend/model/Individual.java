@@ -51,10 +51,4 @@ public class Individual {
         return "\n";
     }
 
-    public static void main(String[] args) {
-        Individual person = new Individual("thanh", 1);
-        person.setProperty("Age", "19", 4);
-        person.setProperty("Height", "168", 2);
-        person.toString();
-    }
 }
