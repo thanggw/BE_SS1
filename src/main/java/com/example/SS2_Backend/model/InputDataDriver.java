@@ -1,11 +1,11 @@
-package com.example.SS2_Backend.model;
-
-/* *
-	A simple class to handle extracting input from .xlsx files
- * */
-
-
-public class InputDataDriver {
+//package com.example.SS2_Backend.model;
+//
+///* *
+//	A simple class to handle extracting input from .xlsx files
+// * */
+//
+//
+//public class InputDataDriver {
 //	String path;
 //	FileInputStream file;
 //	XSSFWorkbook workbook;
@@ -30,6 +30,8 @@ public class InputDataDriver {
 //			while (isCellExist(row, col)) {
 //				String s = getStringOfCoordinate(row, col);
 //				if (s != null) {
+//
+//
 //					Conflict conflict = new Conflict(s);
 //					conflictSet.add(conflict);
 //				}
@@ -154,4 +156,4 @@ public class InputDataDriver {
 //		file.close();
 //		return true;
 //	}
-}
+//}
