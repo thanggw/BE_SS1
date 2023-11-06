@@ -6,14 +6,22 @@ public class Individual {
     private int IndividualSet;
     private List<Property> Properties = new ArrayList<>();
 
-    Individual(String IndividualName, int IndividualSet){
+    public Individual(String IndividualName, int IndividualSet){
         this.IndividualName = IndividualName;
         this.IndividualSet = IndividualSet;
     }
 
-    public void setProperty(String propertyName, String propertyValue, int propertyWeight) {
+    public void setProperty(String propertyName, int propertyValue, int propertyWeight) {
         Property property = new Property(propertyName, propertyValue, propertyWeight);
         this.Properties.add(property);
+    }
+
+    public int getIndividualSet() {
+        return IndividualSet;
+    }
+
+    public int getNumberOfProperties(){
+        return Properties.size();
     }
 
     public String getPropertyName(int index){
@@ -24,11 +32,11 @@ public class Individual {
         }
     }
 
-    public String getPropertyValue(int index){
+    public int getPropertyValue(int index){
         if(index >= 0 && index < this.Properties.size()){
             return Properties.get(index).getValue();
         }else{
-            return null;
+            return 0;
         }
     }
 

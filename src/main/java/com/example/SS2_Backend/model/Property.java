@@ -2,10 +2,10 @@ package com.example.SS2_Backend.model;
 
 public class Property {
     private String name;
-    private String value;
+    private int value;
     private int weight;
 
-    public Property(String name, String value, int weight) {
+    public Property(String name, int value, int weight) {
         this.name = name;
         this.value = value;
         this.weight = weight;
@@ -13,7 +13,7 @@ public class Property {
     public String getName(){
         return name;
     }
-    public String getValue() {
+    public int getValue() {
         return value;
     }
 
