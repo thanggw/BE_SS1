@@ -143,6 +143,7 @@ public class StableMatchingProblem implements Problem {
                     engagedFemale.add(female);
                     matches.add(new Pair(male, female));
                     System.out.println(male + female + " is now together");
+                    break;
                 } else {
                     int currentMale = Integer.parseInt(matches.findCompany(female));
                     System.out.println("Oh no, she is with " + currentMale + " let see if she prefer " + male + " than " + currentMale );
@@ -151,9 +152,10 @@ public class StableMatchingProblem implements Problem {
                         unmatchedMales.add(currentMale);
                         matches.add(new Pair(male, female));
                         System.out.println("Hell yeah! " + female + " ditch the guy " + currentMale + " to be with " + male + "!");
+                        break;
                     } else {
-                        unmatchedMales.add(male);
-                        System.out.println(male + "lost the game, back to the hood...");
+//                        unmatchedMales.add(male);
+                        System.out.println(male + " lost the game, back to the hood...");
                     }
                 }
             }
@@ -180,8 +182,18 @@ public class StableMatchingProblem implements Problem {
     private static int calculatePairSatisfactory(Pair pair, ArrayList<ArrayList<Pair>> preferenceLists) {
         int a = pair.getIndividual1Index();
         int b = pair.getIndividual2Index();
-        int aScore = preferenceLists.get(a).get(b).getIndividual2Index();
-        int bScore = preferenceLists.get(b).get(a).getIndividual2Index();
+        int aScore=0;
+        int bScore=0;
+        for (Pair i:preferenceLists.get(a)) {
+            if(i.getIndividual1Index()==b){
+                aScore=i.getIndividual2Index();
+            }
+        }
+        for (Pair i:preferenceLists.get(a)) {
+            if(i.getIndividual1Index()==b){
+                aScore=i.getIndividual2Index();
+            }
+        }
         return aScore + bScore;
     }
 

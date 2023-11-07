@@ -31,23 +31,23 @@ public class SampleDataGenerator {
         System.out.println(problem.printPreferenceLists()); //failed
         System.out.println(problem.isPreferenceEmpty()); // true -- Preference initializing failed
 
-//        NondominatedPopulation result = new Executor()
-//                .withProblem(problem)
-//                .withAlgorithm("NSGAII")
-//                .withMaxEvaluations(100)
-//                .withProperty("populationSize", 5)
-//                .distributeOnAllCores()
-//                .run();
-//        for (Solution solution : result) {
+        NondominatedPopulation result = new Executor()
+                .withProblem(problem)
+                .withAlgorithm("NSGAII")
+                .withMaxEvaluations(5)
+                .withProperty("populationSize", 5)
+                .distributeOnAllCores()
+                .run();
+        for (Solution solution : result) {
 //            System.out.print(solution.getVariable(0).toString() + "\t\t|");
-//            System.out.print(-solution.getObjective(0) + "\t"); // Negate to show maximized objective
+            System.out.print(-solution.getObjective(0) + "\t"); // Negate to show maximized objective
 //            System.out.print(solution.getObjective(1));
-//            System.out.println();
-//        }
-        Solution solution = problem.newSolution();
-        System.out.println(solution.getVariable(0).toString());
-        Matches matches = problem.stableMatching(solution);
-        System.out.println(matches);
+            System.out.println();
+        }
+//        Solution solution = problem.newSolution();
+//        System.out.println(solution.getVariable(0).toString());
+//        Matches matches = problem.stableMatching(solution);
+//        System.out.println(matches);
     }
 
     public static ArrayList<Individual> generateSampleIndividuals(int numIndividuals) {
