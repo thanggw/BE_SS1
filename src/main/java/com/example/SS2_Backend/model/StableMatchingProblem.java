@@ -1,5 +1,6 @@
 package com.example.SS2_Backend.model;
 
+import java.sql.SQLOutput;
 import java.util.*;
 
 import com.example.SS2_Backend.util.MergeSortPair;
@@ -19,11 +20,11 @@ public class StableMatchingProblem implements Problem {
 
     public StableMatchingProblem(ArrayList<Individual> Individuals, String compositeWeightFunction, String fitnessFunction) {
         this.Individuals = Individuals;
+        this.numberOfIndividual = Individuals.size();
+        this.numberOfProperties = Individuals.get(0).getNumberOfProperties();
         this.compositeWeightFunction = compositeWeightFunction;
         this.fitnessFunction = fitnessFunction;
         this.preferenceLists = getPreferences();
-        this.numberOfProperties = Individuals.get(0).getNumberOfProperties();
-        this.numberOfIndividual = Individuals.size();
     }
 
     @Override
@@ -37,7 +38,9 @@ public class StableMatchingProblem implements Problem {
     public String getName() {
         return "Stable Matching Problem";
     }
-
+    public int getNumberOfProperties(){
+        return numberOfProperties;
+    }
     public String getCompositeWeightFunction() {
         return compositeWeightFunction;
     }
@@ -66,21 +69,12 @@ public class StableMatchingProblem implements Problem {
     public ArrayList<ArrayList<Pair>> getPreferences() {
         ArrayList<ArrayList<Pair>> fullList = new ArrayList<>();
         for (int i = 0; i < numberOfIndividual; i++) {
-//          ArrayList<Pair> list = getPreferenceOfIndividual(i);
-//
           System.out.println("Adding preference for Individual " + i );
-          fullList.add(getPreferenceOfIndividual(i));
+          ArrayList<Pair> a = getPreferenceOfIndividual(i); //pass
+          System.out.println(a.toString()); //pass
+          System.out.println(fullList.add(a)); //true everytime
         }
-
-//        ArrayList<Pair> pair = new ArrayList<>();
-//        pair.add(new Pair(6,9));
-//        pair.add(new Pair(4, 4));
-//        pair.add(new Pair(4, 5));
-//        fullList.add(pair);
-//        fullList.add(pair);
-//        fullList.add(pair);
-//        fullList.add(pair);
-        return fullList;
+        return fullList; //true
     }
     public int getNumberOfIndividual(){
         return numberOfIndividual;
@@ -107,15 +101,15 @@ public class StableMatchingProblem implements Problem {
         return preferenceLists;
     }
 
-    public int getPropertyValueOf(int index, int jdex){
-        return Individuals.get(index).getPropertyValue(jdex);
+    public int getPropertyValueOf(int index, int jndex){
+        return Individuals.get(index).getPropertyValue(jndex);
     }
 
-    public int getPropertyWeightOf(int index, int jdex){
-        return Individuals.get(index).getPropertyWeight(jdex);
+    public int getPropertyWeightOf(int index, int jndex){
+        return Individuals.get(index).getPropertyWeight(jndex);
     }
 
-    private static Matches stableMatching(ArrayList<Individual> individuals, ArrayList<ArrayList<Pair>> preferenceLists, Solution solution) {
+    public Matches stableMatching(Solution solution) {
         Matches matches = new Matches();
         Queue<Integer> unmatchedMales = new LinkedList<>();
         LinkedList<Integer> engagedFemale = new LinkedList<>();
@@ -126,7 +120,7 @@ public class StableMatchingProblem implements Problem {
             try {
                 // Convert each token to an Integer and add it to the queue
                 int i = Integer.parseInt(token);
-                if (individuals.get(i).getIndividualSet() == 1) {
+                if (Individuals.get(i).getIndividualSet() == 1) {
                     unmatchedMales.add(i);
                 }
             } catch (NumberFormatException e) {
@@ -134,33 +128,37 @@ public class StableMatchingProblem implements Problem {
                 System.err.println("Skipping invalid token: " + token);
                 return null;
             }
+            System.out.println("Solution: " + java.util.Arrays.toString(decodedSolution));
         }
 
         while (!unmatchedMales.isEmpty()) {
             int male = unmatchedMales.poll();
-//            int female = findBestFemale(male, preferenceLists[male]);
-            //int[] preferenceList = preferenceLists[male];
+            System.out.println("working on Individual:" + male);
             ArrayList<Pair> preferenceList = preferenceLists.get(male);
+            System.out.print("Hmm ... He prefer Individual ");
             for (int i = 0; i < preferenceList.size(); i++) {
                 int female = preferenceList.get(i).getIndividual1Index();
-
+                System.out.println(female);
                 if (!engagedFemale.contains(female)) {
                     engagedFemale.add(female);
                     matches.add(new Pair(male, female));
+                    System.out.println(male + female + " is now together");
                 } else {
-                    if (matches.findCompany(female) != null) {
-                        int currentMale = Integer.parseInt(matches.findCompany(female));
-                        if (isPreferredOver(male, currentMale, female, preferenceLists)) {
-                            matches.disMatch(currentMale);
-                            unmatchedMales.add(currentMale);
-                            matches.add(new Pair(male, female));
-                        } else {
-                            unmatchedMales.add(male);
-                        }
+                    int currentMale = Integer.parseInt(matches.findCompany(female));
+                    System.out.println("Oh no, she is with " + currentMale + " let see if she prefer " + male + " than " + currentMale );
+                    if (isPreferredOver(male, currentMale, female, preferenceLists)) {
+                        matches.disMatch(currentMale);
+                        unmatchedMales.add(currentMale);
+                        matches.add(new Pair(male, female));
+                        System.out.println("Hell yeah! " + female + " ditch the guy " + currentMale + " to be with " + male + "!");
+                    } else {
+                        unmatchedMales.add(male);
+                        System.out.println(male + "lost the game, back to the hood...");
                     }
                 }
             }
         }
+        System.out.println("Matching Complete!!");
 
         return matches;
     }
@@ -189,7 +187,7 @@ public class StableMatchingProblem implements Problem {
 
     public void evaluate(Solution solution) {
         System.out.println("Evaluating...");
-        Matches result = stableMatching(Individuals, preferenceLists, solution);
+        Matches result = stableMatching(solution);
         int fitnessScore = 0;
         if (result != null) {
             for (int i = 0; i < result.size(); i++) {
