@@ -1,7 +1,7 @@
 package com.example.SS2_Backend.util;
 
 import java.util.ArrayList;
-import com.example.SS2_Backend.model.Pair;
+import com.example.SS2_Backend.model.StableMatching.Pair;
 
 public class MergeSortPair {
     public static void mergeSort(ArrayList<Pair> list) {

@@ -1,9 +1,8 @@
 package com.example.SS2_Backend.util;
 
-import com.example.SS2_Backend.model.Individual;
-import com.example.SS2_Backend.model.Matches;
-import com.example.SS2_Backend.model.Pair;
-import com.example.SS2_Backend.model.StableMatchingProblem;
+import com.example.SS2_Backend.model.StableMatching.Individual;
+import com.example.SS2_Backend.model.StableMatching.Matches;
+import com.example.SS2_Backend.model.StableMatching.StableMatchingProblem;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
@@ -18,9 +17,6 @@ public class SampleDataGenerator {
 
         // Create a StableMatchingProblem object with the generated data
         StableMatchingProblem problem = new StableMatchingProblem(individuals, "compositeWeightFunction", "fitnessFunction");
-        System.out.println(problem);
-        System.out.println(problem.getPropertyValueOf(10, 1)); //success
-        System.out.println(problem.getPropertyWeightOf(10, 1)); // success
         if(problem.isPreferenceEmpty()){
             System.out.println("Preference failed to generate");
         }else{
@@ -34,20 +30,17 @@ public class SampleDataGenerator {
         NondominatedPopulation result = new Executor()
                 .withProblem(problem)
                 .withAlgorithm("NSGAII")
-                .withMaxEvaluations(5)
-                .withProperty("populationSize", 5)
+                .withMaxEvaluations(1000)
+                .withProperty("populationSize", 100)
                 .distributeOnAllCores()
                 .run();
+        //create Datastructure to fetch the result
         for (Solution solution : result) {
-//            System.out.print(solution.getVariable(0).toString() + "\t\t|");
             System.out.print(-solution.getObjective(0) + "\t"); // Negate to show maximized objective
-//            System.out.print(solution.getObjective(1));
-            System.out.println();
+            System.out.println(solution.getVariable(0).toString());
+            Matches matches = problem.stableMatching(solution.getVariable(0));
+            System.out.println(matches);
         }
-//        Solution solution = problem.newSolution();
-//        System.out.println(solution.getVariable(0).toString());
-//        Matches matches = problem.stableMatching(solution);
-//        System.out.println(matches);
     }
 
     public static ArrayList<Individual> generateSampleIndividuals(int numIndividuals) {

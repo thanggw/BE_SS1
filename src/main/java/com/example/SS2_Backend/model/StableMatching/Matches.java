@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model;
+package com.example.SS2_Backend.model.StableMatching;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +42,15 @@ public class Matches {
                 break;
             }
         }
+    }
+    public int[] parseArray(){
+        int[] a = new int[matches.size()*2];
+        for(int i=0; i < a.length;i++){
+            a[i] = matches.get(i).getIndividual1Index();
+            a[i+1] = matches.get(i).getIndividual2Index();
+            i+=2;
+        }
+        return a;
     }
 
     public String toString(){

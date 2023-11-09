@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model;
+package com.example.SS2_Backend.model.StableMatching;
 
 public class Property {
     private String name;

@@ -1,15 +1,14 @@
-package com.example.SS2_Backend.model;
+package com.example.SS2_Backend.model.StableMatching;
 
-import java.sql.SQLOutput;
 import java.util.*;
 
-import com.example.SS2_Backend.util.MergeSortPair;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
+import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.EncodingUtils;
 
 import static com.example.SS2_Backend.util.MergeSortPair.mergeSort;
-import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
+
 public class StableMatchingProblem implements Problem {
     private final ArrayList<Individual> Individuals;
     private final int numberOfIndividual;
@@ -18,6 +17,7 @@ public class StableMatchingProblem implements Problem {
     private final String compositeWeightFunction;
     private final String fitnessFunction;
 
+    //Constructor
     public StableMatchingProblem(ArrayList<Individual> Individuals, String compositeWeightFunction, String fitnessFunction) {
         this.Individuals = Individuals;
         this.numberOfIndividual = Individuals.size();
@@ -27,26 +27,12 @@ public class StableMatchingProblem implements Problem {
         this.preferenceLists = getPreferences();
     }
 
+    //MOEA Solution
     @Override
     public Solution newSolution() {
         Solution solution = new Solution(1, 1);
         solution.setVariable(0, EncodingUtils.newPermutation(Individuals.size()));
         return solution;
-    }
-
-    @Override
-    public String getName() {
-        return "Stable Matching Problem";
-    }
-    public int getNumberOfProperties(){
-        return numberOfProperties;
-    }
-    public String getCompositeWeightFunction() {
-        return compositeWeightFunction;
-    }
-
-    public String getFitnessFunction() {
-        return fitnessFunction;
     }
     public ArrayList<Pair> getPreferenceOfIndividual(int index) {
         ArrayList<Pair> a = new ArrayList<>();
@@ -65,55 +51,21 @@ public class StableMatchingProblem implements Problem {
         mergeSort(a);
         return a;
     }
-    //the problem lies here
     public ArrayList<ArrayList<Pair>> getPreferences() {
         ArrayList<ArrayList<Pair>> fullList = new ArrayList<>();
         for (int i = 0; i < numberOfIndividual; i++) {
-          System.out.println("Adding preference for Individual " + i );
-          ArrayList<Pair> a = getPreferenceOfIndividual(i); //pass
-          System.out.println(a.toString()); //pass
-          System.out.println(fullList.add(a)); //true everytime
+            System.out.println("Adding preference for Individual " + i );
+            ArrayList<Pair> a = getPreferenceOfIndividual(i); //pass
+            System.out.println(a.toString()); //pass
+            System.out.println(fullList.add(a)); //true everytime
         }
         return fullList; //true
     }
-    public int getNumberOfIndividual(){
-        return numberOfIndividual;
-    }
-    public boolean isPreferenceEmpty(){
-        return preferenceLists.isEmpty();
-    }
-
-    public int getNumberOfVariables() {
-        return 1;
-    }
-
-    @Override
-    public int getNumberOfObjectives() {
-        return 1;
-    }
-
-    @Override
-    public int getNumberOfConstraints() {
-        return 0;
-    }
-
-    public ArrayList<ArrayList<Pair>> getPreferenceLists(){
-        return preferenceLists;
-    }
-
-    public int getPropertyValueOf(int index, int jndex){
-        return Individuals.get(index).getPropertyValue(jndex);
-    }
-
-    public int getPropertyWeightOf(int index, int jndex){
-        return Individuals.get(index).getPropertyWeight(jndex);
-    }
-
-    public Matches stableMatching(Solution solution) {
+    public Matches stableMatching(Variable var) {
         Matches matches = new Matches();
         Queue<Integer> unmatchedMales = new LinkedList<>();
         LinkedList<Integer> engagedFemale = new LinkedList<>();
-        String s = solution.getVariable(0).toString();
+        String s = var.toString();
 
         String[] decodedSolution = s.split(",");
         for (String token : decodedSolution) {
@@ -128,39 +80,39 @@ public class StableMatchingProblem implements Problem {
                 System.err.println("Skipping invalid token: " + token);
                 return null;
             }
-            System.out.println("Solution: " + java.util.Arrays.toString(decodedSolution));
+            //System.out.println("Solution: " + java.util.Arrays.toString(decodedSolution));
         }
 
         while (!unmatchedMales.isEmpty()) {
             int male = unmatchedMales.poll();
-            System.out.println("working on Individual:" + male);
+            //System.out.println("working on Individual:" + male);
             ArrayList<Pair> preferenceList = preferenceLists.get(male);
-            System.out.print("Hmm ... He prefer Individual ");
+            //System.out.print("Hmm ... He prefer Individual ");
             for (int i = 0; i < preferenceList.size(); i++) {
                 int female = preferenceList.get(i).getIndividual1Index();
-                System.out.println(female);
+                //System.out.println(female);
                 if (!engagedFemale.contains(female)) {
                     engagedFemale.add(female);
                     matches.add(new Pair(male, female));
-                    System.out.println(male + female + " is now together");
+                    //System.out.println(male + female + " is now together");
                     break;
                 } else {
                     int currentMale = Integer.parseInt(matches.findCompany(female));
-                    System.out.println("Oh no, she is with " + currentMale + " let see if she prefer " + male + " than " + currentMale );
+                    //System.out.println("Oh no, she is with " + currentMale + " let see if she prefer " + male + " than " + currentMale );
                     if (isPreferredOver(male, currentMale, female, preferenceLists)) {
                         matches.disMatch(currentMale);
                         unmatchedMales.add(currentMale);
                         matches.add(new Pair(male, female));
-                        System.out.println("Hell yeah! " + female + " ditch the guy " + currentMale + " to be with " + male + "!");
+                        //System.out.println("Hell yeah! " + female + " ditch the guy " + currentMale + " to be with " + male + "!");
                         break;
                     } else {
 //                        unmatchedMales.add(male);
-                        System.out.println(male + " lost the game, back to the hood...");
+                        //System.out.println(male + " lost the game, back to the hood...");
                     }
                 }
             }
         }
-        System.out.println("Matching Complete!!");
+        //System.out.println("Matching Complete!!");
 
         return matches;
     }
@@ -199,7 +151,8 @@ public class StableMatchingProblem implements Problem {
 
     public void evaluate(Solution solution) {
         System.out.println("Evaluating...");
-        Matches result = stableMatching(solution);
+        Matches result = stableMatching(solution.getVariable(0));
+        //System.out.println(solution.getVariable(1).toString());
         int fitnessScore = 0;
         if (result != null) {
             for (int i = 0; i < result.size(); i++) {
@@ -207,7 +160,55 @@ public class StableMatchingProblem implements Problem {
             }
         }
         solution.setObjective(0, -fitnessScore);
+
     }
+    @Override
+    public String getName() {
+        return "Two Sided Stable Matching Problem";
+    }
+    public int getNumberOfProperties(){
+        return numberOfProperties;
+    }
+    public String getCompositeWeightFunction() {
+        return compositeWeightFunction;
+    }
+
+    public String getFitnessFunction() {
+        return fitnessFunction;
+    }
+    public int getNumberOfIndividual(){
+        return numberOfIndividual;
+    }
+    public boolean isPreferenceEmpty(){
+        return preferenceLists.isEmpty();
+    }
+
+    public int getNumberOfVariables() {
+        return 1;
+    }
+
+    @Override
+    public int getNumberOfObjectives() {
+        return 1;
+    }
+
+    @Override
+    public int getNumberOfConstraints() {
+        return 0;
+    }
+
+    private ArrayList<ArrayList<Pair>> getPreferenceLists(){
+        return preferenceLists;
+    }
+
+    public int getPropertyValueOf(int index, int jndex){
+        return Individuals.get(index).getPropertyValue(jndex);
+    }
+
+    public int getPropertyWeightOf(int index, int jndex){
+        return Individuals.get(index).getPropertyWeight(jndex);
+    }
+
     public void close() {
     }
 

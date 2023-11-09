@@ -1,6 +1,6 @@
 package com.example.SS2_Backend.dto.request;
 
-import com.example.SS2_Backend.model.Individual;
+import com.example.SS2_Backend.model.StableMatching.Individual;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
