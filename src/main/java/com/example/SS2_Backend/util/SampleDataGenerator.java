@@ -12,9 +12,10 @@ import java.util.Random;
 
 public class SampleDataGenerator {
     public static void main(String[] args) {
+        // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividuals(12);
 
-        // Create a StableMatchingProblem object with the generated data
+        // Create an Instance of StableMatchingProblem class with randomly generated data
         StableMatchingProblem problem = new StableMatchingProblem(individuals, "compositeWeightFunction", "fitnessFunction");
 
         // Run algorithm:
@@ -22,7 +23,7 @@ public class SampleDataGenerator {
                 .withProblem(problem)
                 .withAlgorithm("NSGAII")
                 .withMaxEvaluations(1000)
-                .withProperty("populationSize", 100)
+                .withProperty("populationSize", 200)
                 .distributeOnAllCores()
                 .run();
         // Number of Individuals inside this problem
@@ -30,8 +31,12 @@ public class SampleDataGenerator {
         // Preference List Produced by Algorithm
         System.out.println("Preference List of All: \n" + problem.printPreferenceLists());
         for (Solution solution : result) {
-            System.out.println("Randomized Population: " + solution.getVariable(0).toString());
-            System.out.println("Processed Matches" + solution.getAttribute("matches"));
+            System.out.println("Randomized Individuals Order: " + solution.getVariable(0).toString());
+            // Turn Solution:Attribute(Serializable Object) to Matches:"matches"(Instance of Matches Class)
+            Matches matches = (Matches) solution.getAttribute("matches");
+            // Prints matches
+            System.out.println("Processed Matches" + matches.toString());
+            // Prints fitness score of this Solution
             System.out.println("TotalScore: " + -solution.getObjective(0));
         }
     }

@@ -1,10 +1,16 @@
 package com.example.SS2_Backend.model.StableMatching;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.*;
 
+@Getter
 public class Individual {
+    @Setter
     private String IndividualName;
+    @Setter
     private int IndividualSet;
-    private List<Property> Properties = new ArrayList<>();
+    private final List<Property> Properties = new ArrayList<>();
 
     public Individual(String IndividualName, int IndividualSet){
         this.IndividualName = IndividualName;
@@ -14,10 +20,6 @@ public class Individual {
     public void setProperty(String propertyName, int propertyValue, int propertyWeight) {
         Property property = new Property(propertyName, propertyValue, propertyWeight);
         this.Properties.add(property);
-    }
-
-    public int getIndividualSet() {
-        return IndividualSet;
     }
 
     public int getNumberOfProperties(){
@@ -56,7 +58,7 @@ public class Individual {
         for (Property property : Properties) {
             System.out.println(property.toString());
         }
-        return "\n";
+        return IndividualName;
     }
 
 }
