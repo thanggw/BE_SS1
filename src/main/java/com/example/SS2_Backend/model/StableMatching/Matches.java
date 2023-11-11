@@ -1,9 +1,11 @@
 package com.example.SS2_Backend.model.StableMatching;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Matches {
+public class Matches implements Serializable {
+    private static final long serialVersionUID = 1L;
     private List<Pair> matches = new LinkedList<>();
     public Matches(){
     }
@@ -51,6 +53,17 @@ public class Matches {
             i+=2;
         }
         return a;
+    }
+
+    public Matches parseMatches(int[] array){
+        Matches matches = new Matches();
+        for(int i = 0; i < array.length; i++){
+            int a = array[i];
+            int b = array[i+1];
+            matches.add(new Pair(a, b));
+            i+=2;
+        }
+        return matches;
     }
 
     public String toString(){

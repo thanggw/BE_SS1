@@ -11,22 +11,13 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class SampleDataGenerator {
-
     public static void main(String[] args) {
         ArrayList<Individual> individuals = generateSampleIndividuals(12);
 
         // Create a StableMatchingProblem object with the generated data
         StableMatchingProblem problem = new StableMatchingProblem(individuals, "compositeWeightFunction", "fitnessFunction");
-        if(problem.isPreferenceEmpty()){
-            System.out.println("Preference failed to generate");
-        }else{
-            System.out.println("success");
-            System.out.println(problem.printPreferenceLists());
-        }
-        System.out.println(problem.getNumberOfIndividual()); //success
-        System.out.println(problem.printPreferenceLists()); //failed
-        System.out.println(problem.isPreferenceEmpty()); // true -- Preference initializing failed
 
+        // Run algorithm:
         NondominatedPopulation result = new Executor()
                 .withProblem(problem)
                 .withAlgorithm("NSGAII")
@@ -34,12 +25,14 @@ public class SampleDataGenerator {
                 .withProperty("populationSize", 100)
                 .distributeOnAllCores()
                 .run();
-        //create Datastructure to fetch the result
+        // Number of Individuals inside this problem
+        System.out.println("Number Of Individual: " + problem.getNumberOfIndividual());
+        // Preference List Produced by Algorithm
+        System.out.println("Preference List of All: \n" + problem.printPreferenceLists());
         for (Solution solution : result) {
-            System.out.print(-solution.getObjective(0) + "\t"); // Negate to show maximized objective
-            System.out.println(solution.getVariable(0).toString());
-            Matches matches = problem.stableMatching(solution.getVariable(0));
-            System.out.println(matches);
+            System.out.println("Randomized Population: " + solution.getVariable(0).toString());
+            System.out.println("Processed Matches" + solution.getAttribute("matches"));
+            System.out.println("TotalScore: " + -solution.getObjective(0));
         }
     }
 
@@ -57,7 +50,7 @@ public class SampleDataGenerator {
             Individual individual = new Individual(individualName, individualSet);
 
             // Add some sample properties (you can customize this part)
-            for (int j = 0; j < 5; j++) { // Adding 5 sample properties for each individual
+            for (int j = 0; j < 5; j++) {
                 String propertyName = "Property" + j;
                 int propertyValue = new Random().nextInt(20) + 1;
                 int propertyWeight = new Random().nextInt(10) + 1; // Random weight between 1 and 10
@@ -66,6 +59,7 @@ public class SampleDataGenerator {
 
             individuals.add(individual);
         }
+
 
         return individuals;
     }

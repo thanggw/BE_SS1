@@ -2,18 +2,20 @@ package com.example.SS2_Backend.model.StableMatching;
 
 import java.util.*;
 
+import org.aspectj.weaver.ast.Var;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.EncodingUtils;
 
 import static com.example.SS2_Backend.util.MergeSortPair.mergeSort;
+import static com.example.SS2_Backend.util.BinaryEncoderDecoder.*;
 
 public class StableMatchingProblem implements Problem {
     private final ArrayList<Individual> Individuals;
     private final int numberOfIndividual;
     private final int numberOfProperties;
-    private final ArrayList<ArrayList<Pair>> preferenceLists;
+    private final PreferenceLists preferenceLists;
     private final String compositeWeightFunction;
     private final String fitnessFunction;
 
@@ -34,8 +36,8 @@ public class StableMatchingProblem implements Problem {
         solution.setVariable(0, EncodingUtils.newPermutation(Individuals.size()));
         return solution;
     }
-    public ArrayList<Pair> getPreferenceOfIndividual(int index) {
-        ArrayList<Pair> a = new ArrayList<>();
+    public List<Pair> getPreferenceOfIndividual(int index) {
+        List<Pair> a = new ArrayList<>();
         int set = Individuals.get(index).getIndividualSet();
         for (int i = 0; i < numberOfIndividual; i++) {
             if(Individuals.get(i).getIndividualSet() != set){
@@ -51,13 +53,13 @@ public class StableMatchingProblem implements Problem {
         mergeSort(a);
         return a;
     }
-    public ArrayList<ArrayList<Pair>> getPreferences() {
-        ArrayList<ArrayList<Pair>> fullList = new ArrayList<>();
+    public PreferenceLists getPreferences() {
+        PreferenceLists fullList = new PreferenceLists();
         for (int i = 0; i < numberOfIndividual; i++) {
             System.out.println("Adding preference for Individual " + i );
-            ArrayList<Pair> a = getPreferenceOfIndividual(i); //pass
+            List<Pair> a = getPreferenceOfIndividual(i); //pass
             System.out.println(a.toString()); //pass
-            System.out.println(fullList.add(a)); //true everytime
+            fullList.add(a);//true everytime
         }
         return fullList; //true
     }
@@ -86,7 +88,7 @@ public class StableMatchingProblem implements Problem {
         while (!unmatchedMales.isEmpty()) {
             int male = unmatchedMales.poll();
             //System.out.println("working on Individual:" + male);
-            ArrayList<Pair> preferenceList = preferenceLists.get(male);
+            List<Pair> preferenceList = preferenceLists.getIndividualPreferenceList(male);
             //System.out.print("Hmm ... He prefer Individual ");
             for (int i = 0; i < preferenceList.size(); i++) {
                 int female = preferenceList.get(i).getIndividual1Index();
@@ -118,8 +120,8 @@ public class StableMatchingProblem implements Problem {
     }
 
 
-    private static boolean isPreferredOver(int male1, int male2, int female, ArrayList<ArrayList<Pair>> preferenceLists) {
-        ArrayList<Pair> preference = preferenceLists.get(female);
+    private static boolean isPreferredOver(int male1, int male2, int female, PreferenceLists preferenceLists) {
+        List<Pair> preference = preferenceLists.getIndividualPreferenceList(female);
         for (int i = 0; i < preference.size(); i++) {
             if (preference.get(i).getIndividual1Index() == male1) {
                 return true;
@@ -131,17 +133,17 @@ public class StableMatchingProblem implements Problem {
     }
 
 
-    private static int calculatePairSatisfactory(Pair pair, ArrayList<ArrayList<Pair>> preferenceLists) {
+    private static int calculatePairSatisfactory(Pair pair, PreferenceLists preferenceLists) {
         int a = pair.getIndividual1Index();
         int b = pair.getIndividual2Index();
         int aScore=0;
         int bScore=0;
-        for (Pair i:preferenceLists.get(a)) {
+        for (Pair i:preferenceLists.getIndividualPreferenceList(a)) {
             if(i.getIndividual1Index()==b){
                 aScore=i.getIndividual2Index();
             }
         }
-        for (Pair i:preferenceLists.get(a)) {
+        for (Pair i:preferenceLists.getIndividualPreferenceList(a)) {
             if(i.getIndividual1Index()==b){
                 aScore=i.getIndividual2Index();
             }
@@ -159,6 +161,7 @@ public class StableMatchingProblem implements Problem {
                 fitnessScore += calculatePairSatisfactory(result.getPair(i), preferenceLists);
             }
         }
+        solution.setAttribute("matches", result);
         solution.setObjective(0, -fitnessScore);
 
     }
@@ -194,11 +197,11 @@ public class StableMatchingProblem implements Problem {
 
     @Override
     public int getNumberOfConstraints() {
-        return 0;
+        return 1;
     }
 
-    private ArrayList<ArrayList<Pair>> getPreferenceLists(){
-        return preferenceLists;
+    private List<List<Pair>> getPreferenceLists(){
+        return preferenceLists.getPreferenceList();
     }
 
     public int getPropertyValueOf(int index, int jndex){
@@ -220,34 +223,7 @@ public class StableMatchingProblem implements Problem {
         return numberOfProperties + "\n" + fitnessFunction + "\n" + compositeWeightFunction + "\n" + sb;
     }
 
-//    public String printPreferenceLists(){
-//        StringBuilder sb = new StringBuilder();
-//        for(int i=0;i<numberOfIndividual;i++){
-//            ArrayList<Pair> list = preferenceLists.get(i);
-//            sb.append("Individual ").append(i);
-//            sb.append(" [");
-//            for(int j=0;j<list.size();j++) {
-//                sb.append("C").append(j+1).append(": ");
-//                sb.append(list.get(j).getIndividual1Index()).append("\t");
-//                sb.append("Tt: ");
-//                sb.append(list.get(j).getIndividual2Index()).append("\t").append("|");
-//            }
-//            sb.append("]\n");
-//        }
-//        return sb.toString();
-//    }
     public String printPreferenceLists() {
-        StringBuilder sb = new StringBuilder();
-        //sb.append("first").append(preferenceLists.size());
-        for (int i = 0; i < preferenceLists.size(); i++) {
-            sb.append("Individual ").append(i).append(" [");
-            for (Pair pair : preferenceLists.get(i)) {
-                sb.append("Individual ").append(pair.getIndividual1Index()).append(" Tt: ");
-                sb.append(pair.getIndividual2Index()).append(" | ");
-            }
-            sb.append("]\n");
-        }
-        return sb.toString();
+        return this.preferenceLists.toString();
     }
-
 }
