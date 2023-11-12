@@ -58,7 +58,7 @@ public class Individual {
         for (Property property : Properties) {
             System.out.println(property.toString());
         }
-        return IndividualName;
+        return "\n";
     }
 
 }

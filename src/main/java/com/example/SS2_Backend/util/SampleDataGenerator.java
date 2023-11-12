@@ -17,7 +17,8 @@ public class SampleDataGenerator {
 
         // Create an Instance of StableMatchingProblem class with randomly generated data
         StableMatchingProblem problem = new StableMatchingProblem(individuals, "compositeWeightFunction", "fitnessFunction");
-
+        // Print the whole Population
+        problem.printIndividuals();
         // Run algorithm:
         NondominatedPopulation result = new Executor()
                 .withProblem(problem)
@@ -55,7 +56,7 @@ public class SampleDataGenerator {
             Individual individual = new Individual(individualName, individualSet);
 
             // Add some sample properties (you can customize this part)
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < 6; j++) {
                 String propertyName = "Property" + j;
                 int propertyValue = new Random().nextInt(20) + 1;
                 int propertyWeight = new Random().nextInt(10) + 1; // Random weight between 1 and 10
