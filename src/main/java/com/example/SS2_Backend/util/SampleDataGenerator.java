@@ -1,8 +1,6 @@
 package com.example.SS2_Backend.util;
 
-import com.example.SS2_Backend.model.StableMatching.Individual;
-import com.example.SS2_Backend.model.StableMatching.Matches;
-import com.example.SS2_Backend.model.StableMatching.StableMatchingProblem;
+import com.example.SS2_Backend.model.StableMatching.*;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
@@ -11,34 +9,42 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class SampleDataGenerator {
+
     public static void main(String[] args) {
-        // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividuals(12);
 
-        // Create an Instance of StableMatchingProblem class with randomly generated data
+        // Create a StableMatchingProblem object with the generated data
         StableMatchingProblem problem = new StableMatchingProblem(individuals, "compositeWeightFunction", "fitnessFunction");
+        System.out.println(problem);
+        System.out.println(problem.getPropertyValueOf(10, 1)); //success
+        System.out.println(problem.getPropertyWeightOf(10, 1)); // success
+        if(problem.isPreferenceEmpty()){
+            System.out.println("Preference failed to generate");
+        }else{
+            System.out.println("success");
+            System.out.println(problem.printPreferenceLists());
+        }
+        System.out.println(problem.getNumberOfIndividual()); //success
+        System.out.println(problem.printPreferenceLists()); //failed
+        System.out.println(problem.isPreferenceEmpty()); // true -- Preference initializing failed
 
-        // Run algorithm:
         NondominatedPopulation result = new Executor()
                 .withProblem(problem)
                 .withAlgorithm("NSGAII")
-                .withMaxEvaluations(1000)
-                .withProperty("populationSize", 200)
+                .withMaxEvaluations(5)
+                .withProperty("populationSize", 5)
                 .distributeOnAllCores()
                 .run();
-        // Number of Individuals inside this problem
-        System.out.println("Number Of Individual: " + problem.getNumberOfIndividual());
-        // Preference List Produced by Algorithm
-        System.out.println("Preference List of All: \n" + problem.printPreferenceLists());
         for (Solution solution : result) {
-            System.out.println("Randomized Individuals Order: " + solution.getVariable(0).toString());
-            // Turn Solution:Attribute(Serializable Object) to Matches:"matches"(Instance of Matches Class)
-            Matches matches = (Matches) solution.getAttribute("matches");
-            // Prints matches
-            System.out.println("Processed Matches" + matches.toString());
-            // Prints fitness score of this Solution
-            System.out.println("TotalScore: " + -solution.getObjective(0));
+//            System.out.print(solution.getVariable(0).toString() + "\t\t|");
+            System.out.print(-solution.getObjective(0) + "\t"); // Negate to show maximized objective
+//            System.out.print(solution.getObjective(1));
+            System.out.println();
         }
+//        Solution solution = problem.newSolution();
+//        System.out.println(solution.getVariable(0).toString());
+//        Matches matches = problem.stableMatching(solution);
+//        System.out.println(matches);
     }
 
     public static ArrayList<Individual> generateSampleIndividuals(int numIndividuals) {
@@ -55,7 +61,7 @@ public class SampleDataGenerator {
             Individual individual = new Individual(individualName, individualSet);
 
             // Add some sample properties (you can customize this part)
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < 5; j++) { // Adding 5 sample properties for each individual
                 String propertyName = "Property" + j;
                 int propertyValue = new Random().nextInt(20) + 1;
                 int propertyWeight = new Random().nextInt(10) + 1; // Random weight between 1 and 10
@@ -64,7 +70,6 @@ public class SampleDataGenerator {
 
             individuals.add(individual);
         }
-
 
         return individuals;
     }
