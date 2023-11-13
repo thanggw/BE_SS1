@@ -4,16 +4,23 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Data Container for Algorithm Result
+ * Matches = {Match1, Match2, Match3, ...}
+ * Match maybe an Object of "Pair" or "MatchSet" Class, both Implement "MatchItem" Interface
+ */
+
 public class Matches implements Serializable {
     private static final long serialVersionUID = 1L;
-    private List<Pair> matches = new LinkedList<>();
+    private final List<MatchItem> matches = new LinkedList<>();
+
     public Matches(){
     }
 
-    public void add(Pair match){
+    public void add(MatchItem match){
         matches.add(match);
     }
-    public Pair getPair(int index){
+    public MatchItem getPair(int index){
         return matches.get(index);
     }
     public String findCompany(int target){
@@ -68,11 +75,11 @@ public class Matches implements Serializable {
 
     public String toString(){
         StringBuilder s = new StringBuilder();
-        s.append("{");
+        s.append("{\n");
         for(int i = 0; i < matches.size(); i++){
             s.append("[");
             s.append(matches.get(i).toString());
-            s.append("]");
+            s.append("]\n");
         }
         s.append("}");
         return s.toString();
