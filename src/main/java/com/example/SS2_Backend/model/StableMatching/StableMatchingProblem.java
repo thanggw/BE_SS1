@@ -61,6 +61,7 @@ public class StableMatchingProblem implements Problem {
                     int PropertyWeight = Individuals.get(index).getPropertyWeight(j);
                     totalScore += PropertyValue*PropertyWeight;
                 }
+                // Reuse "Pair" Data Structure for Conveniency
                 a.add(new Pair(i, totalScore));
             }
         }
@@ -69,15 +70,16 @@ public class StableMatchingProblem implements Problem {
         // return Sorted list
         return a;
     }
+    // Add to a complete List
     public PreferenceLists getPreferences() {
         PreferenceLists fullList = new PreferenceLists();
         for (int i = 0; i < numberOfIndividual; i++) {
-            System.out.println("Adding preference for Individual " + i );
-            List<Pair> a = getPreferenceOfIndividual(i); //pass
-            System.out.println(a.toString()); //pass
-            fullList.add(a);//true everytime
+            //System.out.println("Adding preference for Individual " + i );
+            List<Pair> a = getPreferenceOfIndividual(i);
+            //System.out.println(a.toString());
+            fullList.add(a);
         }
-        return fullList; //true
+        return fullList;
     }
     // Gale Shapley: Stable Matching Algorithm
     public Matches stableMatching(Variable var) {
@@ -151,7 +153,7 @@ public class StableMatchingProblem implements Problem {
     }
 
     // Calculate each pair Satisfactory of the result produced By Stable Matching Algorithm
-    private static int calculatePairSatisfactory(Pair pair, PreferenceLists preferenceLists) {
+    private static int calculatePairSatisfactory(MatchItem pair, PreferenceLists preferenceLists) {
         int a = pair.getIndividual1Index();
         int b = pair.getIndividual2Index();
         int aScore=0;

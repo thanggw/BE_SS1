@@ -1,14 +1,12 @@
 package com.example.SS2_Backend.model.StableMatching;
 
-public class Pair {
-    /*
-    kieu du lieu Pair(gia tri 1, gia tri 2)
-    Dung cho nhung tinh huong Match (i1, i2)
-    / Property(Gia tri, Weight)
-    / Male(index, totalCalculatedScore)
-    */
-    private int individual1Index;
-    private int individual2Index;
+/**
+ * Match Data Structure for Match:One to One Stable Matching Problem
+ * [IndividualA] <=> [IndividualB]
+ */
+public class Pair implements MatchItem {
+    private final int individual1Index;
+    private final int individual2Index;
 
     public Pair(int individual1Index, int individual2Index){
         this.individual1Index = individual1Index;
@@ -21,6 +19,11 @@ public class Pair {
 
     public int getIndividual2Index() {
         return individual2Index;
+    }
+
+    @Override
+    public int[] getIndividualMatches() {
+        return null;
     }
 
     public String toString(){

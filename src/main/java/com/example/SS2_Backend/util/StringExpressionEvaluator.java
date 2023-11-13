@@ -34,7 +34,7 @@ public class StringExpressionEvaluator {
         String expression = payoffFunction;
 
         if (payoffFunction.isBlank()) {
-            // the payoff function is the the sum function of all properties by default
+            // the payoff function is the sum function of all properties by default
             return calculateByDefault(strategy.getProperties(), null);
         } else {
 
