@@ -2,6 +2,9 @@ package com.example.SS2_Backend.util;
 
 import com.example.SS2_Backend.model.StableMatching.Individual;
 import com.example.SS2_Backend.model.StableMatching.Matches;
+import com.example.SS2_Backend.model.StableMatching.Requirement.OneBoundRequirement;
+import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
+import com.example.SS2_Backend.model.StableMatching.Requirement.TwoBoundRequirement;
 import com.example.SS2_Backend.model.StableMatching.StableMatchingProblem;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
@@ -17,11 +20,12 @@ import java.util.Random;
 public class SampleDataGenerator {
     public static void main(String[] args) {
         // Generate Individuals data Randomly
-        ArrayList<Individual> individuals = generateSampleIndividuals(12);
+        ArrayList<Individual> individuals = generateSampleIndividuals(12,4);
+
+        String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4"};
 
         // Create an Instance of StableMatchingProblem class with randomly generated data
-        StableMatchingProblem problem = new StableMatchingProblem(individuals,
-                "Default",
+        StableMatchingProblem problem = new StableMatchingProblem(individuals, propNames,
                 "Default");
 
         // Print the whole Population
@@ -67,7 +71,7 @@ public class SampleDataGenerator {
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "NSGAII");
     }
 
-    public static ArrayList<Individual> generateSampleIndividuals(int numIndividuals) {
+    public static ArrayList<Individual> generateSampleIndividuals(int numIndividuals, int numProps) {
         ArrayList<Individual> individuals = new ArrayList<>();
 
         for (int i = 1; i <= numIndividuals; i++) {
@@ -81,11 +85,23 @@ public class SampleDataGenerator {
             Individual individual = new Individual(individualName, individualSet);
 
             // Add some sample properties (you can customize this part)
-            for (int j = 0; j < 6; j++) {
-                String propertyName = "Property" + j;
-                int propertyValue = new Random().nextInt(50) + 20; // Random property Value (20 -> 50)
+            for (int j = 0; j < numProps; j++) {
+                double propertyValue = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
+                // Random property Value (20 -> 50)
                 int propertyWeight = new Random().nextInt(10) + 1; // Random property Weight (1 -> 10)
-                individual.setProperty(propertyName, propertyValue, propertyWeight);
+                String[] expression = {"","--", "++"};
+                double propertyBound = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
+                double propertyBound2 = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
+                int randomType = new Random().nextInt(2) + 1;
+                int randomExpression = new Random().nextInt(2) + 1;
+
+                if(randomType == 1){
+                    String[] requirement = {String.valueOf(propertyBound), expression[randomExpression]};
+                    individual.setProperty(propertyValue, propertyWeight, requirement);
+                }else{
+                    String[] requirement = {String.valueOf(propertyBound), String.valueOf(propertyBound2)};
+                    individual.setProperty(propertyValue, propertyWeight, requirement);
+                }
             }
 
             individuals.add(individual);

@@ -14,7 +14,6 @@ public class StableMatchingProblemDTO {
     private String problemName;
     private ArrayList<Individual> Individuals;
     private String[] allPropertyNames;
-    private String compositeWeightFunction;
     private String fitnessFunction;
     private String specifiedAlgorithm;
     private int populationSize;
@@ -36,7 +35,6 @@ public class StableMatchingProblemDTO {
                 ", ProblemName= " + problemName + '\'' +
                 ", Population= " + Individuals.size() +
                 ", PropertyName= " + java.util.Arrays.toString(allPropertyNames) +
-                ", CompositeWeightFunction= '" + compositeWeightFunction + '\'' +
                 ", fitnessFunction= '" + fitnessFunction + '\'' +
                 ", SpecifiedAlgorithm= " + specifiedAlgorithm + '\'' +
                 ", PopulationSize= " + populationSize +

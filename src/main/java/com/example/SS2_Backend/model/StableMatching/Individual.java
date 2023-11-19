@@ -1,4 +1,5 @@
 package com.example.SS2_Backend.model.StableMatching;
+import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,8 +18,8 @@ public class Individual {
         this.IndividualSet = IndividualSet;
     }
 
-    public void setProperty(String propertyName, int propertyValue, int propertyWeight) {
-        Property property = new Property(propertyName, propertyValue, propertyWeight);
+    public void setProperty(Double propertyValue, int propertyWeight, String[] inputRequirement) {
+        Property property = new Property(propertyValue, propertyWeight, inputRequirement);
         this.Properties.add(property);
     }
 
@@ -26,19 +27,19 @@ public class Individual {
         return Properties.size();
     }
 
-    public String getPropertyName(int index){
-        if(index >= 0 && index < this.Properties.size()){
-            return Properties.get(index).getName();
-        }else{
-            return null;
-        }
-    }
+//    public String getPropertyName(int index){
+//        if(index >= 0 && index < this.Properties.size()){
+//            return Properties.get(index).getName();
+//        }else{
+//            return null;
+//        }
+//    }
 
-    public int getPropertyValue(int index){
+    public Double getPropertyValue(int index){
         if(index >= 0 && index < this.Properties.size()){
             return Properties.get(index).getValue();
         }else{
-            return 0;
+            return null;
         }
     }
 
@@ -48,6 +49,10 @@ public class Individual {
         }else{
             return 0;
         }
+    }
+
+    public Requirement getRequirement(int index){
+        return Properties.get(index).getRequirement();
     }
 
     public String toString(){
