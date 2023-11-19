@@ -66,6 +66,8 @@ public class StableMatchingSolver {
         );
     }
 
+public class StableMatchingSolver {
+
     private NondominatedPopulation solveProblem(StableMatchingProblem problem,
                                                 String specifiedAlgorithm,
                                                 int populationSize,
