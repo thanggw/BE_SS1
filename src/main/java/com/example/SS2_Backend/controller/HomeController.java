@@ -15,7 +15,14 @@ public class HomeController {
 
     @Autowired
     private GameTheorySolver gameTheorySolver;
+
+    @Autowired
     private StableMatchingSolver stableMatchingSolver;
+
+    @PostMapping("/api/stable-matching-solver")
+    public ResponseEntity<Response> getJson(@RequestBody StableMatchingSolver stableMatchingProblem) {
+        return StableMatchingSolver.getJson(stableMatchingProblem);
+    }
 
     @PostMapping("/game-theory-solver")
     public ResponseEntity<Response> solveGameTheory(@RequestBody GameTheoryProblemDTO gameTheoryProblem) {

@@ -1,7 +1,10 @@
 package com.example.SS2_Backend.model.StableMatching;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.*;
 
+import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
 import lombok.Getter;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
@@ -9,7 +12,7 @@ import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.EncodingUtils;
 
 import static com.example.SS2_Backend.util.MergeSortPair.mergeSort;
-import com.example.SS2_Backend.util.StringExpressionEvaluator;
+import static com.example.SS2_Backend.util.Utils.formatDouble;
 
 /**
 Base case of Stable Matching Problem (One to One) : Number of Individuals in two sets are Equal (n1 = n2)
@@ -24,18 +27,19 @@ public class StableMatchingProblem implements Problem {
     private final int numberOfIndividual;
     @Getter
     private final int numberOfProperties;
+    private final String[] PropertiesName;
     private final PreferenceLists preferenceLists; // Preference List of each Individual
-    @Getter
-    private final String compositeWeightFunction; // Function for Individual to Evaluate others based on her/his Weights
+    //private final String compositeWeightFunction; // Function for Individual to Evaluate others based on her/his Weights
     @Getter
     private final String fitnessFunction; // Evaluate total Score of each Solution set
 
     //Constructor
-    public StableMatchingProblem(ArrayList<Individual> Individuals, String compositeWeightFunction, String fitnessFunction) {
+    public StableMatchingProblem(ArrayList<Individual> Individuals, String[] PropertiesName,  String fitnessFunction) {
         this.Individuals = Individuals;
         this.numberOfIndividual = Individuals.size();
         this.numberOfProperties = Individuals.get(0).getNumberOfProperties();
-        this.compositeWeightFunction = compositeWeightFunction;
+        this.PropertiesName = PropertiesName;
+        //this.compositeWeightFunction = compositeWeightFunction;
         this.fitnessFunction = fitnessFunction;
         this.preferenceLists = getPreferences(); // Construct Preference List based on the given above Individuals data
     }
@@ -50,19 +54,55 @@ public class StableMatchingProblem implements Problem {
     }
 
     // Need to edit to evaluate each Individual based on the Composite Weight function (Expression Evaluator Utility) provided for each set (more complex problem)
-    public List<Pair> getPreferenceOfIndividual(int index) {
-        List<Pair> a = new ArrayList<>();
+    public List<PreferenceLists.IndexValue> getPreferenceOfIndividual(int index) {
+        List<PreferenceLists.IndexValue> a = new ArrayList<>();
+        // get this Individual set belong to
         int set = Individuals.get(index).getIndividualSet();
+        // Calc totalScore of others for this Individual
         for (int i = 0; i < numberOfIndividual; i++) {
             if(Individuals.get(i).getIndividualSet() != set){
-                int totalScore = 0;
+                double totalScore = 0;
                 for (int j = 0; j < numberOfProperties; j++) {
-                    int PropertyValue = Individuals.get(i).getPropertyValue(j);
+                    double Score = 0.0;
+                    Double PropertyValue = Individuals.get(i).getPropertyValue(j);
+                    Requirement requirement = Individuals.get(index).getRequirement(j);
                     int PropertyWeight = Individuals.get(index).getPropertyWeight(j);
-                    totalScore += PropertyValue*PropertyWeight;
+                    //Case: 1 Bound
+                    if (requirement.getType() == 1){
+                        Double Bound = requirement.getBound();
+                        String expression = requirement.getExpression();
+                        if(Objects.equals(expression, "++")){
+                            if(PropertyValue < Bound){
+                                Score += 0.0;
+                            }else{
+                                Double distance = Math.abs(PropertyValue - Bound);
+                                double Scale = (Bound + distance)/Bound;
+                                Score = Scale * PropertyWeight;
+                            }
+                        }else{
+                            if(PropertyValue > Bound){
+                                Score += 0.0;
+                            }else{
+                                Double distance = Math.abs(PropertyValue - Bound);
+                                double Scale = (Bound + distance)/Bound;
+                                Score = Scale * PropertyWeight;
+                            }
+                        }
+                    //Case: 2 Bounds
+                    }else{
+                        Double lowerBound = requirement.getLowerBound();
+                        Double upperBound = requirement.getUpperBound();
+                        if(PropertyValue < lowerBound || PropertyValue > upperBound){
+                            Double medium = (lowerBound + upperBound)/2;
+                            Double distance = Math.abs(PropertyValue - medium);
+                            double Scale = (medium-distance)/medium + 1;
+                            Score = Scale * PropertyWeight;
+                        }
+                    }
+                    totalScore += Score;
                 }
                 // Reuse "Pair" Data Structure for Conveniency
-                a.add(new Pair(i, totalScore));
+                a.add(new PreferenceLists.IndexValue(i, totalScore));
             }
         }
         // Sort: Individuals with higher score than others sit on the top of the List
@@ -75,7 +115,7 @@ public class StableMatchingProblem implements Problem {
         PreferenceLists fullList = new PreferenceLists();
         for (int i = 0; i < numberOfIndividual; i++) {
             //System.out.println("Adding preference for Individual " + i );
-            List<Pair> a = getPreferenceOfIndividual(i);
+            List<PreferenceLists.IndexValue> a = getPreferenceOfIndividual(i);
             //System.out.println(a.toString());
             fullList.add(a);
         }
@@ -107,10 +147,10 @@ public class StableMatchingProblem implements Problem {
         while (!unmatchedMales.isEmpty()) {
             int male = unmatchedMales.poll();
             //System.out.println("working on Individual:" + male);
-            List<Pair> preferenceList = preferenceLists.getIndividualPreferenceList(male);
-            //System.out.print("Hmm ... He prefer Individual ");
+            List<PreferenceLists.IndexValue> preferenceList = preferenceLists.getIndividualPreferenceList(male);
+            //System.out.print("Hmm ... He prefers Individual ");
             for (int i = 0; i < preferenceList.size(); i++) {
-                int female = preferenceList.get(i).getIndividual1Index();
+                int female = preferenceList.get(i).getIndividualIndex();
                 //System.out.println(female);
                 if (!engagedFemale.contains(female)) {
                     engagedFemale.add(female);
@@ -141,11 +181,11 @@ public class StableMatchingProblem implements Problem {
 
     // Stable Matching Algorithm Component: isPreferredOver
     private static boolean isPreferredOver(int male1, int male2, int female, PreferenceLists preferenceLists) {
-        List<Pair> preference = preferenceLists.getIndividualPreferenceList(female);
+        List<PreferenceLists.IndexValue> preference = preferenceLists.getIndividualPreferenceList(female);
         for (int i = 0; i < preference.size(); i++) {
-            if (preference.get(i).getIndividual1Index() == male1) {
+            if (preference.get(i).getIndividualIndex() == male1) {
                 return true;
-            } else if (preference.get(i).getIndividual1Index() == male2) {
+            } else if (preference.get(i).getIndividualIndex() == male2) {
                 return false;
             }
         }
@@ -153,19 +193,19 @@ public class StableMatchingProblem implements Problem {
     }
 
     // Calculate each pair Satisfactory of the result produced By Stable Matching Algorithm
-    private static int calculatePairSatisfactory(MatchItem pair, PreferenceLists preferenceLists) {
+    private static double calculatePairSatisfactory(MatchItem pair, PreferenceLists preferenceLists) {
         int a = pair.getIndividual1Index();
         int b = pair.getIndividual2Index();
-        int aScore=0;
-        int bScore=0;
-        for (Pair i:preferenceLists.getIndividualPreferenceList(a)) {
-            if(i.getIndividual1Index()==b){
-                aScore=i.getIndividual2Index();
+        double aScore=0;
+        double bScore=0;
+        for (PreferenceLists.IndexValue i:preferenceLists.getIndividualPreferenceList(a)) {
+            if(i.getIndividualIndex()==b){
+                aScore=i.getValue();
             }
         }
-        for (Pair i:preferenceLists.getIndividualPreferenceList(a)) {
-            if(i.getIndividual1Index()==b){
-                aScore=i.getIndividual2Index();
+        for (PreferenceLists.IndexValue i:preferenceLists.getIndividualPreferenceList(a)) {
+            if(i.getIndividualIndex()==b){
+                aScore=i.getValue();
             }
         }
         return aScore + bScore;
@@ -176,7 +216,7 @@ public class StableMatchingProblem implements Problem {
         //System.out.println("Evaluating...");
         Matches result = stableMatching(solution.getVariable(0));
         //System.out.println(solution.getVariable(1).toString());
-        int fitnessScore = 0;
+        double fitnessScore = 0;
         if (result != null) {
             for (int i = 0; i < result.size(); i++) {
                 fitnessScore += calculatePairSatisfactory(result.getPair(i), preferenceLists);
@@ -209,28 +249,24 @@ public class StableMatchingProblem implements Problem {
         return 1;
     }
 
-    private List<List<Pair>> getPreferenceLists(){
+    public List<List<PreferenceLists.IndexValue>> getPreferenceLists(){
         return preferenceLists.getPreferenceList();
     }
 
     private String getPropertyNameOfIndex(int index){
-        return Individuals.get(0).getPropertyName(index);
+        return PropertiesName[index];
     }
 
-    public int getPropertyValueOf(int index, int jndex){
+    public Double getPropertyValueOf(int index, int jndex){
         return Individuals.get(index).getPropertyValue(jndex);
     }
 
     public int getPropertyWeightOf(int index, int jndex){
         return Individuals.get(index).getPropertyWeight(jndex);
     }
-    private static String fillWithChar(String character, int width) {
-        if (character.length() != 1) {
-            throw new IllegalArgumentException("Character must be a single character.");
-        }
-
+    private static String fillWithChar(char character, int width) {
         String format = "%" + width + "s";
-        return String.format(format, "").replace(' ', character.charAt(0));
+        return String.format(format, "").replace(' ', character);
     }
 
     public void printIndividuals(){
@@ -240,17 +276,27 @@ public class StableMatchingProblem implements Problem {
         }
         String propName = sb.toString();
         sb.delete(0, sb.length());
+        //header
         System.out.println("No | Set | Name                | " + propName );
         int width = this.numberOfProperties * 18 + 32;
-        String filledString = fillWithChar("-", width);
+        String filledString = fillWithChar('-', width);
         sb.append(filledString).append("\n");
+        //content
         for (int i = 0; i<this.numberOfIndividual; i++){
+            //name / set
             sb.append(String.format("%-3d| ", i));
             sb.append(String.format("%-4d| ", Individuals.get(i).getIndividualSet()));
             sb.append(String.format("%-20s| ", Individuals.get(i).getIndividualName()));
+            // prop value
             StringBuilder ss = new StringBuilder();
             for (int j = 0; j< this.numberOfProperties; j++){
-                ss.append(String.format("%-16s| ", this.getPropertyValueOf(i,j)));
+                ss.append(String.format("%-16s| ", formatDouble(this.getPropertyValueOf(i,j))));
+            }
+            sb.append(ss).append("\n");
+            ss.delete(0, sb.length());
+            ss.append(String.format("%33s", "Requirement: | "));
+            for (int j = 0; j< this.numberOfProperties; j++){
+                ss.append(String.format("%-16s| ", this.Individuals.get(i).getRequirement(j).toString()));
             }
             sb.append(ss).append("\n");
             ss.delete(0, sb.length());
@@ -264,6 +310,7 @@ public class StableMatchingProblem implements Problem {
         System.out.print(sb);
     }
 
+
     public void close() {
     }
 
@@ -272,7 +319,7 @@ public class StableMatchingProblem implements Problem {
         for(int i = 0; i < Individuals.size(); i++){
             sb.append(Individuals.get(i).toString()).append("\n");
         }
-        return numberOfProperties + "\n" + fitnessFunction + "\n" + compositeWeightFunction + "\n" + sb;
+        return numberOfProperties + "\n" + fitnessFunction + "\n" + sb;
     }
 
     public String printPreferenceLists() {

@@ -13,9 +13,9 @@ public class MatchSet implements MatchItem {
     @Getter
     private final int Individual1Index;
     private final int[] IndividualMatches;
-    public MatchSet(int Individual, int[] IndividualMatches){
+    public MatchSet(int Individual, int Capacity){
         this.Individual1Index = Individual;
-        this.IndividualMatches = IndividualMatches;
+        this.IndividualMatches = new int[Capacity];
     }
     public int[] getIndividualMatches(){
         return this.IndividualMatches;

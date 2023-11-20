@@ -1,9 +1,16 @@
 package com.example.SS2_Backend.util;
 
-import java.util.Arrays;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
-public class BinaryEncoderDecoder {
-    // Encode array of integers to a binary string
+public class Utils {
+    public static Double formatDouble(double val){
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+        DecimalFormat df = new DecimalFormat("#.##", symbols);
+        String formattedValue = df.format(val);
+        return Double.parseDouble(formattedValue);
+    }
     public static String binEncode(int[] array) {
         StringBuilder binaryString = new StringBuilder();
         for (int num : array) {
@@ -24,17 +31,5 @@ public class BinaryEncoderDecoder {
             result[i / 32] = num;
         }
         return result;
-    }
-
-    public static void main(String[] args) {
-        int[] originalArray = {3, 10, 2, 6, 8, 1, 11, 0, 4, 7, 5, 9};
-
-        // Encode array to binary string
-        String encodedString = binEncode(originalArray);
-        System.out.println("Encoded Binary String: " + encodedString);
-
-        // Decode binary string back to array
-        int[] decodedArray = binDecode(encodedString);
-        System.out.println("Decoded Array: " + Arrays.toString(decodedArray));
     }
 }

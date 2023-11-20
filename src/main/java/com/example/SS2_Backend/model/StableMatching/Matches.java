@@ -13,6 +13,7 @@ import java.util.List;
 public class Matches implements Serializable {
     private static final long serialVersionUID = 1L;
     private final List<MatchItem> matches = new LinkedList<>();
+    private final List<Integer> leftOvers = new LinkedList<>();
 
     public Matches(){
     }
@@ -36,7 +37,9 @@ public class Matches implements Serializable {
         }
         return company;
     }
-
+    public void addLeftOver(int index){
+        leftOvers.add(index);
+    }
     public int size(){
         return matches.size();
     }
@@ -75,10 +78,17 @@ public class Matches implements Serializable {
 
     public String toString(){
         StringBuilder s = new StringBuilder();
-        s.append("{\n");
-        for(int i = 0; i < matches.size(); i++){
+        s.append("Matches {\n");
+        for (MatchItem match : matches) {
             s.append("[");
-            s.append(matches.get(i).toString());
+            s.append(match.toString());
+            s.append("]\n");
+        }
+        s.append("}\n");
+        s.append("LeftOvers {");
+        for (Integer leftOver : leftOvers) {
+            s.append("[");
+            s.append(leftOver.toString());
             s.append("]\n");
         }
         s.append("}");
