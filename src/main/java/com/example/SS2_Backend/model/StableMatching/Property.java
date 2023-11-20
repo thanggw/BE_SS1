@@ -47,4 +47,10 @@ public class Property {
     public String toString() {
         return "Value: " + value + " , Requirement " + requirement + " , Weight: " + weight;
     }
+    public static void main(String[] args){
+        String[] strings = {"103.44", "++"};
+        Property p = new Property(16.5,6, strings);
+        System.out.println(p);
+    }
+
 }

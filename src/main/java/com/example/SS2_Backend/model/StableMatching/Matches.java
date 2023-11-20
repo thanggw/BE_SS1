@@ -1,5 +1,8 @@
 package com.example.SS2_Backend.model.StableMatching;
 
+import lombok.Builder;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +12,8 @@ import java.util.List;
  * Matches = {Match1, Match2, Match3, ...}
  * Match maybe an Object of "Pair" or "MatchSet" Class, both Implement "MatchItem" Interface
  */
-
+@Data
+@Builder
 public class Matches implements Serializable {
     private static final long serialVersionUID = 1L;
     private final List<MatchItem> matches = new LinkedList<>();

@@ -22,18 +22,22 @@ Wish to test this Class? Run "src.main.java.com.example.SS2_Backend.util.SampleD
  **/
 
 public class StableMatchingProblem implements Problem {
-    private final ArrayList<Individual> Individuals; // Storing Data of the Whole population
+    private ArrayList<Individual> Individuals; // Storing Data of the Whole population
     @Getter
-    private final int numberOfIndividual;
+    private int numberOfIndividual;
     @Getter
-    private final int numberOfProperties;
-    private final String[] PropertiesName;
-    private final PreferenceLists preferenceLists; // Preference List of each Individual
+    private int numberOfProperties;
+    private String[] PropertiesName;
+    private PreferenceLists preferenceLists; // Preference List of each Individual
     //private final String compositeWeightFunction; // Function for Individual to Evaluate others based on her/his Weights
     @Getter
-    private final String fitnessFunction; // Evaluate total Score of each Solution set
+    private String fitnessFunction; // Evaluate total Score of each Solution set
 
     //Constructor
+
+    public StableMatchingProblem(){
+
+    }
     public StableMatchingProblem(ArrayList<Individual> Individuals, String[] PropertiesName,  String fitnessFunction) {
         this.Individuals = Individuals;
         this.numberOfIndividual = Individuals.size();
@@ -125,6 +129,7 @@ public class StableMatchingProblem implements Problem {
     public Matches stableMatching(Variable var) {
         Matches matches = new Matches();
         Queue<Integer> unmatchedMales = new LinkedList<>();
+        int cFemale = 0;
         LinkedList<Integer> engagedFemale = new LinkedList<>();
         String s = var.toString();
 
@@ -135,6 +140,8 @@ public class StableMatchingProblem implements Problem {
                 int i = Integer.parseInt(token);
                 if (Individuals.get(i).getIndividualSet() == 1) {
                     unmatchedMales.add(i);
+                }else if(Individuals.get(i).getIndividualSet() == 0){
+                    cFemale++;
                 }
             } catch (NumberFormatException e) {
                 // Handle invalid tokens (non-integer values)
@@ -167,10 +174,19 @@ public class StableMatchingProblem implements Problem {
                         //System.out.println("Hell yeah! " + female + " ditch the guy " + currentMale + " to be with " + male + "!");
                         break;
                     }
-                    //else {
-//                        unmatchedMales.add(male);
+                    else {
+                        if(preferenceList.get(preferenceList.size()-1).getIndividualIndex() == female){
+                            matches.addLeftOver(male);
+                        }
                         //System.out.println(male + " lost the game, back to the hood...");
-                    //}
+                    }
+                }
+            }
+        }
+        for(int i = 0; i < Individuals.size(); i++){
+            if(Individuals.get(i).getIndividualSet() == 0){
+                if(!engagedFemale.contains(i)){
+                    matches.addLeftOver(i);
                 }
             }
         }
@@ -324,5 +340,20 @@ public class StableMatchingProblem implements Problem {
 
     public String printPreferenceLists() {
         return this.preferenceLists.toString();
+    }
+
+    public void setFitnessFunction(String fitnessFunction) {
+        this.fitnessFunction = fitnessFunction;
+    }
+
+    public void setPopulation(ArrayList<Individual> individuals) {
+        this.Individuals = individuals;
+        this.numberOfIndividual = Individuals.size();
+        this.numberOfProperties = Individuals.get(0).getNumberOfProperties();
+        this.preferenceLists = getPreferences();
+    }
+
+    public void setAllPropertyNames(String[] allPropertyNames) {
+        this.PropertiesName = allPropertyNames;
     }
 }
