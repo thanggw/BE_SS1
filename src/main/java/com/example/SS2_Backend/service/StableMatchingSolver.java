@@ -36,6 +36,8 @@ public class StableMatchingSolver {
             problem.setAllPropertyNames(request.getAllPropertyNames());
             problem.setFitnessFunction(request.getFitnessFunction());
 
+            System.out.println(problem.printPreferenceLists());
+
             long startTime = System.currentTimeMillis();
 
             NondominatedPopulation results = solveProblem(
@@ -50,7 +52,7 @@ public class StableMatchingSolver {
             double runtime = ((double) (endTime - startTime) / 1000 / 60);
             runtime = Math.round(runtime * 100.0) / 100.0;
             MatchingSolution matchingSolution = formatSolution(problem, results, runtime);
-            System.out.println(matchingSolution.toString());
+            System.out.println(matchingSolution);
             return ResponseEntity.ok(
                     Response.builder()
                             .status(200)
@@ -77,7 +79,7 @@ public class StableMatchingSolver {
 
 
         matchingSolution.setFitnessValue(fitnessValue);
-        matchingSolution.setPreferenceLists(preferenceLists);
+        //matchingSolution.setPreferenceLists(preferenceLists);
         matchingSolution.setMatches(matches);
         matchingSolution.setAlgorithm("NSGAII");
         matchingSolution.setRuntime(Runtime);

@@ -73,16 +73,21 @@ public class StableMatchingProblem implements Problem {
                     Double PropertyValue = Individuals.get(i).getPropertyValue(j);
                     Requirement requirement = Individuals.get(index).getRequirement(j);
                     int PropertyWeight = Individuals.get(index).getPropertyWeight(j);
-                    //Case: 1 Bound
+                    // Case: Scale
                     if (requirement.getType() == 0){
                       int TargetValue = requirement.getTargetValue();
                       if(PropertyValue < 0 || PropertyValue > 0){
                           Score += 0;
                       }else{
-                          double Distance = Math.abs(PropertyValue-TargetValue);
-                          double Scale = (TargetValue-Distance)/Distance + 1;
-                          Score += Scale;
+                          if(TargetValue != 0.0){
+                              double Distance = Math.abs(PropertyValue-TargetValue);
+                              double Scale = (TargetValue-Distance)/TargetValue + 1;
+                              Score += Scale;
+                          }else{
+                              Score += 0;
+                          }
                       }
+                        //Case: 1 Bound
                     } else if (requirement.getType() == 1){
                         Double Bound = requirement.getBound();
                         String expression = requirement.getExpression();
