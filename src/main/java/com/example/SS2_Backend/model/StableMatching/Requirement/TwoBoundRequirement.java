@@ -22,6 +22,9 @@ public class TwoBoundRequirement implements Requirement {
     public String getExpression() {
         return null;
     }
+    public int getTargetValue(){
+        return 0;
+    }
 
     public String toString(){
         return "[" + formatDouble(lowerBound) + ", " + formatDouble(upperBound) + "]";

@@ -24,6 +24,8 @@ Wish to test this Class? Run "src.main.java.com.example.SS2_Backend.util.SampleD
 public class StableMatchingProblem implements Problem {
     private ArrayList<Individual> Individuals; // Storing Data of the Whole population
     @Getter
+    private int numberOfSets;
+    @Getter
     private int numberOfIndividual;
     @Getter
     private int numberOfProperties;
@@ -72,7 +74,16 @@ public class StableMatchingProblem implements Problem {
                     Requirement requirement = Individuals.get(index).getRequirement(j);
                     int PropertyWeight = Individuals.get(index).getPropertyWeight(j);
                     //Case: 1 Bound
-                    if (requirement.getType() == 1){
+                    if (requirement.getType() == 0){
+                      int TargetValue = requirement.getTargetValue();
+                      if(PropertyValue < 0 || PropertyValue > 0){
+                          Score += 0;
+                      }else{
+                          double Distance = Math.abs(PropertyValue-TargetValue);
+                          double Scale = (TargetValue-Distance)/Distance + 1;
+                          Score += Scale;
+                      }
+                    } else if (requirement.getType() == 1){
                         Double Bound = requirement.getBound();
                         String expression = requirement.getExpression();
                         if(Objects.equals(expression, "++")){
@@ -105,7 +116,7 @@ public class StableMatchingProblem implements Problem {
                     }
                     totalScore += Score;
                 }
-                // Reuse "Pair" Data Structure for Conveniency
+                // Add
                 a.add(new PreferenceLists.IndexValue(i, totalScore));
             }
         }
@@ -131,6 +142,7 @@ public class StableMatchingProblem implements Problem {
         Queue<Integer> unmatchedMales = new LinkedList<>();
         int cFemale = 0;
         LinkedList<Integer> engagedFemale = new LinkedList<>();
+
         String s = var.toString();
 
         String[] decodedSolution = s.split(",");

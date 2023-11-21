@@ -105,6 +105,10 @@ public class Matches implements Serializable {
         matches.add(new Pair(3,4));
         matches.add(new Pair(5,6));
 
-        System.out.println(matches.toString());
+        matches.addLeftOver(7);
+        matches.addLeftOver(8);
+        matches.addLeftOver(9);
+
+        System.out.println(matches);
     }
 }

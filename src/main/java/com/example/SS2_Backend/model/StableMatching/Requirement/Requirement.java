@@ -14,5 +14,6 @@ public interface Requirement {
     String getExpression();
     Double getLowerBound();
     Double getUpperBound();
+    int getTargetValue();
     String toString();
 }

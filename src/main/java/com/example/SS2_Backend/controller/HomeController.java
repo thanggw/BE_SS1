@@ -26,6 +26,7 @@ public class HomeController {
     public ResponseEntity<Response> getJson(@RequestBody Object object) {
             ObjectMapper OM = new ObjectMapper();
             StableMatchingProblemDTO problemDTO = OM.convertValue(object, StableMatchingProblemDTO.class);
+            System.out.println(problemDTO);
             return StableMatchingSolver.solveStableMatching(problemDTO);
     }
 

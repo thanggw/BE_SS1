@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.util.*;
 
+import static com.example.SS2_Backend.util.Utils.*;
+
 @Getter
 @JsonDeserialize(using = IndividualDeserializer.class)
 public class Individual {
@@ -32,27 +34,107 @@ public class Individual {
         Property property = new Property(propertyValue, propertyWeight, inputRequirement);
         this.Properties.add(property);
     }
-    public String[] decodeInputRequirement(String item){
+    public static String[] decodeInputRequirement(String item){
         item = item.trim();
         String[] result = new String[2];
-        if (item.contains(",")) {
-            String[] parts = item.split(",");
-            result[0] = parts[0].trim();
-            result[1] = parts[1].trim();
-        } else {
-            // If no comma, extract the number and expression
-            int index = findFirstNonNumericIndex(item);
-            result[0] = item.substring(0, index).trim();
-            result[1] = item.substring(index).trim();
+        int index = findFirstNonNumericIndex(item);
+        if(index == -1){
+            if(isInteger(item)) {
+                try {
+                    int a = Integer.parseInt(item);
+                    result[0] = item;
+                    if(a >= 0 && a <= 10){
+                        result[1] = null;
+                    }else{
+                        result[1] = "++";
+                    }
+                } catch (NumberFormatException e){
+                    System.out.println("error index - 1");
+                    result[0] = "-1";
+                    result[1] = "++";
+                }
+            }else if(isDouble(item)) {
+                    result[0] = "-2";
+                    result[1] = null;
+            }else{
+                result[0] = "-3";
+                result[1] = null;
+            }
+        }else{
+            if(item.contains(":")){
+                System.out.println("contains :");
+                String[] parts = item.split(":");
+                result[0] = parts[0].trim();
+                result[1] = parts[1].trim();
+            }else if(item.contains("++")){
+                System.out.println("Contains ++");
+                String[] parts = item.split("\\+\\+");
+                result[0] = parts[0].trim();
+                result[1] = "++";
+            } else if (item.contains("--")) {
+                System.out.println("Contains --");
+                String[] parts = item.split("--");
+                result[0] = parts[0].trim();
+                result[1] = "--";
+            } else {
+                result[0] = "-2";
+                result[1] = "++";
+            }
         }
+//        if(isInteger(item)) {
+//            try {
+//                int a = Integer.parseInt(item);
+//                result[0] = item;
+//                if(a < 0 || a > 10){
+//                    result[1] = null;
+//                }else{
+//                    result[1] = "++";
+//                }
+//            } catch (NumberFormatException e){
+//                result[0] = item;
+//                result[1] = "++";
+//            }
+//        }else if(isDouble(item)){
+//            result[0] = item;
+//            result[1] = null;
+//        }else if (item.contains(":")) {
+//            String[] parts = item.split(":");
+//            result[0] = parts[0].trim();
+//            result[1] = parts[1].trim();
+//        } else {
+//            // If no comma, extract the number and expression
+//            int index = findFirstNonNumericIndex(item);
+//
+//            // Check if the index is within bounds before accessing the character
+//            if (index < item.length()) {
+//                result[0] = item.substring(0, index).trim();
+//                char expressionChar = item.charAt(index);
+//                result[1] = (expressionChar == '+') ? "++" : ((expressionChar == '-') ? "--" : "++");
+//            } else {
+//                // Handle the case when the index is out of bounds
+//                result[0] = item.trim();
+//                result[1] = "++";
+//            }
+//        }
         return result;
     }
+
+    public static void main(String[] args){
+        String inputReq = "200.011--";
+        String[] requirement = decodeInputRequirement(inputReq);
+        System.out.println(Arrays.toString(requirement));
+    }
     private static int findFirstNonNumericIndex(String s) {
+        s = s.trim();
         int index = 0;
         while (index < s.length() && (Character.isDigit(s.charAt(index)) || s.charAt(index) == '.')) {
             index++;
         }
-        return index;
+        if(index < s.length()){
+            return index;
+        }else{
+            return -1;
+        }
     }
     @JsonProperty("IndividualName")
     public void setIndividualName(String individualName) {

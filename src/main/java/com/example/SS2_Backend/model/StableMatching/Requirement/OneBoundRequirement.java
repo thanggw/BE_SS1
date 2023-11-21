@@ -1,7 +1,6 @@
 package com.example.SS2_Backend.model.StableMatching.Requirement;
 
 import lombok.Getter;
-import com.example.SS2_Backend.util.Utils.*;
 
 import static com.example.SS2_Backend.util.Utils.formatDouble;
 
@@ -24,6 +23,9 @@ public class OneBoundRequirement implements Requirement{
     @Override
     public Double getUpperBound() {
         return null;
+    }
+    public int getTargetValue(){
+        return 0;
     }
     public String toString(){
         return "[" + formatDouble(bound) + ", " + expression + "]";
