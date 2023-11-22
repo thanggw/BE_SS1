@@ -17,6 +17,7 @@ public class Individual {
     private String IndividualName;
     @Setter
     private int IndividualSet;
+    private int Capacity;
     private final List<Property> Properties = new ArrayList<>();
 
 
@@ -81,41 +82,6 @@ public class Individual {
                 result[1] = "++";
             }
         }
-//        if(isInteger(item)) {
-//            try {
-//                int a = Integer.parseInt(item);
-//                result[0] = item;
-//                if(a < 0 || a > 10){
-//                    result[1] = null;
-//                }else{
-//                    result[1] = "++";
-//                }
-//            } catch (NumberFormatException e){
-//                result[0] = item;
-//                result[1] = "++";
-//            }
-//        }else if(isDouble(item)){
-//            result[0] = item;
-//            result[1] = null;
-//        }else if (item.contains(":")) {
-//            String[] parts = item.split(":");
-//            result[0] = parts[0].trim();
-//            result[1] = parts[1].trim();
-//        } else {
-//            // If no comma, extract the number and expression
-//            int index = findFirstNonNumericIndex(item);
-//
-//            // Check if the index is within bounds before accessing the character
-//            if (index < item.length()) {
-//                result[0] = item.substring(0, index).trim();
-//                char expressionChar = item.charAt(index);
-//                result[1] = (expressionChar == '+') ? "++" : ((expressionChar == '-') ? "--" : "++");
-//            } else {
-//                // Handle the case when the index is out of bounds
-//                result[0] = item.trim();
-//                result[1] = "++";
-//            }
-//        }
         return result;
     }
 
@@ -144,6 +110,10 @@ public class Individual {
     @JsonProperty("IndividualSet")
     public void setIndividualSet(int individualSet) {
         IndividualSet = individualSet;
+    }
+
+    public void setCapacity(int capacity){
+        this.Capacity = capacity;
     }
 
     public int getNumberOfProperties(){

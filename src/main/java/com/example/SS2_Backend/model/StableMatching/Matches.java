@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Data Container for Algorithm Result
  * Matches = {Match1, Match2, Match3, ...}
- * Match maybe an Object of "Pair" or "MatchSet" Class, both Implement "MatchItem" Interface
+ * Match can be an Object of "Pair" or "MatchSet" Class, both Implement "MatchItem" Interface
  */
 @Data
 @Builder
@@ -59,27 +59,29 @@ public class Matches implements Serializable {
             }
         }
     }
-    public int[] parseArray(){
-        int[] a = new int[matches.size()*2];
-        for(int i=0; i < a.length;i++){
-            a[i] = matches.get(i).getIndividual1Index();
-            a[i+1] = matches.get(i).getIndividual2Index();
-            i+=2;
+    public boolean isFull (int target){
+        for (MatchItem match : matches) {
+            if (match.getIndividual1Index() == target) {
+                int cap = match.getCapacity();
+                return match.getIndividualMatches().size() >= cap;
+            }
         }
-        return a;
+        return false;
     }
-
-    public Matches parseMatches(int[] array){
-        Matches matches = new Matches();
-        for(int i = 0; i < array.length; i++){
-            int a = array[i];
-            int b = array[i+1];
-            matches.add(new Pair(a, b));
-            i+=2;
+    public void addMatch(int target, int match){
+        for (MatchItem matchSet : matches) {
+            if (matchSet.getIndividual1Index() == target) {
+                matchSet.addMatch(match);
+            }
         }
-        return matches;
     }
-
+    public void disMatch(int target, int match){
+        for (MatchItem matchSet : matches) {
+            if (matchSet.getIndividual1Index() == target) {
+                matchSet.unMatch(match);
+            }
+        }
+    }
     public String toString(){
         StringBuilder s = new StringBuilder();
         s.append("Matches {\n");
@@ -101,14 +103,31 @@ public class Matches implements Serializable {
 
     public static void main(String[] args){
         Matches matches = new Matches();
-        matches.add(new Pair(1,2));
-        matches.add(new Pair(3,4));
-        matches.add(new Pair(5,6));
+        matches.add(new MatchSet(1, 3));
+        matches.add(new MatchSet(2,4));
+        matches.add(new MatchSet(3,2));
 
-        matches.addLeftOver(7);
-        matches.addLeftOver(8);
+        matches.addMatch(1,4);
+        matches.addMatch(1,5);
+        matches.addMatch(1,6);
+
+        matches.addMatch(2,3);
+        matches.addMatch(2,1);
+        matches.addMatch(2,8);
+
+        matches.addMatch(3,7);
+        matches.addMatch(3,11);
+
+
+        matches.addLeftOver(12);
+        matches.addLeftOver(10);
         matches.addLeftOver(9);
 
+        matches.disMatch(1,4);
+
+        System.out.println(matches.isFull(1));
+        System.out.println(matches.isFull(2));
+        System.out.println(matches.isFull(3));
         System.out.println(matches);
     }
 }

@@ -10,6 +10,7 @@ import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.EncodingUtils;
+import org.moeaframework.util.tree.While;
 
 import static com.example.SS2_Backend.util.MergeSortPair.mergeSort;
 import static com.example.SS2_Backend.util.Utils.formatDouble;
@@ -210,6 +211,50 @@ public class StableMatchingProblem implements Problem {
         //System.out.println("Matching Complete!!");
 
         return matches;
+    }
+
+    private Matches StableMatchingExtra(Variable var){
+        Matches matches = new Matches();
+        Queue<Integer> unMatchedLeftSideNode = new LinkedList<>();
+        List<Integer> matchedRightSideNode = new LinkedList<>();
+
+        String s = var.toString();
+
+        String[] decodedSolution = s.split(",");
+        for (String token : decodedSolution) {
+            try {
+                // Convert each token to an Integer and add it to the queue
+                int i = Integer.parseInt(token);
+                matches.add(new MatchSet(i, getCapacityOfIndividual(i)));
+                if (Individuals.get(i).getIndividualSet() == 1) {
+                    unMatchedLeftSideNode.add(i);
+                }
+            } catch (NumberFormatException e) {
+                // Handle invalid tokens (non-integer values)
+                System.err.println("Skipping invalid token: " + token);
+                return null;
+            }
+        }
+
+        while(!unMatchedLeftSideNode.isEmpty()){
+            int leftNode = unMatchedLeftSideNode.poll();
+            List<PreferenceLists.IndexValue> NodePreference = preferenceLists.getIndividualPreferenceList(leftNode);
+            for (int i = 0; i < NodePreference.size(); i++){
+                int rightNode = NodePreference.get(i).getIndividualIndex();
+                if(!matchedRightSideNode.contains(rightNode)){
+                    if(matches.isFull(rightNode)) {
+                        matchedRightSideNode.add(rightNode);
+
+                    }
+                }
+            }
+        }
+
+        return matches;
+    }
+
+    private int getCapacityOfIndividual(int target){
+        return Individuals.get(target).getCapacity();
     }
 
     // Stable Matching Algorithm Component: isPreferredOver
