@@ -11,6 +11,7 @@ import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -34,20 +35,6 @@ public class SampleDataGenerator {
                 "\n[ Randomly Generated Population ]\n"
         );
         problem.printIndividuals();
-
-        // Run algorithm:
-        long startTime = System.currentTimeMillis();
-
-        NondominatedPopulation result = new Executor()
-                .withProblem(problem)
-                .withAlgorithm("NSGAII")
-                .withMaxEvaluations(5)
-                .withProperty("populationSize", 5)
-                .distributeOnAllCores()
-                .run();
-        long endTime = System.currentTimeMillis();
-        double runtime = ((double) (endTime - startTime) / 1000);
-        runtime = Math.round(runtime * 100.0) / 100.0;
 
         // Number of Individuals inside this problem
         System.out.println("Number Of Individual: " + problem.getNumberOfIndividual());
@@ -91,6 +78,8 @@ public class SampleDataGenerator {
             System.out.println("Fitness Score: " + -solution.getObjective(0));
         }
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "NSGAII");
+
+
     }
 
     public static ArrayList<Individual> generateSampleIndividuals(int numIndividuals, int numProps) {
@@ -113,6 +102,79 @@ public class SampleDataGenerator {
                 double propertyValue = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
                 // Random property Value (20 -> 50)
                 int propertyWeight = new Random().nextInt(10) + 1; // Random property Weight (1 -> 10)
+                String[] expression = {"", "--", "++"};
+                double propertyBound = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
+                double propertyBound2 = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
+                int randomType = new Random().nextInt(2) + 1;
+                int randomExpression = new Random().nextInt(2) + 1;
+
+                if (randomType == 1) {
+                    String[] requirement = {String.valueOf(propertyBound), expression[randomExpression]};
+                    individual.setProperty(propertyValue, propertyWeight, requirement);
+                } else {
+                    String[] requirement = {String.valueOf(propertyBound), String.valueOf(propertyBound2)};
+                    individual.setProperty(propertyValue, propertyWeight, requirement);
+                }
+            }
+            individuals.add(individual);
+
+        }
+        return individuals;
+    }
+    public static ArrayList<Individual> generateSampleIndividualsWithCapacity(int numSet1, int numSet2, int numProps) {
+        ArrayList<Individual> individuals = new ArrayList<>();
+
+        for (int i = 1; i <= numSet1; i++) {
+            String individualName = "Individual Name" + i;
+            int individualSet;
+            individualSet = 0;
+            int individualCapacity = new Random().nextInt(5) + 1;
+            Individual individual = new Individual();
+            individual.setIndividualName(individualName);
+            individual.setIndividualSet(individualSet);
+            individual.setCapacity(individualCapacity);
+
+            // Add some sample properties (you can customize this part)
+            for (int j = 0; j < numProps; j++) {
+                // Random property Value (20 -> 50)
+                double propertyValue = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
+                // Random property Weight (1 -> 10)
+                int propertyWeight = new Random().nextInt(10) + 1; // Random property Weight (1 -> 10)
+                // Random property Requirement with types
+                String[] expression = {"", "--", "++"};
+                double propertyBound = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
+                double propertyBound2 = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
+                int randomType = new Random().nextInt(2) + 1;
+                int randomExpression = new Random().nextInt(2) + 1;
+
+                if (randomType == 1) {
+                    String[] requirement = {String.valueOf(propertyBound), expression[randomExpression]};
+                    individual.setProperty(propertyValue, propertyWeight, requirement);
+                } else {
+                    String[] requirement = {String.valueOf(propertyBound), String.valueOf(propertyBound2)};
+                    individual.setProperty(propertyValue, propertyWeight, requirement);
+                }
+            }
+            individuals.add(individual);
+        }
+        for (int i = 1; i <= numSet2; i++) {
+            String individualName = "Individual Name" + i;
+            int individualSet;
+            individualSet = 1;
+//            int individualCapacity = new Random().nextInt(4) + 1;
+            int individualCapacity = 1;
+            Individual individual = new Individual();
+            individual.setIndividualName(individualName);
+            individual.setIndividualSet(individualSet);
+            individual.setCapacity(individualCapacity);
+
+            // Add some sample properties (you can customize this part)
+            for (int j = 0; j < numProps; j++) {
+                // Random property Value (20 -> 50)
+                double propertyValue = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
+                // Random property Weight (1 -> 10)
+                int propertyWeight = new Random().nextInt(10) + 1; // Random property Weight (1 -> 10)
+                // Random property Requirement with types
                 String[] expression = {"", "--", "++"};
                 double propertyBound = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
                 double propertyBound2 = new Random().nextDouble() * (70.0 - 20.0) + 20.0;
