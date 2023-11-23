@@ -203,72 +203,72 @@ public class StableMatchingProblem implements Problem {
         return matches;
     }
 
-    private Matches StableMatchingExtra(Variable var){
-        Matches matches = new Matches();
-        Queue<Integer> unMatchedLeftSideNode = new LinkedList<>();
-        //List<Integer> matchedRightSideNode = new LinkedList<>();
-
-        String s = var.toString();
-
-        String[] decodedSolution = s.split(",");
-        for (String token : decodedSolution) {
-            try {
-                // Convert each token to an Integer and add it to the queue
-                int i = Integer.parseInt(token);
-                matches.add(new MatchSet(i, getCapacityOfIndividual(i)));
-                if (Individuals.get(i).getIndividualSet() == 1) {
-                    unMatchedLeftSideNode.add(i);
-                }
-            } catch (NumberFormatException e) {
-                // Handle invalid tokens (non-integer values)
-                System.err.println("Skipping invalid token: " + token);
-                return null;
-            }
-        }
-
-        while(!unMatchedLeftSideNode.isEmpty()){
-            System.out.println(matches);
-            int leftNode = unMatchedLeftSideNode.poll();
-            System.out.println("working on Node:" + leftNode);
-            //Get pref List of LeftNode
-            PreferenceList NodePreference = preferenceLists.get(leftNode);
-           //Loop through LeftNode's preference list to find a Match
-            for (int i = 0; i < NodePreference.size(); i++){
-                //Next Match (RightNode) is found on the list
-                int rightNode = NodePreference.getByIndex(i).getIndividualIndex();
-                System.out.println(leftNode + " Prefer : " + rightNode);
-                //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
-                if(!matches.isFull(rightNode)) {
-                    System.out.println(rightNode + " is not full.");
-                    //AddMatch (Node, NodeToConnect)
-                    matches.addMatch(rightNode, leftNode);
-                    matchedRightSideNode.add(rightNode);
-                    break;
-                }else{
-                    //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
-                    //Loser will be the return value
-                    System.out.println(rightNode + " is full! Begin making a Compete game involve: " + leftNode + " ..." );
-                    int Loser = Compete(rightNode, leftNode, matches.getIndividualMatches(rightNode));
-                    //If RightNode is the LastChoice of Loser -> then
-                    // Loser will be terminated and Saved in Matches.LeftOvers Container
-                    System.out.println("Found Loser: " + Loser);
-                    if(LastChoice(Loser) == rightNode){
-                        System.out.println(Loser + " has no where to go. Go to LeftOvers!");
-                        matches.disMatch(rightNode, Loser);
-                        matches.addMatch(rightNode, leftNode);
-                        matches.addLeftOver(Loser);
-                        break;
-                    //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
-                    }else{
-                        System.out.println(Loser + " lost the game, waiting for the second chance.");
-                        unMatchedLeftSideNode.add(Loser);
-                        break;
-                    }
-                }
-            }
-        }
-        return matches;
-    }
+//    private Matches StableMatchingExtra(Variable var){
+//        Matches matches = new Matches();
+//        Queue<Integer> unMatchedLeftSideNode = new LinkedList<>();
+//        //List<Integer> matchedRightSideNode = new LinkedList<>();
+//
+//        String s = var.toString();
+//
+//        String[] decodedSolution = s.split(",");
+//        for (String token : decodedSolution) {
+//            try {
+//                // Convert each token to an Integer and add it to the queue
+//                int i = Integer.parseInt(token);
+//                matches.add(new MatchSet(i, getCapacityOfIndividual(i)));
+//                if (Individuals.get(i).getIndividualSet() == 1) {
+//                    unMatchedLeftSideNode.add(i);
+//                }
+//            } catch (NumberFormatException e) {
+//                // Handle invalid tokens (non-integer values)
+//                System.err.println("Skipping invalid token: " + token);
+//                return null;
+//            }
+//        }
+//
+//        while(!unMatchedLeftSideNode.isEmpty()){
+//            System.out.println(matches);
+//            int leftNode = unMatchedLeftSideNode.poll();
+//            System.out.println("working on Node:" + leftNode);
+//            //Get pref List of LeftNode
+//            PreferenceList NodePreference = preferenceLists.get(leftNode);
+//           //Loop through LeftNode's preference list to find a Match
+//            for (int i = 0; i < NodePreference.size(); i++){
+//                //Next Match (RightNode) is found on the list
+//                int rightNode = NodePreference.getByIndex(i).getIndividualIndex();
+//                System.out.println(leftNode + " Prefer : " + rightNode);
+//                //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
+//                if(!matches.isFull(rightNode)) {
+//                    System.out.println(rightNode + " is not full.");
+//                    //AddMatch (Node, NodeToConnect)
+//                    matches.addMatch(rightNode, leftNode);
+//                    matchedRightSideNode.add(rightNode);
+//                    break;
+//                }else{
+//                    //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
+//                    //Loser will be the return value
+//                    System.out.println(rightNode + " is full! Begin making a Compete game involve: " + leftNode + " ..." );
+//                    int Loser = Compete(rightNode, leftNode, matches.getIndividualMatches(rightNode));
+//                    //If RightNode is the LastChoice of Loser -> then
+//                    // Loser will be terminated and Saved in Matches.LeftOvers Container
+//                    System.out.println("Found Loser: " + Loser);
+//                    if(LastChoice(Loser) == rightNode){
+//                        System.out.println(Loser + " has no where to go. Go to LeftOvers!");
+//                        matches.disMatch(rightNode, Loser);
+//                        matches.addMatch(rightNode, leftNode);
+//                        matches.addLeftOver(Loser);
+//                        break;
+//                    //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
+//                    }else{
+//                        System.out.println(Loser + " lost the game, waiting for the second chance.");
+//                        unMatchedLeftSideNode.add(Loser);
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//        return matches;
+//    }
 
     private int getCapacityOfIndividual(int target){
         return Individuals.get(target).getCapacity();
@@ -328,8 +328,7 @@ public class StableMatchingProblem implements Problem {
 
     // Evaluate
     public void evaluate(Solution solution) {
-        System.out.println("Evaluating...");
-        Matches result = StableMatchingExtra(solution.getVariable(0));
+        Matches result = stableMatching(solution.getVariable(0));
         //System.out.println(solution.getVariable(1).toString());
         double fitnessScore = 0;
         if (result != null) {

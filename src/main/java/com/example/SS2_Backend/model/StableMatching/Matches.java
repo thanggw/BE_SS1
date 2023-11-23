@@ -92,7 +92,7 @@ public class Matches implements Serializable {
         for (MatchItem match : matches) {
             s.append("[");
             s.append(match.toString());
-            s.append("]");
+            s.append("]\n");
         }
         s.append("}\n");
         s.append("LeftOvers {");

@@ -48,6 +48,7 @@ public class StableMatchingSolver {
                     request.getEvolutionRate(),
                     request.getMaximumExecutionTime()
             );
+
             long endTime = System.currentTimeMillis();
             double runtime = ((double) (endTime - startTime) / 1000 / 60);
             runtime = Math.round(runtime * 100.0) / 100.0;
@@ -75,7 +76,6 @@ public class StableMatchingSolver {
     private static MatchingSolution formatSolution(StableMatchingProblem problem, NondominatedPopulation result, double Runtime){
         Solution solution = result.get(0);
         MatchingSolution matchingSolution = new MatchingSolution();
-        List<PreferenceList> preferenceLists = problem.getPreferenceLists();
         double fitnessValue = solution.getObjective(0);
         Matches matches = (Matches) solution.getAttribute("matches");
 
