@@ -95,7 +95,7 @@ public class Matches implements Serializable {
         for (Integer leftOver : leftOvers) {
             s.append("[");
             s.append(leftOver.toString());
-            s.append("]\n");
+            s.append("],");
         }
         s.append("}");
         return s.toString();

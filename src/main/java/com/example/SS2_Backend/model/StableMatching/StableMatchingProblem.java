@@ -216,7 +216,7 @@ public class StableMatchingProblem implements Problem {
     private Matches StableMatchingExtra(Variable var){
         Matches matches = new Matches();
         Queue<Integer> unMatchedLeftSideNode = new LinkedList<>();
-        List<Integer> matchedRightSideNode = new LinkedList<>();
+        //List<Integer> matchedRightSideNode = new LinkedList<>();
 
         String s = var.toString();
 
