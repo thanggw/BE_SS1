@@ -21,22 +21,9 @@ public class SampleDataGenerator {
 
     public static void main(String[] args) {
         // Generate Individuals data Randomly
-        //ArrayList<Individual> individuals = generateSampleIndividuals(10001, 4);
-        ArrayList<Individual> individuals = new ArrayList<>();
-        Individual individual = new Individual();
-            individual.setIndividualName("1");
-            individual.setIndividualSet(0);
-            individual.setProperty(5.5, 5, "0");
-            individual.setProperty(6.6, 0, "0");
+        ArrayList<Individual> individuals = generateSampleIndividuals(1001, 4);
 
-        Individual individual1 = new Individual();
-            individual1.setIndividualName("2");
-            individual1.setIndividualSet(1);
-            individual1.setProperty(0.0, 6, "6--");
-            individual1.setProperty(0.0, 0, "0");
-        individuals.add(individual);
-        individuals.add(individual1);
-        String[] propNames = {"Prop1", "Prop2"};
+        String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4"};
 
         // Create an Instance of StableMatchingProblem class with randomly generated data
         StableMatchingProblem problem = new StableMatchingProblem(individuals, propNames,
