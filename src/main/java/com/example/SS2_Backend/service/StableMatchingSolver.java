@@ -73,7 +73,7 @@ public class StableMatchingSolver {
     private static MatchingSolution formatSolution(StableMatchingProblem problem, NondominatedPopulation result, double Runtime){
         Solution solution = result.get(0);
         MatchingSolution matchingSolution = new MatchingSolution();
-        List<List<PreferenceLists.IndexValue>> preferenceLists = problem.getPreferenceLists();
+        List<PreferenceList> preferenceLists = problem.getPreferenceLists();
         double fitnessValue = solution.getObjective(0);
         Matches matches = (Matches) solution.getAttribute("matches");
 
