@@ -51,10 +51,9 @@ public class SampleDataGenerator {
         List<Integer> oldPLayers = new ArrayList<>();
         oldPLayers.add(7);
         oldPLayers.add(11);
-        oldPLayers.add(5);
+        oldPLayers.add(6);
         System.out.println(oldPLayers);
         System.out.println(problem.Compete(0, 12, oldPLayers));
-        /*
         // Run algorithm:
         long startTime = System.currentTimeMillis();
 
@@ -63,7 +62,6 @@ public class SampleDataGenerator {
             .withAlgorithm("NSGAII")
             .withMaxEvaluations(5)
             .withProperty("populationSize", 5)
-            .distributeOnAllCores()
             .run();
         long endTime = System.currentTimeMillis();
         double runtime = ((double) (endTime - startTime) / 1000);
@@ -79,7 +77,7 @@ public class SampleDataGenerator {
         }
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "NSGAII");
 
-         */
+
 
     }
 
