@@ -59,6 +59,16 @@ public class Matches implements Serializable {
             }
         }
     }
+    public boolean alreadyMatch(int Node1, int Node2){
+        for (MatchItem match : matches){
+            if(match.getIndividual1Index() == Node1){
+                if(match.getIndividualMatches().contains(Node2)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     public boolean isFull (int target){
         for (MatchItem match : matches) {
             // hmm
