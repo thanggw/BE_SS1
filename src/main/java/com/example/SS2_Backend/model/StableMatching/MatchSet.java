@@ -2,29 +2,38 @@ package com.example.SS2_Backend.model.StableMatching;
 
 import lombok.Getter;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Match Data Structure for Match:One to Many Stable Matching Problem
  * [individual1] => [individual2, individual3, individual4, ...]
  */
 
+@Getter
 public class MatchSet implements MatchItem {
-    @Getter
     private final int Individual1Index;
-    private final int[] IndividualMatches;
-    public MatchSet(int Individual, int[] IndividualMatches){
+    @Getter
+    private final int Capacity;
+    private final List<Integer> IndividualMatches = new ArrayList<>();
+    public MatchSet(int Individual, int Capacity){
         this.Individual1Index = Individual;
-        this.IndividualMatches = IndividualMatches;
+        this.Capacity = Capacity;
     }
-    public int[] getIndividualMatches(){
-        return this.IndividualMatches;
-    }
+
     @Override
     public int getIndividual2Index(){
         return 0;
     }
+    public void addMatch(int target){
+        if(!IndividualMatches.contains(target)){
+            IndividualMatches.add(target);
+        }
+    }
+    public void unMatch(int target){
+        IndividualMatches.remove((Integer) target);
+    }
     public String toString(){
-        return "[" + Individual1Index + "] => " + Arrays.toString(IndividualMatches);
+        return "[" + Individual1Index + "] => " + IndividualMatches.toString();
     }
 }
