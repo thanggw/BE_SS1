@@ -26,6 +26,26 @@ public class StableMatchingSolver {
 //    SimpMessageSendingOperations simpMessagingTemplate;
 //    private static final int RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
 
+    public static ResponseEntity<Response> getIndividuals (StableMatchingProblemDTO request) {
+        try {
+            ArrayList<Individual> individualsList = request.getIndividuals();
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .status(200)
+                            .message("Get individuals list successfully!")
+                            .data(individualsList)
+                            .build()
+            );
+        } catch (Exception e) {
+            // Handle exceptions and return an error response
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.builder()
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .message("Error getting data.")
+                            .data(null)
+                            .build());
+        }
+    };
 
     public static ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
 
