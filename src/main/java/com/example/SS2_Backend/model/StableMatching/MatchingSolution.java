@@ -24,6 +24,10 @@ public class MatchingSolution {
         return ComputerSpecsUtil.getComputerSpecs();
     }
 
+    public Matches getMatches() {
+        return matches;
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

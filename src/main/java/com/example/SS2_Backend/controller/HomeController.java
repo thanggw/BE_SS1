@@ -18,16 +18,24 @@ import static com.example.SS2_Backend.service.StableMatchingSolver.convertObject
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class HomeController {
 
+    public ResponseEntity<Response> dataFromWeb;
+
     @Autowired
     private GameTheorySolver gameTheorySolver;
     private StableMatchingSolver stableMatchingSolver;
-
 
     @PostMapping("/stable-matching-solver")
     public ResponseEntity<Response> getJson(@RequestBody Object object) {
             ObjectMapper OM = new ObjectMapper();
             StableMatchingProblemDTO problemDTO = OM.convertValue(object, StableMatchingProblemDTO.class);
-            return StableMatchingSolver.solveStableMatching(problemDTO);
+            ResponseEntity<Response> r = StableMatchingSolver.solveStableMatching(problemDTO);
+            dataFromWeb = StableMatchingSolver.getUIResult(problemDTO);
+            return r;
+    }
+
+    @GetMapping("/stable-matching-result")
+    public ResponseEntity<Response> getNameList() {
+        return dataFromWeb;
     }
 
     @PostMapping("/game-theory-solver")

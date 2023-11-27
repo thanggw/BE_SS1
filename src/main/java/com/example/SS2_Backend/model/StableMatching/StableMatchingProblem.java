@@ -460,4 +460,6 @@ public class StableMatchingProblem implements Problem {
     public void setAllPropertyNames(String[] allPropertyNames) {
         this.PropertiesName = allPropertyNames;
     }
+
+
 }

@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.service;
 
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
+import com.example.SS2_Backend.dto.request.StableMatchingUIResult;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.model.GameSolutionInsights;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +28,36 @@ public class StableMatchingSolver {
 //    SimpMessageSendingOperations simpMessagingTemplate;
 //    private static final int RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
 
+    public static List<PreferenceList> preferencesList;
+
+    public static ArrayList<Double> coupleFitnessList = new ArrayList<>();
+
+
+    public static ResponseEntity<Response> getUIResult(StableMatchingProblemDTO request) {
+        try {
+            ArrayList<Individual> individualsList = request.getIndividuals();
+
+            StableMatchingUIResult uiResult = new StableMatchingUIResult();
+            uiResult.setIndividuals(individualsList);
+            uiResult.setCoupleFitness(coupleFitnessList);
+
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .status(200)
+                            .message("Get individuals list successfully!")
+                            .data(uiResult)
+                            .build()
+            );
+        } catch (Exception e) {
+            // Handle exceptions and return an error response
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.builder()
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .message("Error getting data.")
+                            .data(null)
+                            .build());
+        }
+    };
 
     public static ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
 
@@ -36,7 +68,7 @@ public class StableMatchingSolver {
             problem.setAllPropertyNames(request.getAllPropertyNames());
             problem.setFitnessFunction(request.getFitnessFunction());
 
-            System.out.println(problem.printPreferenceLists());
+//            System.out.println(problem.printPreferenceLists());
 
             long startTime = System.currentTimeMillis();
 
@@ -54,8 +86,17 @@ public class StableMatchingSolver {
             runtime = Math.round(runtime * 100.0) / 100.0;
             System.out.println("Runtime: " + runtime + " Second(s).");
             MatchingSolution matchingSolution = formatSolution(problem, results, runtime);
-            System.out.println("RESPOND TO FRONT_END:");
-            System.out.println(matchingSolution);
+//            System.out.println("RESPOND TO FRONT_END:");
+//            System.out.println(matchingSolution);
+            preferencesList = problem.getPreferenceLists();
+            System.out.println(preferencesList);
+            Matches m = (Matches) results.get(0).getAttribute("matches");
+//            System.out.println(m.getMatches());
+//            for (MatchItem k: m.getMatches()) {
+//                System.out.println(k.getIndividual1Index());
+//            }
+            calculateFitnessList(preferencesList, m);
+//            System.out.println(coupleFitnessList);
             return ResponseEntity.ok(
                     Response.builder()
                             .status(200)
@@ -246,5 +287,29 @@ public class StableMatchingSolver {
 
     }
 
-
+    private static void calculateFitnessList(List<PreferenceList> pList, Matches m) {
+        ArrayList<Double> p = new ArrayList<>();
+        List<MatchItem> b = m.getMatches();
+        for (MatchItem c : b) {
+            int d = c.getIndividual1Index();
+            int e = c.getIndividual2Index();
+            List<PreferenceList.IndexValue> ofD = pList.get(d).getPreferenceList();
+            List<PreferenceList.IndexValue> ofE = pList.get(e).getPreferenceList();
+            double dScore = 0.0;
+            double eScore = 0.0;
+                for (int i = 0; i < ofD.size(); i++) {
+                    if (ofD.get(i).getIndividualIndex() == e) {
+                        dScore += ofD.get(i).getValue();
+                    }
+                }
+                for (int i = 0; i < ofE.size(); i++) {
+                    if (ofE.get(i).getIndividualIndex() == d) {
+                        eScore += ofE.get(i).getValue();
+                    }
+                }
+//            System.out.println(dScore + eScore);
+            p.add(dScore+eScore);
+        }
+        coupleFitnessList = p;
+    }
 }
