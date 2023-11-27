@@ -5,14 +5,16 @@ import com.example.SS2_Backend.dto.request.StableMatchingUIResult;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.model.GameSolutionInsights;
-import com.example.SS2_Backend.model.StableMatching.*;
+import com.example.SS2_Backend.model.StableMatching.Individual;
+import com.example.SS2_Backend.model.StableMatching.Matches;
+import com.example.SS2_Backend.model.StableMatching.MatchingSolution;
+import com.example.SS2_Backend.model.StableMatching.StableMatchingProblem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
