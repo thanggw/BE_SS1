@@ -1,4 +1,5 @@
 package com.example.SS2_Backend.model.StableMatching;
+
 import com.example.SS2_Backend.dto.request.IndividualDeserializer;
 import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,9 +7,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import static com.example.SS2_Backend.util.Utils.*;
+import static com.example.SS2_Backend.util.Utils.isDouble;
+import static com.example.SS2_Backend.util.Utils.isInteger;
 
 @Getter
 @JsonDeserialize(using = IndividualDeserializer.class)

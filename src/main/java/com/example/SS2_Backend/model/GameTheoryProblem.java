@@ -1,12 +1,12 @@
 package com.example.SS2_Backend.model;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.variable.BinaryIntegerVariable;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.*;
 
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 
