@@ -28,8 +28,9 @@ public class HomeController {
     public ResponseEntity<Response> getJson(@RequestBody Object object) {
             ObjectMapper OM = new ObjectMapper();
             StableMatchingProblemDTO problemDTO = OM.convertValue(object, StableMatchingProblemDTO.class);
-            dataFromWeb = StableMatchingSolver.getIndividuals(problemDTO);
-            return StableMatchingSolver.solveStableMatching(problemDTO);
+            ResponseEntity<Response> r = StableMatchingSolver.solveStableMatching(problemDTO);
+            dataFromWeb = StableMatchingSolver.getUIResult(problemDTO);
+            return r;
     }
 
     @GetMapping("/stable-matching-result")
