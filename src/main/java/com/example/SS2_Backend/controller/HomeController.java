@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class HomeController {
 
-    public ResponseEntity<Response> dataFromWeb;
+//    public ResponseEntity<Response> dataFromWeb;
 
     @Autowired
     private GameTheorySolver gameTheorySolver;
@@ -25,15 +25,14 @@ public class HomeController {
     public ResponseEntity<Response> getJson(@RequestBody Object object) {
             ObjectMapper OM = new ObjectMapper();
             StableMatchingProblemDTO problemDTO = OM.convertValue(object, StableMatchingProblemDTO.class);
-            ResponseEntity<Response> r = StableMatchingSolver.solveStableMatching(problemDTO);
-            dataFromWeb = StableMatchingSolver.getUIResult(problemDTO);
-            return r;
+        //            dataFromWeb = StableMatchingSolver.getUIResult(problemDTO);
+            return StableMatchingSolver.solveStableMatching(problemDTO);
     }
 
-    @GetMapping("/stable-matching-result")
-    public ResponseEntity<Response> getNameList() {
-        return dataFromWeb;
-    }
+//    @GetMapping("/stable-matching-result")
+//    public ResponseEntity<Response> getNameList() {
+//        return dataFromWeb;
+//    }
 
     @PostMapping("/game-theory-solver")
     public ResponseEntity<Response> solveGameTheory(@RequestBody GameTheoryProblemDTO gameTheoryProblem) {

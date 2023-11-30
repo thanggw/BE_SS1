@@ -70,6 +70,7 @@ public class StableMatchingSolver {
 
             long startTime = System.currentTimeMillis();
 
+
             NondominatedPopulation results = solveProblem(
                     problem,
     //                request.getSpecifiedAlgorithm(),
@@ -79,22 +80,23 @@ public class StableMatchingSolver {
                     request.getMaximumExecutionTime()
             );
 
+            preferencesList = problem.getPreferenceLists();
+            System.out.println(preferencesList);
+            Matches m = (Matches) results.get(0).getAttribute("matches");
+//            System.out.println(m.getMatches());
+            calculateFitnessList(preferencesList, m);
+//            System.out.println(coupleFitnessList);
+
+            ArrayList<Individual> individualsList = request.getIndividuals();
+
             long endTime = System.currentTimeMillis();
             double runtime = ((double) (endTime - startTime) / 1000 / 60);
             runtime = Math.round(runtime * 100.0) / 100.0;
             System.out.println("Runtime: " + runtime + " Second(s).");
             MatchingSolution matchingSolution = formatSolution(problem, results, runtime);
+            matchingSolution.setIndividuals(individualsList);
 //            System.out.println("RESPOND TO FRONT_END:");
 //            System.out.println(matchingSolution);
-            preferencesList = problem.getPreferenceLists();
-            System.out.println(preferencesList);
-            Matches m = (Matches) results.get(0).getAttribute("matches");
-//            System.out.println(m.getMatches());
-//            for (MatchItem k: m.getMatches()) {
-//                System.out.println(k.getIndividual1Index());
-//            }
-            calculateFitnessList(preferencesList, m);
-//            System.out.println(coupleFitnessList);
             return ResponseEntity.ok(
                     Response.builder()
                             .status(200)
@@ -123,6 +125,7 @@ public class StableMatchingSolver {
         matchingSolution.setMatches(matches);
         matchingSolution.setAlgorithm("NSGAII");
         matchingSolution.setRuntime(Runtime);
+        matchingSolution.setCoupleFitness(coupleFitnessList);
 
         return matchingSolution;
     }

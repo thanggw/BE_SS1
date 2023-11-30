@@ -1,11 +1,15 @@
 package com.example.SS2_Backend.model.StableMatching;
 
+import com.example.SS2_Backend.dto.request.IndividualDeserializer;
 import com.example.SS2_Backend.dto.response.ComputerSpecs;
 import com.example.SS2_Backend.util.ComputerSpecsUtil;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 
 @Data
 @NoArgsConstructor
@@ -20,6 +24,9 @@ public class MatchingSolution {
     public ComputerSpecs getComputerSpecs() {
         return ComputerSpecsUtil.getComputerSpecs();
     }
+    private ArrayList<Double> coupleFitness;
+    @JsonDeserialize(contentUsing = IndividualDeserializer.class)
+    private ArrayList<Individual> Individuals;
 
     public Matches getMatches() {
         return matches;
@@ -34,6 +41,4 @@ public class MatchingSolution {
         private String Individual2Name;
         private double PairScore;
     }
-
-
 }
