@@ -22,7 +22,14 @@ public class SampleDataGenerator {
 
     public static void main(String[] args) {
         // Generate Individuals data Randomly
-        ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(40, 1, false, 10, 4, false, 4);
+        ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
+            320,
+            1,
+            false,
+            80,
+            4,
+            false,
+            4);
 
         String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4"};
 
