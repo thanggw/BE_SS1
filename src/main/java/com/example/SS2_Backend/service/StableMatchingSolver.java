@@ -30,34 +30,7 @@ public class StableMatchingSolver {
 
     public static ArrayList<Double> coupleFitnessList = new ArrayList<>();
 
-
-    public static ResponseEntity<Response> getUIResult(StableMatchingProblemDTO request) {
-        try {
-            ArrayList<Individual> individualsList = request.getIndividuals();
-
-            StableMatchingUIResult uiResult = new StableMatchingUIResult();
-            uiResult.setIndividuals(individualsList);
-            uiResult.setCoupleFitness(coupleFitnessList);
-
-            return ResponseEntity.ok(
-                    Response.builder()
-                            .status(200)
-                            .message("Get individuals list successfully!")
-                            .data(uiResult)
-                            .build()
-            );
-        } catch (Exception e) {
-            // Handle exceptions and return an error response
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Response.builder()
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                            .message("Error getting data.")
-                            .data(null)
-                            .build());
-        }
-    };
-
-    public static ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
+    public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
 
         try{
             StableMatchingProblem problem = new StableMatchingProblem();
@@ -91,8 +64,8 @@ public class StableMatchingSolver {
 
             long endTime = System.currentTimeMillis();
             double runtime = ((double) (endTime - startTime) / 1000 / 60);
-            runtime = Math.round(runtime * 100.0) / 100.0;
-            System.out.println("Runtime: " + runtime + " Second(s).");
+            runtime = (runtime * 1000.0);
+            System.out.println("Runtime: " + runtime + " Millisecond(s).");
             MatchingSolution matchingSolution = formatSolution(problem, results, runtime);
             matchingSolution.setIndividuals(individualsList);
 //            System.out.println("RESPOND TO FRONT_END:");
@@ -114,7 +87,7 @@ public class StableMatchingSolver {
                             .build());
         }
     }
-    private static MatchingSolution formatSolution(StableMatchingProblem problem, NondominatedPopulation result, double Runtime){
+    private MatchingSolution formatSolution(StableMatchingProblem problem, NondominatedPopulation result, double Runtime){
         Solution solution = result.get(0);
         MatchingSolution matchingSolution = new MatchingSolution();
         double fitnessValue = solution.getObjective(0);
@@ -123,7 +96,7 @@ public class StableMatchingSolver {
 
         matchingSolution.setFitnessValue(-fitnessValue);
         matchingSolution.setMatches(matches);
-        matchingSolution.setAlgorithm("NSGAII");
+        matchingSolution.setAlgorithm("NSGAIII");
         matchingSolution.setRuntime(Runtime);
         matchingSolution.setCoupleFitness(coupleFitnessList);
 
@@ -131,7 +104,7 @@ public class StableMatchingSolver {
     }
 
 
-    public static String convertObjectToJson(Object object) {
+    public String convertObjectToJson(Object object) {
         try {
             // Create an instance of ObjectMapper
             ObjectMapper objectMapper = new ObjectMapper();
@@ -148,14 +121,14 @@ public class StableMatchingSolver {
 
 
 
-    private static NondominatedPopulation solveProblem(StableMatchingProblem problem,
+    private NondominatedPopulation solveProblem(StableMatchingProblem problem,
                                                        int populationSize,
                                                        String fitnessFunction,
                                                        int evolutionRate,
                                                        int maximumExecutionTime) {
         NondominatedPopulation result = new Executor()
                 .withProblem(problem)
-                .withAlgorithm("NSGAII")
+                .withAlgorithm("NSGAIII")
                 .withMaxEvaluations(1000)
                 .withProperty("populationSize", 200)
                 .distributeOnAllCores()
@@ -280,7 +253,7 @@ public class StableMatchingSolver {
                 .build();
     }
 
-    private static double getFitnessValue(NondominatedPopulation result) {
+    private double getFitnessValue(NondominatedPopulation result) {
 
         Solution solution = result.get(0);
         double fitnessValue = solution.getObjective(0);
@@ -288,7 +261,7 @@ public class StableMatchingSolver {
 
     }
 
-    private static void calculateFitnessList(List<PreferenceList> pList, Matches m) {
+    private void calculateFitnessList(List<PreferenceList> pList, Matches m) {
         ArrayList<Double> p = new ArrayList<>();
         List<MatchItem> b = m.getMatches();
         for (MatchItem c : b) {

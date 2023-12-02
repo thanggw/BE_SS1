@@ -19,14 +19,12 @@ public class HomeController {
 
     @Autowired
     private GameTheorySolver gameTheorySolver;
+    @Autowired
     private StableMatchingSolver stableMatchingSolver;
 
     @PostMapping("/stable-matching-solver")
-    public ResponseEntity<Response> getJson(@RequestBody Object object) {
-            ObjectMapper OM = new ObjectMapper();
-            StableMatchingProblemDTO problemDTO = OM.convertValue(object, StableMatchingProblemDTO.class);
-        //            dataFromWeb = StableMatchingSolver.getUIResult(problemDTO);
-            return StableMatchingSolver.solveStableMatching(problemDTO);
+    public ResponseEntity<Response> getJson(@RequestBody StableMatchingProblemDTO object) {
+            return stableMatchingSolver.solveStableMatching(object);
     }
 
 //    @GetMapping("/stable-matching-result")
