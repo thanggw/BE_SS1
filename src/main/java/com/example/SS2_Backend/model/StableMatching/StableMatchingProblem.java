@@ -332,13 +332,16 @@ public class StableMatchingProblem implements Problem {
     // Evaluate
     public void evaluate(Solution solution) {
         Matches result = stableMatching(solution.getVariable(0));
+        List<Double> coupleFitness = new ArrayList<>();
         //System.out.println(solution.getVariable(1).toString());
         double fitnessScore = 0;
         if (result != null) {
             for (int i = 0; i < result.size(); i++) {
                 fitnessScore += calculatePairSatisfactory(result.getPair(i));
+                coupleFitness.add(calculatePairSatisfactory(result.getPair(i)));
             }
         }
+        result.setCoupleFitness(coupleFitness);
         solution.setAttribute("matches", result);
         solution.setObjective(0, -fitnessScore);
 

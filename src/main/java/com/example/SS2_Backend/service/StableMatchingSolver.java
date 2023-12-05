@@ -53,13 +53,6 @@ public class StableMatchingSolver {
                     request.getDistributedCores()
             );
 
-            preferencesList = problem.getPreferenceLists();
-            System.out.println(preferencesList);
-            Matches m = (Matches) results.get(0).getAttribute("matches");
-//            System.out.println(m.getMatches());
-//            calculateFitnessList(preferencesList, m);
-//            System.out.println(coupleFitnessList);
-
             ArrayList<Individual> individualsList = request.getIndividuals();
 
             long endTime = System.currentTimeMillis();
@@ -68,8 +61,9 @@ public class StableMatchingSolver {
             System.out.println("Runtime: " + runtime + " Millisecond(s).");
             MatchingSolution matchingSolution = formatSolution(problem, results, runtime);
             matchingSolution.setIndividuals(individualsList);
-//            System.out.println("RESPOND TO FRONT_END:");
-//            System.out.println(matchingSolution);
+            System.out.println("RESPOND TO FRONT_END:");
+            System.out.println(matchingSolution);
+            System.out.println(matchingSolution.getMatches().getCoupleFitness());
             return ResponseEntity.ok(
                     Response.builder()
                             .status(200)
@@ -93,12 +87,10 @@ public class StableMatchingSolver {
         double fitnessValue = solution.getObjective(0);
         Matches matches = (Matches) solution.getAttribute("matches");
 
-
         matchingSolution.setFitnessValue(-fitnessValue);
         matchingSolution.setMatches(matches);
         matchingSolution.setAlgorithm(problem.getAlgorithm());
         matchingSolution.setRuntime(Runtime);
-        matchingSolution.setCoupleFitness(coupleFitnessList);
 
         return matchingSolution;
     }
@@ -306,30 +298,4 @@ public class StableMatchingSolver {
 //        return fitnessValue;
 //
 //    }
-
-    private void calculateFitnessList(List<PreferenceList> pList, Matches m) {
-        ArrayList<Double> p = new ArrayList<>();
-        List<MatchItem> b = m.getMatches();
-        for (MatchItem c : b) {
-            int d = c.getIndividual1Index();
-            int e = c.getIndividual2Index();
-            List<PreferenceList.IndexValue> ofD = pList.get(d).getPreferenceList();
-            List<PreferenceList.IndexValue> ofE = pList.get(e).getPreferenceList();
-            double dScore = 0.0;
-            double eScore = 0.0;
-                for (int i = 0; i < ofD.size(); i++) {
-                    if (ofD.get(i).getIndividualIndex() == e) {
-                        dScore += ofD.get(i).getValue();
-                    }
-                }
-                for (int i = 0; i < ofE.size(); i++) {
-                    if (ofE.get(i).getIndividualIndex() == d) {
-                        eScore += ofE.get(i).getValue();
-                    }
-                }
-//            System.out.println(dScore + eScore);
-            p.add(dScore+eScore);
-        }
-        coupleFitnessList = p;
-    }
 }

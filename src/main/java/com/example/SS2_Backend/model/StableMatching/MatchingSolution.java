@@ -24,13 +24,8 @@ public class MatchingSolution {
     public ComputerSpecs getComputerSpecs() {
         return ComputerSpecsUtil.getComputerSpecs();
     }
-    private ArrayList<Double> coupleFitness;
     @JsonDeserialize(contentUsing = IndividualDeserializer.class)
     private ArrayList<Individual> Individuals;
-
-    public Matches getMatches() {
-        return matches;
-    }
 
     @Data
     @NoArgsConstructor
