@@ -180,7 +180,7 @@ public class StableMatchingProblem implements Problem {
                     int currentMale = Integer.parseInt(matches.findCompany(female));
                     //System.out.println("Oh no, she is with " + currentMale + " let see if she prefers " + male + " than " + currentMale );
                     if (isPreferredOver(male, currentMale, female)) {
-                        matches.disMatch(currentMale);
+                        matches.disMatchPair(currentMale);
                         unmatchedMales.add(currentMale);
                         matches.add(new Pair(male, female));
                         //System.out.println("Hell yeah! " + female + " ditch the guy " + currentMale + " to be with " + male + "!");
@@ -264,7 +264,7 @@ public class StableMatchingProblem implements Problem {
 //                    //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
 //                    }else{
 //                        System.out.println(Loser + " lost the game, waiting for the second chance.");
-//                        unMatchedLeftSideNode.add(Loser);
+//                        //unMatchedLeftSideNode.add(Loser);
 //                        break;
 //                    }
 //                }
@@ -309,23 +309,19 @@ public class StableMatchingProblem implements Problem {
     }
 
     // Calculate each pair Satisfactory of the result produced By Stable Matching Algorithm
+    // Issues lies here Match item may not be a pair
     private double calculatePairSatisfactory(MatchItem pair) {
+        // a = 0 - b = 11
         int a = pair.getIndividual1Index();
         int b = pair.getIndividual2Index();
+        // len > 6
         PreferenceList ofA = preferenceLists.get(a);
+        // len <= 6
         PreferenceList ofB = preferenceLists.get(b);
         double aScore = 0.0;
         double bScore = 0.0;
-        for (int i = 0; i < ofA.size(); i++) {
-            if(ofA.getByIndex(i).getIndividualIndex()==b){
-                aScore += ofA.getByIndex(i).getValue();
-            }
-        }
-        for (int i = 0; i < ofB.size(); i++) {
-            if(ofB.getByIndex(i).getIndividualIndex()==a){
-                bScore += ofA.getByIndex(i).getValue();
-            }
-        }
+        aScore += ofB.getByKey(a).getValue();
+        bScore += ofA.getByKey(b).getValue();
         return aScore + bScore;
     }
 

@@ -44,22 +44,20 @@ public class SampleDataGenerator {
         System.out.println(
                 "\n[ Algorithm Output Solution ]\n"
         );
-//        List<Integer> oldPLayers = new ArrayList<>();
-//        oldPLayers.add(7);
-//        oldPLayers.add(11);
-//        oldPLayers.add(6);
-//        System.out.println(oldPLayers);
-//        System.out.println(problem.Compete(0, 12, oldPLayers));
-
+        List<Integer> oldPLayers = new ArrayList<>();
+        oldPLayers.add(7);
+        oldPLayers.add(11);
+        oldPLayers.add(6);
+        System.out.println(oldPLayers);
+        System.out.println(problem.Compete(0, 12, oldPLayers));
         // Run algorithm:
         long startTime = System.currentTimeMillis();
 
         NondominatedPopulation result = new Executor()
             .withProblem(problem)
             .withAlgorithm("NSGAII")
-            .withMaxEvaluations(1000)
-            .withProperty("populationSize", 20)
-            .distributeOnAllCores()
+            .withMaxEvaluations(5)
+            .withProperty("populationSize", 5)
             .run();
         long endTime = System.currentTimeMillis();
         double runtime = ((double) (endTime - startTime) / 1000);
@@ -74,6 +72,7 @@ public class SampleDataGenerator {
             System.out.println("Fitness Score: " + -solution.getObjective(0));
         }
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "NSGAII");
+
 
 
     }
