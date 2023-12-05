@@ -8,6 +8,7 @@ import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
