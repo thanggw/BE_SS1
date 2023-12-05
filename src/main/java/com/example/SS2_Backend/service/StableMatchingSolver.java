@@ -46,18 +46,18 @@ public class StableMatchingSolver {
 
             NondominatedPopulation results = solveProblem(
                     problem,
-    //                request.getSpecifiedAlgorithm(),
+                    request.getAlgorithm(),
                     request.getPopulationSize(),
-                    request.getFitnessFunction(),
-                    request.getEvolutionRate(),
-                    request.getMaximumExecutionTime()
+                    request.getGeneration(),
+                    request.getMaxTime(),
+                    request.getDistributedCores()
             );
 
             preferencesList = problem.getPreferenceLists();
             System.out.println(preferencesList);
             Matches m = (Matches) results.get(0).getAttribute("matches");
 //            System.out.println(m.getMatches());
-            calculateFitnessList(preferencesList, m);
+//            calculateFitnessList(preferencesList, m);
 //            System.out.println(coupleFitnessList);
 
             ArrayList<Individual> individualsList = request.getIndividuals();
@@ -96,7 +96,7 @@ public class StableMatchingSolver {
 
         matchingSolution.setFitnessValue(-fitnessValue);
         matchingSolution.setMatches(matches);
-        matchingSolution.setAlgorithm("NSGAIII");
+        matchingSolution.setAlgorithm(problem.getAlgorithm());
         matchingSolution.setRuntime(Runtime);
         matchingSolution.setCoupleFitness(coupleFitnessList);
 
@@ -122,24 +122,70 @@ public class StableMatchingSolver {
 
 
     private NondominatedPopulation solveProblem(StableMatchingProblem problem,
+                                                       String algorithm,
                                                        int populationSize,
-                                                       String fitnessFunction,
-                                                       int evolutionRate,
-                                                       int maximumExecutionTime) {
-        NondominatedPopulation result = new Executor()
-                .withProblem(problem)
-                .withAlgorithm("NSGAIII")
-                .withMaxEvaluations(1000)
-                .withProperty("populationSize", 200)
-                .distributeOnAllCores()
-                .run();
-        for (Solution solution : result) {
-            System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
-            Matches matches = (Matches) solution.getAttribute("matches");
-            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
-            System.out.println("Fitness Score: " + -solution.getObjective(0));
+                                                       int generation,
+                                                       int maxTime,
+                                                       String distributedCores) {
+        NondominatedPopulation result;
+        problem.setAlgorithm(algorithm);
+        try {
+            if (distributedCores.equals("all")) {
+                result = new Executor()
+                        .withProblem(problem)
+                        .withAlgorithm(algorithm)
+                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withProperty("populationSize", populationSize)
+                        .withProperty("maxTime", maxTime)
+                        .distributeOnAllCores()
+                        .run();
+
+
+            } else {
+                int numberOfCores = Integer.parseInt(distributedCores);
+                result = new Executor()
+                        .withProblem(problem)
+                        .withAlgorithm(algorithm)
+                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withProperty("populationSize", populationSize)
+                        .withProperty("maxTime", maxTime)
+                        .distributeOn(numberOfCores)
+                        .run();
+            }
+            return result;
+        } catch (Exception e) {
+
+            // second attempt to solve the problem if the first run got some error
+            if (distributedCores.equals("all")) {
+                result = new Executor()
+                        .withProblem(problem)
+                        .withAlgorithm(algorithm)
+                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withProperty("populationSize", populationSize)
+                        .withProperty("maxTime", maxTime)
+                        .distributeOnAllCores()
+                        .run();
+
+
+            } else {
+                int numberOfCores = Integer.parseInt(distributedCores);
+                result = new Executor()
+                        .withProblem(problem)
+                        .withAlgorithm(algorithm)
+                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withProperty("populationSize", populationSize)
+                        .withProperty("maxTime", maxTime)
+                        .distributeOn(numberOfCores)
+                        .run();
+            }
+            return result;
         }
-        return result;
+
+//        for (Solution solution : result) {
+//            System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
+//            Matches matches = (Matches) solution.getAttribute("matches");
+//            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
+//            System.out.println("Fitness Score: " + -solution.getObjective(0));
     }
 
 
@@ -218,48 +264,48 @@ public class StableMatchingSolver {
 //        );
 //    }
 
-    private GameSolutionInsights initGameSolutionInsights(String[] algorithms) {
-        GameSolutionInsights gameSolutionInsights = new GameSolutionInsights();
-        Map<String, List<Double>> fitnessValueMap = new HashMap<>();
-        Map<String, List<Double>> runtimeMap = new HashMap<>();
-
-        gameSolutionInsights.setFitnessValues(fitnessValueMap);
-        gameSolutionInsights.setRuntimes(runtimeMap);
-
-        for (String algorithm : algorithms) {
-            fitnessValueMap.put(algorithm, new ArrayList<>());
-            runtimeMap.put(algorithm, new ArrayList<>());
-        }
-
-        return gameSolutionInsights;
-    }
-
-    private Progress createProgressMessage(String message) {
-        return Progress.builder()
-                .inProgress(false) // this object is just to send a message to the client, not to show the progress
-                .message(message)
-                .build();
-    }
-
-    private Progress createProgress(String message, Double runtime, Integer runCount, int maxRunCount) {
-        int percent = runCount * 100 / maxRunCount;
-        int minuteLeff = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
-        return Progress.builder()
-                .inProgress(true) // this object is just to send to the client to show the progress
-                .message(message)
-                .runtime(runtime)
-                .minuteLeft(minuteLeff)
-                .percentage(percent)
-                .build();
-    }
-
-    private double getFitnessValue(NondominatedPopulation result) {
-
-        Solution solution = result.get(0);
-        double fitnessValue = solution.getObjective(0);
-        return fitnessValue;
-
-    }
+//    private GameSolutionInsights initGameSolutionInsights(String[] algorithms) {
+//        GameSolutionInsights gameSolutionInsights = new GameSolutionInsights();
+//        Map<String, List<Double>> fitnessValueMap = new HashMap<>();
+//        Map<String, List<Double>> runtimeMap = new HashMap<>();
+//
+//        gameSolutionInsights.setFitnessValues(fitnessValueMap);
+//        gameSolutionInsights.setRuntimes(runtimeMap);
+//
+//        for (String algorithm : algorithms) {
+//            fitnessValueMap.put(algorithm, new ArrayList<>());
+//            runtimeMap.put(algorithm, new ArrayList<>());
+//        }
+//
+//        return gameSolutionInsights;
+//    }
+//
+//    private Progress createProgressMessage(String message) {
+//        return Progress.builder()
+//                .inProgress(false) // this object is just to send a message to the client, not to show the progress
+//                .message(message)
+//                .build();
+//    }
+//
+//    private Progress createProgress(String message, Double runtime, Integer runCount, int maxRunCount) {
+//        int percent = runCount * 100 / maxRunCount;
+//        int minuteLeff = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
+//        return Progress.builder()
+//                .inProgress(true) // this object is just to send to the client to show the progress
+//                .message(message)
+//                .runtime(runtime)
+//                .minuteLeft(minuteLeff)
+//                .percentage(percent)
+//                .build();
+//    }
+//
+//    private double getFitnessValue(NondominatedPopulation result) {
+//
+//        Solution solution = result.get(0);
+//        double fitnessValue = solution.getObjective(0);
+//        return fitnessValue;
+//
+//    }
 
     private void calculateFitnessList(List<PreferenceList> pList, Matches m) {
         ArrayList<Double> p = new ArrayList<>();

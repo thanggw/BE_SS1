@@ -2,6 +2,7 @@ package com.example.SS2_Backend.model.StableMatching;
 
 import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
 import lombok.Getter;
+import lombok.Setter;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variable;
@@ -29,6 +30,8 @@ public class StableMatchingProblem implements Problem {
     private List<PreferenceList> preferenceLists; // Preference List of each Individual
     @Getter
     private String fitnessFunction; // Evaluate total Score of each Solution set
+    @Setter @Getter
+    private String algorithm;
 
     //Constructor
 

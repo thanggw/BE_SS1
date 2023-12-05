@@ -21,27 +21,22 @@ public class StableMatchingProblemDTO {
     private String[] allPropertyNames;
     private String fitnessFunction;
     private int populationSize;
-    private int evolutionRate;
-    private int maximumExecutionTime;
+    private int generation;
+    private int maxTime;
+    private String algorithm;
+    private String distributedCores;
 
     @JsonProperty("Individuals")
     public void setIndividuals(ArrayList<Individual> individuals) {
         this.Individuals = individuals;
     }
 
-    @JsonProperty("populationSize")
     public void setPopulationSize(int populationSize) {
         this.populationSize = populationSize;
     }
 
-    @JsonProperty("evolutionRate")
-    public void setEvolutionRate(int evolutionRate) {
-        this.evolutionRate = evolutionRate;
-    }
-
-    @JsonProperty("maximumExecutionTime")
-    public void setMaximumExecutionTime(int maximumExecutionTime) {
-        this.maximumExecutionTime = maximumExecutionTime;
+    public void setMaxTime(int maxTime) {
+        this.maxTime = maxTime;
     }
 
     public Individual getIndividual(int index) {
@@ -52,6 +47,17 @@ public class StableMatchingProblemDTO {
         return Individuals.size();
     }
 
+    public void setGeneration(int generation) {
+        this.generation = generation;
+    }
+
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+    }
+
+    public void setDistributedCores(String distributedCores) {
+        this.distributedCores = distributedCores;
+    }
 
     public String toString() {
         return "Matching_Theory_Problem {" +
@@ -62,8 +68,8 @@ public class StableMatchingProblemDTO {
                 ", AllPropertyName= " + java.util.Arrays.toString(allPropertyNames) +
                 ", fitnessFunction= '" + fitnessFunction + '\'' +
                 ", PopulationSize= " + populationSize +
-                ", EvolutionRate= " +evolutionRate +
-                ", MaximumExecutionTime" + maximumExecutionTime +
+                ", Generation= " +generation +
+                ", MaximumExecutionTime" + maxTime +
                 "}";
     }
 }
