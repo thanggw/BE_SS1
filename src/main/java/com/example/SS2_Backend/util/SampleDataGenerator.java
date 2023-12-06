@@ -23,11 +23,11 @@ public class SampleDataGenerator {
     public static void main(String[] args) {
         // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-            320,
-            1,
+            20,
+            4,
             false,
             80,
-            4,
+            1,
             false,
             4);
 
@@ -61,8 +61,8 @@ public class SampleDataGenerator {
         NondominatedPopulation result = new Executor()
             .withProblem(problem)
             .withAlgorithm("NSGAII")
-            .withMaxEvaluations(1000)
-            .withProperty("populationSize", 20)
+            .withMaxEvaluations(200)
+            .withProperty("populationSize", 10)
             .distributeOnAllCores()
             .run();
         long endTime = System.currentTimeMillis();

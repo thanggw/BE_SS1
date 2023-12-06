@@ -25,21 +25,20 @@ public class Matches implements Serializable {
     public void add(MatchItem match){
         matches.add(match);
     }
+
+    public void remove(int index){
+        matches.remove(index);
+    }
     public MatchItem getPair(int index){
         return matches.get(index);
     }
-    public String findCompany(int target){
-        String company = null;
-        for(int i = 0; i < matches.size(); i++){
-            if(matches.get(i).getIndividual1Index() == target){
-                company = Integer.toString(matches.get(i).getIndividual2Index());
-                break;
-            }else if(matches.get(i).getIndividual2Index() == target){
-                company = Integer.toString(matches.get(i).getIndividual1Index());
-                break;
+    public int findCompany(int target){
+        for (MatchItem match : matches){
+            if(match.getIndividualMatches().contains(target)){
+                return match.getIndividual1Index();
             }
         }
-        return company;
+        return 0;
     }
     public void addLeftOver(int index){
         leftOvers.add(index);
@@ -79,17 +78,17 @@ public class Matches implements Serializable {
         }
         return false;
     }
-    public void addMatch(int target, int match){
+    public void addMatch(int target, int prefer){
         for (MatchItem matchSet : matches) {
             if (matchSet.getIndividual1Index() == target) {
-                matchSet.addMatch(match);
+                matchSet.addMatch(prefer);
             }
         }
     }
-    public void disMatch(int target, int match){
+    public void disMatch(int target, int nodeToRemove){
         for (MatchItem matchSet : matches) {
             if (matchSet.getIndividual1Index() == target) {
-                matchSet.unMatch(match);
+                matchSet.unMatch(nodeToRemove);
             }
         }
     }
@@ -137,7 +136,8 @@ public class Matches implements Serializable {
         matches.addLeftOver(10);
         matches.addLeftOver(9);
 
-        matches.disMatch(1,4);
+//        matches.disMatch(1,4);
+        //matches.remove(2);
 
         System.out.println(matches.isFull(1));
         System.out.println(matches.isFull(2));

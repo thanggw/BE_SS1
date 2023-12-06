@@ -13,7 +13,8 @@ import static com.example.SS2_Backend.util.Utils.formatDouble;
 
 /**
  *Base case of Stable Matching Problem (One to One) : Number of Individuals in two sets are Equal (n1 = n2)
- *                                                  : Every Individual inside the Population have equal number of Properties                                                 : Every Individual inside the Population have the same way to evaluate Partner
+ *                                                  : Every Individual inside the Population have equal number of Properties
+ *                                                  : Every Individual inside the Population have the same way to evaluate Partner
  *Wish to test this Class? Run "src.main.java.com.example.SS2_Backend.util.SampleDataGenerator.java"
  **/
 
@@ -23,6 +24,8 @@ public class StableMatchingProblem implements Problem {
     private int numberOfSets;
     @Getter
     private int numberOfIndividual;
+    @Getter
+    private int numberOfIndividualOfSet0;
     @Getter
     private int numberOfProperties;
     private String[] PropertiesName;
@@ -54,16 +57,21 @@ public class StableMatchingProblem implements Problem {
     }
     // Evaluate
     public void evaluate(Solution solution) {
-//        System.out.println("Evaluating...");
         Matches result = StableMatchingExtra(solution.getVariable(0));
         //System.out.println(solution.getVariable(1).toString());
         double fitnessScore = 0;
+        Matches result1 = new Matches();
         if (result != null) {
             for (int i = 0; i < result.size(); i++) {
                 fitnessScore += calculateSetSatisfactory(result.getPair(i));
+                if(Individuals.get(i).getIndividualSet() == 0){
+                    MatchItem temp = result.getPair(i);
+                    result1.add(temp);
+                }
             }
         }
-        solution.setAttribute("matches", result);
+        //result.remove(result.size()-1);
+        solution.setAttribute("matches", result1);
         solution.setObjective(0, -fitnessScore);
     }
     @Override
@@ -170,72 +178,6 @@ public class StableMatchingProblem implements Problem {
         }
         return fullList;
     }
-    // Gale Shapley: Stable Matching Algorithm
-    public Matches stableMatching(Variable var) {
-        Matches matches = new Matches();
-        Queue<Integer> unmatchedMales = new LinkedList<>();
-        LinkedList<Integer> engagedFemale = new LinkedList<>();
-
-        String s = var.toString();
-
-        String[] decodedSolution = s.split(",");
-        for (String token : decodedSolution) {
-            try {
-                // Convert each token to an Integer and add it to the queue
-                int i = Integer.parseInt(token);
-                if (Individuals.get(i).getIndividualSet() == 1) {
-                    unmatchedMales.add(i);
-                }
-            } catch (NumberFormatException e) {
-                // Handle invalid tokens (non-integer values)
-                System.err.println("Skipping invalid token: " + token);
-                return null;
-            }
-            //System.out.println("Solution: " + java.util.Arrays.toString(decodedSolution));
-        }
-
-        while (!unmatchedMales.isEmpty()) {
-            int male = unmatchedMales.poll();
-            //System.out.println("working on Individual:" + male);
-            PreferenceList preferenceList = preferenceLists.get(male);
-            //System.out.print("Hmm ... He prefers Individual ");
-            for (int i = 0; i < preferenceList.size(); i++) {
-                int female = preferenceList.getByIndex(i).getIndividualIndex();
-                //System.out.println(female);
-                if (!engagedFemale.contains(female)) {
-                    engagedFemale.add(female);
-                    matches.add(new Pair(male, female));
-                    //System.out.println(male + female + " is now together");
-                    break;
-                } else {
-                    int currentMale = Integer.parseInt(matches.findCompany(female));
-                    //System.out.println("Oh no, she is with " + currentMale + " let see if she prefers " + male + " than " + currentMale );
-                    if (isPreferredOver(male, currentMale, female)) {
-                        matches.disMatchPair(currentMale);
-                        unmatchedMales.add(currentMale);
-                        matches.add(new Pair(male, female));
-                        //System.out.println("Hell yeah! " + female + " ditch the guy " + currentMale + " to be with " + male + "!");
-                        break;
-                    }
-                    else {
-                        if(preferenceList.getByIndex(preferenceList.size()-1).getIndividualIndex() == female){
-                            matches.addLeftOver(male);
-                        }
-                        //System.out.println(male + " lost the game, back to the hood...");
-                    }
-                }
-            }
-        }
-        for(int i = 0; i < Individuals.size(); i++){
-            if(Individuals.get(i).getIndividualSet() == 0){
-                if(!engagedFemale.contains(i)){
-                    matches.addLeftOver(i);
-                }
-            }
-        }
-        //System.out.println("Matching Complete!!");
-        return matches;
-    }
     private Matches StableMatchingExtra(Variable var){
         //Parse Variable
         Matches matches = new Matches();
@@ -260,26 +202,27 @@ public class StableMatchingProblem implements Problem {
             }
         }
         while(!UnMatchedNode.isEmpty()){
-            System.out.println(matches);
+            //System.out.println(matches);
+            //System.out.println(UnMatchedNode);
             int Node = UnMatchedNode.poll();
             if(MatchedNode.contains(Node)){
                 continue;
             }
-            System.out.println("working on Node:" + Node);
+            //System.out.println("working on Node:" + Node);
             //Get pref List of LeftNode
             PreferenceList NodePreference = preferenceLists.get(Node);
-           //Loop through LeftNode's preference list to find a Match
+            //Loop through LeftNode's preference list to find a Match
             for (int i = 0; i < NodePreference.size(); i++){
                 //Next Match (RightNode) is found on the list
                 int preferNode = NodePreference.getByIndex(i).getIndividualIndex();
-                System.out.println(Node + " Prefer : " + preferNode);
+                //System.out.println(Node + " Prefer : " + preferNode);
                 if(matches.alreadyMatch(preferNode, Node)){
-                    System.out.println(Node + " is already match with " + preferNode);
+                    //System.out.println(Node + " is already match with " + preferNode);
                     break;
                 }
                 //If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
                 if(!matches.isFull(preferNode)) {
-                    System.out.println(preferNode + " is not full.");
+                    //System.out.println(preferNode + " is not full.");
                     //AddMatch (Node, NodeToConnect)
                     matches.addMatch(preferNode, Node);
                     matches.addMatch(Node,preferNode);
@@ -288,27 +231,28 @@ public class StableMatchingProblem implements Problem {
                 }else{
                     //If the RightNode's Capacity is Full then Left Node will Compete with Nodes that are inside RightNode
                     //Loser will be the return value
-                    System.out.println(preferNode + " is full! Begin making a Compete game involve: " + Node + " ..." );
+                    //System.out.println(preferNode + " is full! Begin making a Compete game involve: " + Node + " ..." );
                     int Loser = Compete(preferNode, Node, matches.getIndividualMatches(preferNode));
                     //If RightNode is the LastChoice of Loser -> then
                     // Loser will be terminated and Saved in Matches.LeftOvers Container
-                    System.out.println("Found Loser: " + Loser);
+                    //System.out.println("Found Loser: " + Loser);
                     if(Loser == Node){
                         if(LastChoice(Node) == preferNode){
                             System.out.println(Node + " has no where to go. Go to LeftOvers!");
                             matches.addLeftOver(Loser);
                             break;
                         }
-                    //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
+                        //Or else Loser go back to UnMatched Queue & Waiting for it's Matching Procedure
                     }else{
                         matches.disMatch(preferNode, Loser);
                         matches.disMatch(Loser, preferNode);
                         UnMatchedNode.add(Loser);
-                        System.out.println(Loser + " lost the game, waiting for another chance.");
+                        MatchedNode.remove((Integer) Loser);
+                        //System.out.println(Loser + " lost the game, waiting for another chance.");
                         matches.addMatch(preferNode, Node);
                         matches.addMatch(Node, preferNode);
                         MatchedNode.add(Node);
-                        System.out.println(Node + " is more suitable than " + Loser + " matched with " + preferNode);
+                        //System.out.println(Node + " is more suitable than " + Loser + " matched with " + preferNode);
                         break;
                     }
                 }
