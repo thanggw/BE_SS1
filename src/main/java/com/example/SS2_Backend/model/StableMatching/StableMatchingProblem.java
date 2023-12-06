@@ -68,7 +68,7 @@ public class StableMatchingProblem implements Problem {
             for (int i = 0; i < result.size(); i++) {
                 fitnessScore += calculateSetSatisfactory(result.getPair(i));
                 if(Individuals.get(i).getIndividualSet() == 0){
-                    MatchItem temp = result.getPair(i);
+                    MatchSet temp = result.getPair(i);
                     result1.add(temp);
                 }
             }
@@ -308,22 +308,22 @@ public class StableMatchingProblem implements Problem {
     }
 
     // Calculate each pair Satisfactory of the result produced By Stable Matching Algorithm
-    private double calculatePairSatisfactory(MatchItem pair) {
-        // a = 0 - b = 11
-        int a = pair.getIndividual1Index();
-        int b = pair.getIndividual2Index();
-        // len > 6
-        PreferenceList ofA = preferenceLists.get(a);
-        // len <= 6
-        PreferenceList ofB = preferenceLists.get(b);
-        double aScore = 0.0;
-        double bScore = 0.0;
-        aScore += ofB.getByKey(a).getValue();
-        bScore += ofA.getByKey(b).getValue();
-        return aScore + bScore;
-    }
-    private double calculateSetSatisfactory(MatchItem matchSet){
-        int a = matchSet.getIndividual1Index();
+//    private double calculatePairSatisfactory(MatchItem pair) {
+//        // a = 0 - b = 11
+//        int a = pair.getIndividual1Index();
+//        int b = pair.getIndividual2Index();
+//        // len > 6
+//        PreferenceList ofA = preferenceLists.get(a);
+//        // len <= 6
+//        PreferenceList ofB = preferenceLists.get(b);
+//        double aScore = 0.0;
+//        double bScore = 0.0;
+//        aScore += ofB.getByKey(a).getValue();
+//        bScore += ofA.getByKey(b).getValue();
+//        return aScore + bScore;
+//    }
+    private double calculateSetSatisfactory(MatchSet matchSet){
+        int a = matchSet.getIndividualIndex();
         PreferenceList ofInd = preferenceLists.get(a);
         List<Integer> list = matchSet.getIndividualMatches();
         double setScore = 0.0;
@@ -389,9 +389,9 @@ public class StableMatchingProblem implements Problem {
     }
     public String toString(){
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < Individuals.size(); i++){
-            sb.append(Individuals.get(i).toString()).append("\n");
-        }
+	    for (Individual individual : Individuals) {
+		    sb.append(individual.toString()).append("\n");
+	    }
         return numberOfProperties + "\n" + fitnessFunction + "\n" + sb;
     }
     public String printPreferenceLists() {

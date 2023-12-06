@@ -1,10 +1,8 @@
 package com.example.SS2_Backend.model.StableMatching;
 
-import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,27 +14,27 @@ import java.util.List;
 @Data
 public class Matches implements Serializable {
     private static final long serialVersionUID = 1L;
-    private final List<MatchItem> matches = new LinkedList<>();
+    private final List<MatchSet> matches = new LinkedList<>();
     private final List<Integer> leftOvers = new LinkedList<>();
     private List<Double> coupleFitness = new LinkedList<>();
 
     public Matches(){
     }
 
-    public void add(MatchItem match){
+    public void add(MatchSet match){
         matches.add(match);
     }
 
     public void remove(int index){
         matches.remove(index);
     }
-    public MatchItem getPair(int index){
+    public MatchSet getPair(int index){
         return matches.get(index);
     }
     public int findCompany(int target){
-        for (MatchItem match : matches){
+        for (MatchSet match : matches){
             if(match.getIndividualMatches().contains(target)){
-                return match.getIndividual1Index();
+                return match.getIndividualIndex();
             }
         }
         return 0;
@@ -47,21 +45,9 @@ public class Matches implements Serializable {
     public int size(){
         return matches.size();
     }
-
-    public void disMatchPair(int target){
-        for(int i = 0; i < matches.size(); i++){
-            if(matches.get(i).getIndividual1Index() == target){
-                matches.remove(i);
-                break;
-            }else if(matches.get(i).getIndividual2Index() == target){
-                matches.remove(i);
-                break;
-            }
-        }
-    }
     public boolean alreadyMatch(int Node1, int Node2){
-        for (MatchItem match : matches){
-            if(match.getIndividual1Index() == Node1){
+        for (MatchSet match : matches){
+            if(match.getIndividualIndex() == Node1){
                 if(match.getIndividualMatches().contains(Node2)){
                     return true;
                 }
@@ -70,9 +56,9 @@ public class Matches implements Serializable {
         return false;
     }
     public boolean isFull (int target){
-        for (MatchItem match : matches) {
+        for (MatchSet match : matches) {
             // hmm
-            if (match.getIndividual1Index() == target) {
+            if (match.getIndividualIndex() == target) {
                 int cap = match.getCapacity();
                 return match.getIndividualMatches().size() >= cap;
             }
@@ -80,15 +66,15 @@ public class Matches implements Serializable {
         return false;
     }
     public void addMatch(int target, int prefer){
-        for (MatchItem matchSet : matches) {
-            if (matchSet.getIndividual1Index() == target) {
+        for (MatchSet matchSet : matches) {
+            if (matchSet.getIndividualIndex() == target) {
                 matchSet.addMatch(prefer);
             }
         }
     }
     public void disMatch(int target, int nodeToRemove){
-        for (MatchItem matchSet : matches) {
-            if (matchSet.getIndividual1Index() == target) {
+        for (MatchSet matchSet : matches) {
+            if (matchSet.getIndividualIndex() == target) {
                 matchSet.unMatch(nodeToRemove);
             }
         }
@@ -99,7 +85,7 @@ public class Matches implements Serializable {
     public String toString(){
         StringBuilder s = new StringBuilder();
         s.append("Matches {\n");
-        for (MatchItem match : matches) {
+        for (MatchSet match : matches) {
             s.append("[");
             s.append(match.toString());
             s.append("]\n");

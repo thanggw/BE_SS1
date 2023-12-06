@@ -1,7 +1,6 @@
 package com.example.SS2_Backend.model.StableMatching;
 
 import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,19 +10,14 @@ import java.util.List;
  */
 
 @Getter
-public class MatchSet implements MatchItem {
-    private final int Individual1Index;
+public class MatchSet {
+    private final int IndividualIndex;
     @Getter
     private final int Capacity;
     private final List<Integer> IndividualMatches = new ArrayList<>();
     public MatchSet(int Individual, int Capacity){
-        this.Individual1Index = Individual;
+        this.IndividualIndex = Individual;
         this.Capacity = Capacity;
-    }
-
-    @Override
-    public int getIndividual2Index(){
-        return 0;
     }
     public void addMatch(int target){
         if(!IndividualMatches.contains(target)){
@@ -34,6 +28,6 @@ public class MatchSet implements MatchItem {
         IndividualMatches.remove((Integer) target);
     }
     public String toString(){
-        return "[" + Individual1Index + "] => " + IndividualMatches.toString();
+        return "[" + IndividualIndex + "] => " + IndividualMatches.toString();
     }
 }

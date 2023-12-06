@@ -20,10 +20,10 @@ public class SampleDataGenerator {
     public static void main(String[] args) {
         // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-            20,
+            5,
             4,
             false,
-            80,
+            20,
             1,
             false,
             4);
@@ -75,9 +75,6 @@ public class SampleDataGenerator {
             System.out.println("Fitness Score: " + -solution.getObjective(0));
         }
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "NSGAII");
-
-
-
     }
 
     public static ArrayList<Individual> generateSampleIndividuals(int numIndividuals, int numProps) {
