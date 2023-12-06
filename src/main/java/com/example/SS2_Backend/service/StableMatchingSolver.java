@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.service;
 
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
+import com.example.SS2_Backend.dto.request.StableMatchingUIResult;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.model.GameSolutionInsights;
@@ -11,7 +12,6 @@ import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,8 +26,11 @@ public class StableMatchingSolver {
 //    SimpMessageSendingOperations simpMessagingTemplate;
 //    private static final int RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
 
+    public static List<PreferenceList> preferencesList;
 
-    public static ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
+    public static ArrayList<Double> coupleFitnessList = new ArrayList<>();
+
+    public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
 
         try{
             StableMatchingProblem problem = new StableMatchingProblem();
@@ -36,23 +39,31 @@ public class StableMatchingSolver {
             problem.setAllPropertyNames(request.getAllPropertyNames());
             problem.setFitnessFunction(request.getFitnessFunction());
 
-            System.out.println(problem.printPreferenceLists());
+//            System.out.println(problem.printPreferenceLists());
 
             long startTime = System.currentTimeMillis();
 
+
             NondominatedPopulation results = solveProblem(
                     problem,
-    //                request.getSpecifiedAlgorithm(),
+                    request.getAlgorithm(),
                     request.getPopulationSize(),
-                    request.getFitnessFunction(),
-                    request.getEvolutionRate(),
-                    request.getMaximumExecutionTime()
+                    request.getGeneration(),
+                    request.getMaxTime(),
+                    request.getDistributedCores()
             );
+
+            ArrayList<Individual> individualsList = request.getIndividuals();
+
             long endTime = System.currentTimeMillis();
             double runtime = ((double) (endTime - startTime) / 1000 / 60);
-            runtime = Math.round(runtime * 100.0) / 100.0;
+            runtime = (runtime * 1000.0);
+            System.out.println("Runtime: " + runtime + " Millisecond(s).");
             MatchingSolution matchingSolution = formatSolution(problem, results, runtime);
+            matchingSolution.setIndividuals(individualsList);
+            System.out.println("RESPOND TO FRONT_END:");
             System.out.println(matchingSolution);
+            System.out.println(matchingSolution.getMatches().getCoupleFitness());
             return ResponseEntity.ok(
                     Response.builder()
                             .status(200)
@@ -70,25 +81,22 @@ public class StableMatchingSolver {
                             .build());
         }
     }
-    private static MatchingSolution formatSolution(StableMatchingProblem problem, NondominatedPopulation result, double Runtime){
+    private MatchingSolution formatSolution(StableMatchingProblem problem, NondominatedPopulation result, double Runtime){
         Solution solution = result.get(0);
         MatchingSolution matchingSolution = new MatchingSolution();
-        List<PreferenceList> preferenceLists = problem.getPreferenceLists();
         double fitnessValue = solution.getObjective(0);
         Matches matches = (Matches) solution.getAttribute("matches");
 
-
-        matchingSolution.setFitnessValue(fitnessValue);
-        //matchingSolution.setPreferenceLists(preferenceLists);
+        matchingSolution.setFitnessValue(-fitnessValue);
         matchingSolution.setMatches(matches);
-        matchingSolution.setAlgorithm("NSGAII");
+        matchingSolution.setAlgorithm(problem.getAlgorithm());
         matchingSolution.setRuntime(Runtime);
 
         return matchingSolution;
     }
 
 
-    public static String convertObjectToJson(Object object) {
+    public String convertObjectToJson(Object object) {
         try {
             // Create an instance of ObjectMapper
             ObjectMapper objectMapper = new ObjectMapper();
@@ -105,19 +113,71 @@ public class StableMatchingSolver {
 
 
 
-    private static NondominatedPopulation solveProblem(StableMatchingProblem problem,
+    private NondominatedPopulation solveProblem(StableMatchingProblem problem,
+                                                       String algorithm,
                                                        int populationSize,
-                                                       String fitnessFunction,
-                                                       int evolutionRate,
-                                                       int maximumExecutionTime) {
-        NondominatedPopulation result = new Executor()
-                .withProblem(problem)
-                .withAlgorithm("NSGAII")
-                .withMaxEvaluations(1000)
-                .withProperty("populationSize", 200)
-                .distributeOnAllCores()
-                .run();
-        return result;
+                                                       int generation,
+                                                       int maxTime,
+                                                       String distributedCores) {
+        NondominatedPopulation result;
+        problem.setAlgorithm(algorithm);
+        try {
+            if (distributedCores.equals("all")) {
+                result = new Executor()
+                        .withProblem(problem)
+                        .withAlgorithm(algorithm)
+                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withProperty("populationSize", populationSize)
+                        .withProperty("maxTime", maxTime)
+                        .distributeOnAllCores()
+                        .run();
+
+
+            } else {
+                int numberOfCores = Integer.parseInt(distributedCores);
+                result = new Executor()
+                        .withProblem(problem)
+                        .withAlgorithm(algorithm)
+                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withProperty("populationSize", populationSize)
+                        .withProperty("maxTime", maxTime)
+                        .distributeOn(numberOfCores)
+                        .run();
+            }
+            return result;
+        } catch (Exception e) {
+
+            // second attempt to solve the problem if the first run got some error
+            if (distributedCores.equals("all")) {
+                result = new Executor()
+                        .withProblem(problem)
+                        .withAlgorithm(algorithm)
+                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withProperty("populationSize", populationSize)
+                        .withProperty("maxTime", maxTime)
+                        .distributeOnAllCores()
+                        .run();
+
+
+            } else {
+                int numberOfCores = Integer.parseInt(distributedCores);
+                result = new Executor()
+                        .withProblem(problem)
+                        .withAlgorithm(algorithm)
+                        .withMaxEvaluations(generation * populationSize) // we are using the number of generations and population size to calculate the number of evaluations
+                        .withProperty("populationSize", populationSize)
+                        .withProperty("maxTime", maxTime)
+                        .distributeOn(numberOfCores)
+                        .run();
+            }
+            return result;
+        }
+
+//        for (Solution solution : result) {
+//            System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
+//            Matches matches = (Matches) solution.getAttribute("matches");
+//            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
+//            System.out.println("Fitness Score: " + -solution.getObjective(0));
     }
 
 
@@ -196,48 +256,46 @@ public class StableMatchingSolver {
 //        );
 //    }
 
-    private GameSolutionInsights initGameSolutionInsights(String[] algorithms) {
-        GameSolutionInsights gameSolutionInsights = new GameSolutionInsights();
-        Map<String, List<Double>> fitnessValueMap = new HashMap<>();
-        Map<String, List<Double>> runtimeMap = new HashMap<>();
-
-        gameSolutionInsights.setFitnessValues(fitnessValueMap);
-        gameSolutionInsights.setRuntimes(runtimeMap);
-
-        for (String algorithm : algorithms) {
-            fitnessValueMap.put(algorithm, new ArrayList<>());
-            runtimeMap.put(algorithm, new ArrayList<>());
-        }
-
-        return gameSolutionInsights;
-    }
-
-    private Progress createProgressMessage(String message) {
-        return Progress.builder()
-                .inProgress(false) // this object is just to send a message to the client, not to show the progress
-                .message(message)
-                .build();
-    }
-
-    private Progress createProgress(String message, Double runtime, Integer runCount, int maxRunCount) {
-        int percent = runCount * 100 / maxRunCount;
-        int minuteLeff = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
-        return Progress.builder()
-                .inProgress(true) // this object is just to send to the client to show the progress
-                .message(message)
-                .runtime(runtime)
-                .minuteLeft(minuteLeff)
-                .percentage(percent)
-                .build();
-    }
-
-    private static double getFitnessValue(NondominatedPopulation result) {
-
-        Solution solution = result.get(0);
-        double fitnessValue = solution.getObjective(0);
-        return fitnessValue;
-
-    }
-
-
+//    private GameSolutionInsights initGameSolutionInsights(String[] algorithms) {
+//        GameSolutionInsights gameSolutionInsights = new GameSolutionInsights();
+//        Map<String, List<Double>> fitnessValueMap = new HashMap<>();
+//        Map<String, List<Double>> runtimeMap = new HashMap<>();
+//
+//        gameSolutionInsights.setFitnessValues(fitnessValueMap);
+//        gameSolutionInsights.setRuntimes(runtimeMap);
+//
+//        for (String algorithm : algorithms) {
+//            fitnessValueMap.put(algorithm, new ArrayList<>());
+//            runtimeMap.put(algorithm, new ArrayList<>());
+//        }
+//
+//        return gameSolutionInsights;
+//    }
+//
+//    private Progress createProgressMessage(String message) {
+//        return Progress.builder()
+//                .inProgress(false) // this object is just to send a message to the client, not to show the progress
+//                .message(message)
+//                .build();
+//    }
+//
+//    private Progress createProgress(String message, Double runtime, Integer runCount, int maxRunCount) {
+//        int percent = runCount * 100 / maxRunCount;
+//        int minuteLeff = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
+//        return Progress.builder()
+//                .inProgress(true) // this object is just to send to the client to show the progress
+//                .message(message)
+//                .runtime(runtime)
+//                .minuteLeft(minuteLeff)
+//                .percentage(percent)
+//                .build();
+//    }
+//
+//    private double getFitnessValue(NondominatedPopulation result) {
+//
+//        Solution solution = result.get(0);
+//        double fitnessValue = solution.getObjective(0);
+//        return fitnessValue;
+//
+//    }
 }

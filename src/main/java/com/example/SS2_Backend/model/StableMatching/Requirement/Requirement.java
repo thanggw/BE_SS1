@@ -1,5 +1,4 @@
 package com.example.SS2_Backend.model.StableMatching.Requirement;
-import lombok.Getter;
 
 //public class Requirement {
 //    private int[] value = new int[3];

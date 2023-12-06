@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,11 +14,11 @@ import java.util.List;
  * Match can be an Object of "Pair" or "MatchSet" Class, both Implement "MatchItem" Interface
  */
 @Data
-@Builder
 public class Matches implements Serializable {
     private static final long serialVersionUID = 1L;
     private final List<MatchItem> matches = new LinkedList<>();
     private final List<Integer> leftOvers = new LinkedList<>();
+    private List<Double> coupleFitness = new LinkedList<>();
 
     public Matches(){
     }

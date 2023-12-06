@@ -2,9 +2,6 @@ package com.example.SS2_Backend.util;
 
 import com.example.SS2_Backend.model.StableMatching.Individual;
 import com.example.SS2_Backend.model.StableMatching.Matches;
-import com.example.SS2_Backend.model.StableMatching.Requirement.OneBoundRequirement;
-import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
-import com.example.SS2_Backend.model.StableMatching.Requirement.TwoBoundRequirement;
 import com.example.SS2_Backend.model.StableMatching.StableMatchingProblem;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;

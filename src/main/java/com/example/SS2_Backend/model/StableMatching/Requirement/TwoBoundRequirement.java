@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.model.StableMatching.Requirement;
 
 import lombok.Getter;
+
 import static com.example.SS2_Backend.util.Utils.formatDouble;
 
 @Getter
