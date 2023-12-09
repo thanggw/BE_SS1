@@ -1,9 +1,10 @@
 package com.example.SS2_Backend.model.StableMatching;
-import static com.example.SS2_Backend.model.StableMatching.PreferenceList.MergeSortPair.mergeSort;
-import static com.example.SS2_Backend.util.Utils.formatDouble;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.SS2_Backend.model.StableMatching.PreferenceList.MergeSortPair.mergeSort;
+import static com.example.SS2_Backend.util.Utils.formatDouble;
 
 public class PreferenceList {
     private List<IndexValue> preferenceList = new ArrayList<>();
