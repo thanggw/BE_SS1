@@ -95,10 +95,8 @@ public class StableMatchingProblem implements Problem {
     public void close() {
     }
 
-
-
     /**
-     * Extra Methods for this specific Stable Matching problem
+     * Extra Methods for  Stable Matching Problem
      */
     public PreferenceList getPreferenceOfIndividual(int index) {
         PreferenceList a = new PreferenceList();
