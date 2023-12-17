@@ -10,6 +10,7 @@ import org.moeaframework.core.variable.EncodingUtils;
 
 import java.util.*;
 
+import static com.example.SS2_Backend.util.StringExpressionEvaluator.eval;
 import static com.example.SS2_Backend.util.Utils.formatDouble;
 
 /**
@@ -30,6 +31,10 @@ public class StableMatchingProblem implements Problem {
     @Getter
     private int numberOfProperties;
     private String[] PropertiesName;
+    @Getter@Setter
+    private String evaluateFunctionForSet1;
+    @Getter@Setter
+    private String evaluateFunctionForSet2;
     @Getter
     private List<PreferenceList> preferenceLists; // Preference List of each Individual
     @Getter
@@ -102,72 +107,168 @@ public class StableMatchingProblem implements Problem {
         PreferenceList a = new PreferenceList();
         // get this Individual set belong to
         int set = Individuals.get(index).getIndividualSet();
-        // Calc totalScore of others for this Individual
-        for (int i = 0; i < numberOfIndividual; i++) {
-            if(Individuals.get(i).getIndividualSet() != set){
-                double totalScore = 0;
-                for (int j = 0; j < numberOfProperties; j++) {
-                    double Score = 0.0;
-                    Double PropertyValue = Individuals.get(i).getPropertyValue(j);
-                    Requirement requirement = Individuals.get(index).getRequirement(j);
-                    int PropertyWeight = Individuals.get(index).getPropertyWeight(j);
-                    // Case: Scale
-                    if (requirement.getType() == 0){
-                      int TargetValue = requirement.getTargetValue();
-                      if(PropertyValue < 0 || PropertyValue > 0){
-                          Score += 0;
-                      }else{
-                          if(TargetValue != 0.0){
-                              double Distance = Math.abs(PropertyValue-TargetValue);
-                              double Scale = (TargetValue-Distance)/TargetValue + 1;
-                              Score += Scale;
-                          }else{
-                              Score += 0;
-                          }
-                      }
-                        //Case: 1 Bound
-                    } else if (requirement.getType() == 1){
-                        Double Bound = requirement.getBound();
-                        String expression = requirement.getExpression();
-                        if(Objects.equals(expression, "++")){
-                            if(PropertyValue < Bound){
-                                Score += 0.0;
-                            }else{
-                                Double distance = Math.abs(PropertyValue - Bound);
-                                double Scale = (Bound + distance)/Bound;
-                                Score = Scale * PropertyWeight;
-                            }
-                        }else{
-                            if(PropertyValue > Bound){
-                                Score += 0.0;
-                            }else{
-                                Double distance = Math.abs(PropertyValue - Bound);
-                                double Scale = (Bound + distance)/Bound;
-                                Score = Scale * PropertyWeight;
-                            }
-                        }
-                    //Case: 2 Bounds
-                    }else{
-                        Double lowerBound = requirement.getLowerBound();
-                        Double upperBound = requirement.getUpperBound();
-                        if(PropertyValue < lowerBound || PropertyValue > upperBound){
-                            Double medium = (lowerBound + upperBound)/2;
-                            Double distance = Math.abs(PropertyValue - medium);
-                            double Scale = (medium-distance)/medium + 1;
-                            Score = Scale * PropertyWeight;
-                        }
-                    }
-                    totalScore += Score;
-                }
-                // Add
-                a.add(new PreferenceList.IndexValue(i, totalScore));
-            }
+        String evaluateFunction;
+        if(set == 0){
+            evaluateFunction = this.evaluateFunctionForSet1;
+        }else{
+            evaluateFunction = this.evaluateFunctionForSet2;
         }
+        evaluateFunction = evaluateFunction.toUpperCase();
+          if(!evaluateFunction.contains("P")){
+              a = defaultPreferCalculation(index, set);
+          }else {
+              a = calculatePreferWithFunction(index, set, evaluateFunction);
+          }
         // Sort: Individuals with higher score than others sit on the top of the List
         a.sort();
         // return Sorted list
         return a;
     }
+
+    private PreferenceList defaultPreferCalculation(int index, int set) {
+        PreferenceList a = new PreferenceList();
+        for (int i = 0; i < numberOfIndividual; i++) {
+            if (Individuals.get(i).getIndividualSet() != set) {
+                double totalScore = 0;
+                for (int j = 0; j < numberOfProperties; j++) {
+                    Double PropertyValue = Individuals.get(i).getPropertyValue(j);
+                    Requirement requirement = Individuals.get(index).getRequirement(j);
+                    int PropertyWeight = Individuals.get(index).getPropertyWeight(j);
+                    totalScore += (getScale(requirement, PropertyValue) * PropertyWeight);
+                }
+                // Add
+                a.add(new PreferenceList.IndexValue(i, totalScore));
+            }
+        }
+        return  a;
+    }
+
+    private double getScale(Requirement requirement, double PropertyValue){
+        int type = requirement.getType();
+        // Case: Scale
+        if (type == 0) {
+            int TargetValue = requirement.getTargetValue();
+            if (PropertyValue < 0 || PropertyValue > 0) {
+                return 0.0;
+            } else {
+                if (TargetValue != 0.0) {
+                    double Distance = Math.abs(PropertyValue - TargetValue);
+		      return (TargetValue - Distance) / TargetValue + 1;
+                } else {
+                    return 0.0;
+                }
+            }
+            //Case: 1 Bound
+        } else if (type == 1) {
+            Double Bound = requirement.getBound();
+            String expression = requirement.getExpression();
+            if (Objects.equals(expression, "++")) {
+                if (PropertyValue < Bound) {
+                    return 0.0;
+                } else {
+                    Double distance = Math.abs(PropertyValue - Bound);
+                    return (Bound + distance) / Bound;
+                }
+            } else {
+                if (PropertyValue > Bound) {
+                    return 0.0;
+                } else {
+                    Double distance = Math.abs(PropertyValue - Bound);
+                    return (Bound + distance) / Bound;
+                }
+            }
+            //Case: 2 Bounds
+        } else {
+            Double lowerBound = requirement.getLowerBound();
+            Double upperBound = requirement.getUpperBound();
+            if (PropertyValue < lowerBound || PropertyValue > upperBound) {
+                double medium = (lowerBound + upperBound) / 2;
+                double distance = Math.abs(PropertyValue - medium);
+                return (medium - distance) / medium + 1;
+            }
+        }
+        return 0.0;
+    }
+
+    private PreferenceList calculatePreferWithFunction(int index, int set, String function){
+        PreferenceList a = new PreferenceList();
+        for (int i = 0; i < numberOfIndividual; i++) {
+            if (Individuals.get(i).getIndividualSet() != set) {
+                StringBuilder tmpSB = new StringBuilder();
+                for(int c = 0; c < function.length(); c++){
+                    char ch = function.charAt(c);
+                    if(ch == 'P' || ch == 'p'){
+                        // read next char then parse to int (index)
+                        int ssLength = SubstringLength(function, c);
+                        int indexOfP = Integer.parseInt(function.substring(c + 1, c + 1 + ssLength)) - 1;
+                        double PropertyValue = Individuals.get(i).getPropertyValue(indexOfP);
+                        Requirement requirement = Individuals.get(index).getRequirement(indexOfP);
+                        double Scale = getScale(requirement, PropertyValue);
+                        tmpSB.append(Scale);
+                        c += ssLength;
+                    }else if(ch == 'W' || ch == 'w'){
+                        //read next char then parse to int (index)
+                        int ssLength = SubstringLength(function, c);
+                        int indexOfW = Integer.parseInt(function.substring(c+1, c+1+ssLength)) - 1;
+                        int weight = Individuals.get(index).getPropertyWeight(indexOfW);
+                        tmpSB.append(weight);
+                        c+= ssLength;
+                    }else{
+                        //No occurrence of W/w/P/w
+                        tmpSB.append(ch);
+                    }
+                }
+                double totalScore = eval(tmpSB.toString());
+                // Add
+                a.add(new PreferenceList.IndexValue(i, totalScore));
+            }
+        }
+        return a;
+    }
+
+//    private static double testFunction(String function, List<Double> nums, List<Integer> weights){
+//        StringBuilder tmpSB = new StringBuilder();
+//        for(int c = 0; c < function.length(); c++){
+//            char ch = function.charAt(c);
+//            if(ch == 'P' || ch == 'p'){
+//                // read next char then parse to int (index)
+//                int ssLength = SubstringLength(function, c);
+//                int indexOfP = Integer.parseInt(function.substring(c+1, c+1+ssLength));
+//                double PropertyValue = nums.get(indexOfP-1);
+//                tmpSB.append(PropertyValue);
+//                c += ssLength;
+//            }else if(ch == 'W' || ch == 'w'){
+//                //read next char then parse to int (index)
+//                int ssLength = SubstringLength(function, c);
+//                int indexOfW = Integer.parseInt(function.substring(c+1, c+1+ssLength));
+//                int weight = weights.get(indexOfW-1);
+//                tmpSB.append(weight);
+//                c+= ssLength;
+//            }else{
+//                //No occurrence of W/w/P/w
+//                tmpSB.append(ch);
+//            }
+//        }
+//        System.out.println(tmpSB);
+//	    return eval(tmpSB.toString());
+//    }
+
+    private static int SubstringLength(String function, int startIndex){
+        int length = 0;
+        for(int c = startIndex + 1; c < function.length(); c++){
+            char ch = function.charAt(c);
+            if(isNumericValue(ch)){
+                length++;
+            }else{
+                return length;
+            }
+        }
+        return length;
+    }
+    public static boolean isNumericValue(char c) {
+        return c >= '0' && c <= '9';
+    }
+
     // Add to a complete List
     public List<PreferenceList> getPreferences() {
         List<PreferenceList> fullList = new ArrayList<>();
@@ -414,5 +515,22 @@ public class StableMatchingProblem implements Problem {
         this.PropertiesName = allPropertyNames;
     }
 
-
+//    public static void main(String[] args){
+//        List<Double> nums = new ArrayList<>();
+//        List<Integer> weights = new ArrayList<>();
+//        nums.add(1.1);
+//        nums.add(9.4);
+//        nums.add(13.9);
+//        nums.add(2.8);
+//        nums.add(4.9);
+//        weights.add(9);
+//        weights.add(3);
+//        weights.add(8);
+//        weights.add(4);
+//        weights.add(7);
+//        String f = "P3*W3+P5*W5+P1*W1+P4*W4+P2^W2";
+//        System.out.println(testFunction(f, nums, weights));
+////        System.out.println(SubstringLength("P3*W3+P5*W5+P1*W1+P4*W4+P2*W2", 0));
+////        System.out.println(f.substring(1, 1+1));
+//    }
 }

@@ -246,7 +246,7 @@ public class StringExpressionEvaluator {
         System.out.println(strExpression);
 
         String formattedExpression = strExpression.replaceAll("NaN", "0")// replace NaN with 0, so that the expression can be evaluated
-                .replaceAll("\\s+", ""); // Removes all NBSP characters from the string
+                .replaceAll("\\s+", ""); // Removes all NBSP characters from the string (NBSP: matches one or more whitespace characters (including spaces, tabs, and newlines))
 
         return new Object() {
             int pos = -1, ch;
@@ -254,9 +254,19 @@ public class StringExpressionEvaluator {
             void nextChar() {
                 ch = (++pos < formattedExpression.length()) ? formattedExpression.charAt(pos) : -1;
             }
-
+            /*
+            void nextChar() {
+                if (++pos < formattedExpression.length()) {
+                    ch = formattedExpression.charAt(pos);
+                } else {
+                    ch = -1;
+                }
+                }
+             */
             boolean eat(int charToEat) {
+                //ignore white space
                 while (ch == ' ') nextChar();
+                //return true if ăn phải charToEat
                 if (ch == charToEat) {
                     nextChar();
                     return true;
@@ -342,7 +352,9 @@ public class StringExpressionEvaluator {
         }.parse();
     }
 
-
+public static void main(String[] args){
+    System.out.println(eval("2/3"));
+}
 
 }
 
