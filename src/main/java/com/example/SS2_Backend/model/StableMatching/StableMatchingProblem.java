@@ -512,13 +512,9 @@ public class StableMatchingProblem implements Problem {
 		}else{
 			for(int i = this.numberOfIndividualOfSet0; i < numberOfIndividual; i++){
 				int a = matches.getSet(i).getIndividualIndex();
-				List<Integer> list = matches.getSet(i).getIndividualMatches();
 				PreferenceList ofInd = preferenceLists.get(a);
-				double setScore = 0.0;
-				for (int x : list) {
-					setScore += ofInd.getByKey(x).getValue();
-				}
-				totalScore += setScore;
+				int index = matches.getSet(i).getIndividualMatches().get(0);
+				totalScore += ofInd.getByKey(index).getValue();
 			}
 		}
 		return totalScore;
