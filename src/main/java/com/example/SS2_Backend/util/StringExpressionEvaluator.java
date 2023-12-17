@@ -353,7 +353,7 @@ public class StringExpressionEvaluator {
     }
 
 public static void main(String[] args){
-    System.out.println(eval("2/3"));
+    System.out.println(eval("3*(2+5)"));
 }
 
 }

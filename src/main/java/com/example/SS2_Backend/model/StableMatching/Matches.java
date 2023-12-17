@@ -28,7 +28,7 @@ public class Matches implements Serializable {
     public void remove(int index){
         matches.remove(index);
     }
-    public MatchSet getPair(int index){
+    public MatchSet getSet(int index){
         return matches.get(index);
     }
     public int findCompany(int target){
