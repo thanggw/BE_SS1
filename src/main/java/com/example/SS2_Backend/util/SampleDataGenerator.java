@@ -30,7 +30,7 @@ public class SampleDataGenerator {
 
 		String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4"};
 
-		String f1 = "p1*w1*1000+p2*w2+p3*w3+p4*w4";
+		String f1 = "(p1*w1)^2+p2*w2+p3*w3+p4*w4";
 		String f2 = "p1*w1+p2*w2+p3*w3+p4*w4/20";
 		String fnf = "s(0) + s(1) * 3";
 
@@ -60,6 +60,7 @@ public class SampleDataGenerator {
 		System.out.println(
 		    "\n[ Algorithm Output Solution ]\n"
 		);
+
 		// Run algorithm:
 		long startTime = System.currentTimeMillis();
 
