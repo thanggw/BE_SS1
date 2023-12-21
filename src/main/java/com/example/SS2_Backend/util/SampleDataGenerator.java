@@ -67,9 +67,8 @@ public class SampleDataGenerator {
 		NondominatedPopulation result = new Executor()
 		    .withProblem(problem)
 		    .withAlgorithm("PESA2")
-		    .withMaxEvaluations(1000)
-		    .withProperty("populationSize", 20)
-		    .distributeOnAllCores()
+		    .withMaxEvaluations(1)
+		    .withProperty("populationSize", 1)
 		    .run();
 		long endTime = System.currentTimeMillis();
 		double runtime = ((double) (endTime - startTime) / 1000);

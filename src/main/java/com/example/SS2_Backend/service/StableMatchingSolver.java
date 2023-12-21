@@ -59,7 +59,8 @@ public class StableMatchingSolver {
             double runtime = ((double) (endTime - startTime) / 1000 / 60);
             runtime = (runtime * 1000.0);
             System.out.println("Runtime: " + runtime + " Millisecond(s).");
-            MatchingSolution matchingSolution = formatSolution(problem, results, runtime);
+            String algorithm = request.getAlgorithm();
+            MatchingSolution matchingSolution = formatSolution(problem, algorithm, results, runtime);
             matchingSolution.setIndividuals(individualsList);
             System.out.println("RESPOND TO FRONT_END:");
             System.out.println(matchingSolution);
@@ -81,7 +82,7 @@ public class StableMatchingSolver {
                             .build());
         }
     }
-    private MatchingSolution formatSolution(StableMatchingProblem problem, NondominatedPopulation result, double Runtime){
+    private MatchingSolution formatSolution(StableMatchingProblem problem, String algorithm, NondominatedPopulation result, double Runtime){
         Solution solution = result.get(0);
         MatchingSolution matchingSolution = new MatchingSolution();
         double fitnessValue = solution.getObjective(0);
@@ -89,7 +90,7 @@ public class StableMatchingSolver {
 
         matchingSolution.setFitnessValue(-fitnessValue);
         matchingSolution.setMatches(matches);
-        matchingSolution.setAlgorithm(problem.getAlgorithm());
+        matchingSolution.setAlgorithm(algorithm);
         matchingSolution.setRuntime(Runtime);
 
         return matchingSolution;
@@ -120,7 +121,6 @@ public class StableMatchingSolver {
                                                        int maxTime,
                                                        String distributedCores) {
         NondominatedPopulation result;
-        problem.setAlgorithm(algorithm);
         try {
             if (distributedCores.equals("all")) {
                 result = new Executor()
@@ -131,8 +131,6 @@ public class StableMatchingSolver {
                         .withProperty("maxTime", maxTime)
                         .distributeOnAllCores()
                         .run();
-
-
             } else {
                 int numberOfCores = Integer.parseInt(distributedCores);
                 result = new Executor()
