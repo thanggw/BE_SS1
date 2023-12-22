@@ -20,10 +20,10 @@ public class SampleDataGenerator {
 	public static void main(String[] args) {
 		// Generate Individuals data Randomly
 		ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-		    50,
+		    5,
 		    3,
 		    false,
-		    150,
+		    15,
 		    1,
 		    false,
 		    4);
@@ -67,8 +67,9 @@ public class SampleDataGenerator {
 		NondominatedPopulation result = new Executor()
 		    .withProblem(problem)
 		    .withAlgorithm("PESA2")
-		    .withMaxEvaluations(1)
-		    .withProperty("populationSize", 1)
+		    .withMaxEvaluations(1000)
+		    .withProperty("populationSize", 200)
+		    .distributeOnAllCores()
 		    .run();
 		long endTime = System.currentTimeMillis();
 		double runtime = ((double) (endTime - startTime) / 1000);

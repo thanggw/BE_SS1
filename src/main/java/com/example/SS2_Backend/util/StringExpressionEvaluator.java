@@ -152,34 +152,88 @@ public class StringExpressionEvaluator {
 	 * Stable Matching Calculation:
 	 */
 
-	public static PreferenceList getPreferenceListByFunction(List<Individual> Individuals, int index, String function){
-		System.out.println(function);
+	public static PreferenceList getPreferenceListByFunction(List<Individual> Individuals, int index, String function) {
 		PreferenceList a = new PreferenceList();
 		int set = Individuals.get(index).getIndividualSet();
-		int numberOfIndividuals = Individuals.size();
-		int numberOfProperties = Individuals.get(0).getNumberOfProperties();
-		for (int i = 0; i < numberOfIndividuals; i++) {
+		int numberOfIndividual = Individuals.size();
+		for (int i = 0; i < numberOfIndividual; i++) {
 			if (Individuals.get(i).getIndividualSet() != set) {
-				for (int j = 0; j < numberOfProperties; j++) {
-					double PropertyValue = Individuals.get(i).getPropertyValue(j);
-					Requirement requirement = Individuals.get(index).getRequirement(j);
-					int PropertyWeight = Individuals.get(index).getPropertyWeight(j);
-
-					double Scale = getScale(requirement, PropertyValue);
-
-					String pPlaceholder = String.format("\\bP%d\\b", j + 1);
-					String wPlaceholder = String.format("W%d", j + 1);
-
-					function = function.replaceAll(pPlaceholder, formatDouble(Scale));
-					function = function.replaceAll(wPlaceholder, formatDouble(PropertyWeight));
+				StringBuilder tmpSB = new StringBuilder();
+				for (int c = 0; c < function.length(); c++) {
+					char ch = function.charAt(c);
+					if (ch == 'P' || ch == 'p') {
+						// read next char then parse to int (index)
+						int ssLength = SubstringLength(function, c);
+						int indexOfP = Integer.parseInt(function.substring(c + 1, c + 1 + ssLength)) - 1;
+						double PropertyValue = Individuals.get(i).getPropertyValue(indexOfP);
+						Requirement requirement = Individuals.get(index).getRequirement(indexOfP);
+						double Scale = getScale(requirement, PropertyValue);
+						tmpSB.append(Scale);
+						c += ssLength;
+					} else if (ch == 'W' || ch == 'w') {
+						//read next char then parse to int (index)
+						int ssLength = SubstringLength(function, c);
+						int indexOfW = Integer.parseInt(function.substring(c + 1, c + 1 + ssLength)) - 1;
+						int weight = Individuals.get(index).getPropertyWeight(indexOfW);
+						tmpSB.append(weight);
+						c += ssLength;
+					} else {
+						//No occurrence of W/w/P/w
+						tmpSB.append(ch);
+					}
 				}
-				double totalScore = eval(function);
+				double totalScore = eval(tmpSB.toString());
 				// Add
 				a.add(new PreferenceList.IndexValue(i, totalScore));
 			}
 		}
 		return a;
 	}
+	private static int SubstringLength(String function, int startIndex) {
+		int length = 0;
+		for (int c = startIndex + 1; c < function.length(); c++) {
+			char ch = function.charAt(c);
+			if (isNumericValue(ch)) {
+				length++;
+			} else {
+				return length;
+			}
+		}
+		return length;
+	}
+
+	public static boolean isNumericValue(char c) {
+		return c >= '0' && c <= '9';
+	}
+
+//	public static PreferenceList getPreferenceListByFunction(List<Individual> Individuals, int index, String function){
+//		System.out.println(function);
+//		PreferenceList a = new PreferenceList();
+//		int set = Individuals.get(index).getIndividualSet();
+//		int numberOfIndividuals = Individuals.size();
+//		int numberOfProperties = Individuals.get(0).getNumberOfProperties();
+//		for (int i = 0; i < numberOfIndividuals; i++) {
+//			if (Individuals.get(i).getIndividualSet() != set) {
+//				for (int j = 0; j < numberOfProperties; j++) {
+//					double PropertyValue = Individuals.get(i).getPropertyValue(j);
+//					Requirement requirement = Individuals.get(index).getRequirement(j);
+//					int PropertyWeight = Individuals.get(index).getPropertyWeight(j);
+//
+//					double Scale = getScale(requirement, PropertyValue);
+//
+//					String pPlaceholder = String.format("\\bP%d\\b", j + 1);
+//					String wPlaceholder = String.format("W%d", j + 1);
+//
+//					function = function.replaceAll(pPlaceholder, formatDouble(Scale));
+//					function = function.replaceAll(wPlaceholder, formatDouble(PropertyWeight));
+//				}
+//				double totalScore = eval(function);
+//				// Add
+//				a.add(new PreferenceList.IndexValue(i, totalScore));
+//			}
+//		}
+//		return a;
+//	}
 
 	public static PreferenceList getPreferenceListByDefault(List<Individual> Individuals, int index) {
 		PreferenceList a = new PreferenceList();
