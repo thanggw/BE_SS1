@@ -26,8 +26,6 @@ import static com.example.SS2_Backend.util.Utils.formatDouble;
 public class StableMatchingProblem implements Problem {
 	private ArrayList<Individual> Individuals; // Storing Data of the Whole population
 	@Getter
-	private int numberOfSets;
-	@Getter
 	private int numberOfIndividual;
 	@Getter
 	private int numberOfIndividualOfSet0;
@@ -62,29 +60,18 @@ public class StableMatchingProblem implements Problem {
 
 	// Evaluate
 	public void evaluate(Solution solution) {
-		System.out.println("step 0");
 		Matches result = StableMatchingExtra(solution.getVariable(0));
-		System.out.println("step 1");
 		double fitnessScore;
-		Matches result1 = new Matches();
-		if (result != null) {
-			for (int i = 0; i < result.size(); i++) {
-				if (Individuals.get(i).getIndividualSet() == 0) {
-					MatchSet temp = result.getSet(i);
-					result1.add(temp);
-				}
-			}
-		}
+
 		String fnf = this.fitnessFunction.toUpperCase();
 		if (!fnf.contains("S")) {
 			assert result != null;
-			fitnessScore = defaultEvaluation(result);
+			fitnessScore = defaultFitnessEvaluation(result);
 		}else{
-			fitnessScore = withFunctionEvaluation(result, fnf);
+			fitnessScore = withFitnessFunctionEvaluation(result, fnf);
 		}
-		solution.setAttribute("matches", result1);
+		solution.setAttribute("matches", result);
 		solution.setObjective(0, -fitnessScore);
-		System.out.println("end");
 	}
 
 
@@ -115,10 +102,31 @@ public class StableMatchingProblem implements Problem {
 	 */
 
 	/*
+	 * After Matching Gets
+	 */
+	private List<Double> getAllSatisfactoryOfASet(Matches result, int set){
+		List<Double> a = new ArrayList<>();
+		if(set == 0){
+			for(int i = 0; i < numberOfIndividualOfSet0; i++){
+				MatchSet ms = result.getSet(i);
+				double val = getSetSatisfactory(ms);
+				a.add(val);
+			}
+		}else{
+			for(int i = numberOfIndividualOfSet0; i < numberOfIndividual; i++){
+				MatchSet ms = result.getSet(i);
+				double val = getSetSatisfactory(ms);
+				a.add(val);
+			}
+		}
+		return a;
+	}
+
+	/*
 	 * Evaluate Methods
 	 */
 	public PreferenceList getPreferenceOfIndividual(int index) {
-		PreferenceList a = new PreferenceList();
+		PreferenceList a;
 		// get this Individual set belong to
 		int set = Individuals.get(index).getIndividualSet();
 		String evaluateFunction;
@@ -138,33 +146,6 @@ public class StableMatchingProblem implements Problem {
 		// return Sorted list
 		return a;
 	}
-
-//    private static double testFunction(String function, List<Double> nums, List<Integer> weights){
-//        StringBuilder tmpSB = new StringBuilder();
-//        for(int c = 0; c < function.length(); c++){
-//            char ch = function.charAt(c);
-//            if(ch == 'P' || ch == 'p'){
-//                // read next char then parse to int (index)
-//                int ssLength = SubstringLength(function, c);
-//                int indexOfP = Integer.parseInt(function.substring(c+1, c+1+ssLength));
-//                double PropertyValue = nums.get(indexOfP-1);
-//                tmpSB.append(PropertyValue);
-//                c += ssLength;
-//            }else if(ch == 'W' || ch == 'w'){
-//                //read next char then parse to int (index)
-//                int ssLength = SubstringLength(function, c);
-//                int indexOfW = Integer.parseInt(function.substring(c+1, c+1+ssLength));
-//                int weight = weights.get(indexOfW-1);
-//                tmpSB.append(weight);
-//                c+= ssLength;
-//            }else{
-//                //No occurrence of W/w/P/w
-//                tmpSB.append(ch);
-//            }
-//        }
-//        System.out.println(tmpSB);
-//	    return eval(tmpSB.toString());
-//    }
 
 	// Add to a complete List
 	public List<PreferenceList> getPreferences() {
@@ -205,7 +186,12 @@ public class StableMatchingProblem implements Problem {
 		while (!UnMatchedNode.isEmpty()) {
 			System.out.println(matches);
 			System.out.println(UnMatchedNode);
-			int Node = UnMatchedNode.poll();
+			int Node;
+
+			assert !UnMatchedNode.isEmpty();
+
+			Node = UnMatchedNode.poll();
+
 			if (MatchedNode.contains(Node)) {
 				continue;
 			}
@@ -306,10 +292,10 @@ public class StableMatchingProblem implements Problem {
 			return Game.getByIndex(Game.size() - 1).getIndividualIndex();
 		}
 	}
-	private double defaultEvaluation(Matches matches) {
+	private double defaultFitnessEvaluation(Matches matches) {
 		double fitnessScore = 0.0;
 		for (int i = 0; i < matches.size(); i++) {
-			fitnessScore += calculateSetSatisfactory(matches.getSet(i));
+			fitnessScore += getSetSatisfactory(matches.getSet(i));
 		}
 		return fitnessScore;
 	}
@@ -319,26 +305,92 @@ public class StableMatchingProblem implements Problem {
 	 * $: set - value (1 or 2) represent set 1 (0) or set 2 (1)
 	 * $: S(set) - Sum of all payoff scores of "set" evaluate by opposite set
 	 */
-	private double withFunctionEvaluation(Matches matches, String fitnessFunction) {
+	private double withFitnessFunctionEvaluation(Matches matches, String fitnessFunction) {
 		StringBuilder tmpSB = new StringBuilder();
 		for (int c = 0; c < fitnessFunction.length(); c++) {
 			char ch = fitnessFunction.charAt(c);
 			if (ch == 'S') {
+				if(Objects.equals(fitnessFunction.substring(c, c+5), "SIGMA")){
+					if (fitnessFunction.charAt(c+5) != '{') {
+						System.out.println("Missing '{'");
+						System.out.println(fitnessFunction);
+						throw new RuntimeException("Missing '{' after Sigma function");
+					}else{
+						int expressionStartIndex = c + 6;
+						int expressionLength = getFunctionExpressionLength(fitnessFunction, expressionStartIndex);
+						String expression = fitnessFunction.substring(expressionStartIndex, expressionStartIndex+expressionLength);
+						double val = this.sigmaCalculate(matches, expression);
+						tmpSB.append(val);
+						c += expressionLength + 3;
+					}
+				}
 				// Check for F(index) pattern
 				if (c+ 3 < fitnessFunction.length() && fitnessFunction.charAt(c+1) ==  '(' && fitnessFunction.charAt(c + 3) == ')') {
 					if(isNumericValue(fitnessFunction.charAt(c+2))) {
 						int set = Character.getNumericValue(fitnessFunction.charAt(c + 2));
 						//Calculate SUM
-						tmpSB.append(calculateSetSatisfactoryOfASet(matches, set));
+						tmpSB.append(calculateSatisfactoryOfASetByDefault(matches, set));
 					}
 				}
-				c += 4;
+				c += 3;
+			} else if (ch == 'M') {
+				int ssLength = AfterTokenLength(fitnessFunction, c);
+				int indexOfM = Integer.parseInt(fitnessFunction.substring(c + 1, c + 1 + ssLength));
+				double valueOfM = getSetSatisfactory(matches.getSet(indexOfM));
+				tmpSB.append(valueOfM);
+				c += ssLength;
 			} else {
-				//No occurrence of W/w/P/w
-				tmpSB.append(ch);
-			}
+					//No occurrence of W/w/P/w
+					tmpSB.append(ch);
+				}
 		}
 		return eval(tmpSB.toString());
+	}
+
+	private double sigmaCalculate(Matches matches, String expression){
+		System.out.println("sigma calculating...");
+		StringBuilder parseString = new StringBuilder();
+		List<Double> streamValue = new ArrayList<>();
+		String regex = null;
+		int length = expression.length();
+		for(int i = 0; i < length; i++){
+			char ch = expression.charAt(i);
+			if(ch == 'S'){
+				char set = expression.charAt(i+1);
+				if(set == '0'){
+					streamValue = this.getAllSatisfactoryOfASet(matches, 0);
+					regex = "S0";
+					break;
+				} else if (set == '1') {
+					streamValue = this.getAllSatisfactoryOfASet(matches, 1);
+					regex = "S1";
+					break;
+				}
+			}
+		}
+		int streamLength = streamValue.size();
+		for(int i = 0; i < streamLength; i++){
+			double value = streamValue.get(i);
+			String updatedExpression = expression.replaceAll(regex, String.valueOf(value));
+			if (i == streamLength - 1) {
+				parseString.append(updatedExpression);
+			} else {
+				parseString.append(updatedExpression).append('+');
+			}
+		}
+		return eval(parseString.toString());
+	}
+	private static int getFunctionExpressionLength(String function, int startIndex){
+		int num = 0;
+		for(int i = startIndex; i < function.charAt(i); i++){
+			char ch = function.charAt(i);
+			if(ch == '}'){
+				return num;
+			}else{
+				num++;
+			}
+		}
+		return num;
 	}
 
 	private double getScale(Requirement requirement, double PropertyValue) {
@@ -388,70 +440,23 @@ public class StableMatchingProblem implements Problem {
 		return 0.0;
 	}
 
-//	private PreferenceList calculatePreferWithFunction(int index, String function) {
-//		PreferenceList a = new PreferenceList();
-//		int set = Individuals.get(index).getIndividualSet();
-//		for (int i = 0; i < numberOfIndividual; i++) {
-//			if (Individuals.get(i).getIndividualSet() != set) {
-//				StringBuilder tmpSB = new StringBuilder();
-//				for (int c = 0; c < function.length(); c++) {
-//					char ch = function.charAt(c);
-//					if (ch == 'P' || ch == 'p') {
-//						// read next char then parse to int (index)
-//						int ssLength = SubstringLength(function, c);
-//						int indexOfP = Integer.parseInt(function.substring(c + 1, c + 1 + ssLength)) - 1;
-//						double PropertyValue = Individuals.get(i).getPropertyValue(indexOfP);
-//						Requirement requirement = Individuals.get(index).getRequirement(indexOfP);
-//						double Scale = getScale(requirement, PropertyValue);
-//						tmpSB.append(decimalFormat.format(Scale));
-//						c += ssLength;
-//					} else if (ch == 'W' || ch == 'w') {
-//						//read next char then parse to int (index)
-//						int ssLength = SubstringLength(function, c);
-//						int indexOfW = Integer.parseInt(function.substring(c + 1, c + 1 + ssLength)) - 1;
-//						int weight = Individuals.get(index).getPropertyWeight(indexOfW);
-//						tmpSB.append(weight);
-//						c += ssLength;
-//					} else {
-//						//No occurrence of W/w/P/w
-//						tmpSB.append(ch);
-//					}
-//				}
-//				double totalScore = eval(tmpSB.toString());
-//				// Add
-//				a.add(new PreferenceList.IndexValue(i, totalScore));
-//			}
-//		}
-//		return a;
-//	}
-
-
-	// Calculate each pair Satisfactory of the result produced By Stable Matching Algorithm
-//    private double calculatePairSatisfactory(MatchItem pair) {
-//        // a = 0 - b = 11
-//        int a = pair.getIndividual1Index();
-//        int b = pair.getIndividual2Index();
-//        // len > 6
-//        PreferenceList ofA = preferenceLists.get(a);
-//        // len <= 6
-//        PreferenceList ofB = preferenceLists.get(b);
-//        double aScore = 0.0;
-//        double bScore = 0.0;
-//        aScore += ofB.getByKey(a).getValue();
-//        bScore += ofA.getByKey(b).getValue();
-//        return aScore + bScore;
-//    }
-	private double calculateSetSatisfactory(MatchSet matchSet) {
+	private double getSetSatisfactory(MatchSet matchSet) {
 		int a = matchSet.getIndividualIndex();
+		int cap = Individuals.get(a).getCapacity();
 		PreferenceList ofInd = preferenceLists.get(a);
-		List<Integer> list = matchSet.getIndividualMatches();
-		double setScore = 0.0;
-		for (int x : list) {
-			setScore += ofInd.getByKey(x).getValue();
+		if(cap == 1){
+			int IndividualMatch = matchSet.getIndividualMatches().get(0);
+			return ofInd.getByKey(IndividualMatch).getValue();
+		}else {
+			double setScore = 0.0;
+			List<Integer> list = matchSet.getIndividualMatches();
+			for (int x : list) {
+				setScore += ofInd.getByKey(x).getValue();
+			}
+			return setScore;
 		}
-		return setScore;
 	}
-	private  double calculateSetSatisfactoryOfASet(Matches matches, int set){
+	private  double calculateSatisfactoryOfASetByDefault(Matches matches, int set){
 		double totalScore = 0.0;
 		if(set == 0){
 			for(int i = 0; i < this.numberOfIndividualOfSet0; i++){
@@ -573,23 +578,4 @@ public class StableMatchingProblem implements Problem {
 	public void setAllPropertyNames(String[] allPropertyNames) {
 		this.PropertiesName = allPropertyNames;
 	}
-
-//    public static void main(String[] args){
-//        List<Double> nums = new ArrayList<>();
-//        List<Integer> weights = new ArrayList<>();
-//        nums.add(1.1);
-//        nums.add(9.4);
-//        nums.add(13.9);
-//        nums.add(2.8);
-//        nums.add(4.9);
-//        weights.add(9);
-//        weights.add(3);
-//        weights.add(8);
-//        weights.add(4);
-//        weights.add(7);
-//        String f = "P3*W3+P5*W5+P1*W1+P4*W4+P2^W2";
-//        System.out.println(testFunction(f, nums, weights));
-////        System.out.println(SubstringLength("P3*W3+P5*W5+P1*W1+P4*W4+P2*W2", 0));
-////        System.out.println(f.substring(1, 1+1));
-//    }
 }

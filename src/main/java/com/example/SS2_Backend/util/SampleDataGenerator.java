@@ -8,7 +8,6 @@ import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -20,10 +19,10 @@ public class SampleDataGenerator {
 	public static void main(String[] args) {
 		// Generate Individuals data Randomly
 		ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-		    5,
+		    50,
 		    3,
 		    false,
-		    15,
+		    150,
 		    1,
 		    false,
 		    4);
@@ -32,7 +31,7 @@ public class SampleDataGenerator {
 
 		String f1 = "(p1*w1)^2+p2*w2+p3*w3+p4*w4";
 		String f2 = "p1*w1+p2*w2+p3*w3+p4*w4/20";
-		String fnf = "s(0) + s(1) * 3";
+		String fnf = "SIGMA{6+S0}/6 + SIGMA{S1/(S1+99)}* 3 + M0*2";
 
 		    // Create an Instance of StableMatchingProblem class with randomly generated data
 		StableMatchingProblem problem = new StableMatchingProblem();
@@ -68,8 +67,7 @@ public class SampleDataGenerator {
 		    .withProblem(problem)
 		    .withAlgorithm("PESA2")
 		    .withMaxEvaluations(1000)
-		    .withProperty("populationSize", 200)
-		    .distributeOnAllCores()
+		    .withProperty("populationSize", 20)
 		    .run();
 		long endTime = System.currentTimeMillis();
 		double runtime = ((double) (endTime - startTime) / 1000);
@@ -84,7 +82,6 @@ public class SampleDataGenerator {
 			System.out.println("Fitness Score: " + -solution.getObjective(0));
 		}
 		System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "PESA2");
-
 
 	}
 

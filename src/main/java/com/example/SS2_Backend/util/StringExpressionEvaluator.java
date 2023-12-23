@@ -1,19 +1,19 @@
 package com.example.SS2_Backend.util;
 
 
-import com.example.SS2_Backend.model.NormalPlayer;
-import com.example.SS2_Backend.model.StableMatching.Individual;
-import com.example.SS2_Backend.model.StableMatching.PreferenceList;
-import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
-import com.example.SS2_Backend.model.Strategy;
+    import com.example.SS2_Backend.model.NormalPlayer;
+    import com.example.SS2_Backend.model.StableMatching.Individual;
+    import com.example.SS2_Backend.model.StableMatching.PreferenceList;
+    import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
+    import com.example.SS2_Backend.model.Strategy;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+    import java.math.BigDecimal;
+    import java.math.RoundingMode;
+    import java.text.DecimalFormat;
+    import java.util.ArrayList;
+    import java.util.Arrays;
+    import java.util.List;
+    import java.util.Objects;
 
 public class StringExpressionEvaluator {
 
@@ -163,7 +163,7 @@ public class StringExpressionEvaluator {
 					char ch = function.charAt(c);
 					if (ch == 'P' || ch == 'p') {
 						// read next char then parse to int (index)
-						int ssLength = SubstringLength(function, c);
+						int ssLength = AfterTokenLength(function, c);
 						int indexOfP = Integer.parseInt(function.substring(c + 1, c + 1 + ssLength)) - 1;
 						double PropertyValue = Individuals.get(i).getPropertyValue(indexOfP);
 						Requirement requirement = Individuals.get(index).getRequirement(indexOfP);
@@ -172,7 +172,7 @@ public class StringExpressionEvaluator {
 						c += ssLength;
 					} else if (ch == 'W' || ch == 'w') {
 						//read next char then parse to int (index)
-						int ssLength = SubstringLength(function, c);
+						int ssLength = AfterTokenLength(function, c);
 						int indexOfW = Integer.parseInt(function.substring(c + 1, c + 1 + ssLength)) - 1;
 						int weight = Individuals.get(index).getPropertyWeight(indexOfW);
 						tmpSB.append(weight);
@@ -189,7 +189,7 @@ public class StringExpressionEvaluator {
 		}
 		return a;
 	}
-	private static int SubstringLength(String function, int startIndex) {
+	public static int AfterTokenLength(String function, int startIndex) {
 		int length = 0;
 		for (int c = startIndex + 1; c < function.length(); c++) {
 			char ch = function.charAt(c);
@@ -205,6 +205,7 @@ public class StringExpressionEvaluator {
 	public static boolean isNumericValue(char c) {
 		return c >= '0' && c <= '9';
 	}
+
 
 //	public static PreferenceList getPreferenceListByFunction(List<Individual> Individuals, int index, String function){
 //		System.out.println(function);
@@ -303,6 +304,7 @@ public class StringExpressionEvaluator {
 		return 0.0;
 	}
 
+
 	private static String formatDouble(double propertyValue) {
 		// if the property value is too small it can be written as for example 1.0E-4, so we need to format it to 0.0001
 		return decimalFormat.format(propertyValue);
@@ -366,7 +368,7 @@ public class StringExpressionEvaluator {
 
 	private static BigDecimal calculateByDefault(List<Double> values, String defaultFunction) {
 		DefaultFunction function = DefaultFunction.valueOf(defaultFunction.toUpperCase());
-		double val = 0;
+		double val;
 		switch (function) {
 			case SUM:
 				val = calSum(values);
@@ -478,7 +480,7 @@ public class StringExpressionEvaluator {
 				if (eat('(')) { // parentheses
 					x = parseExpression();
 					if (!eat(')')) {
-						System.out.println("Missing ')");
+						System.out.println("Missing ')'");
 						System.out.println(formattedExpression);
 						throw new RuntimeException("Missing ')'");
 					}
@@ -495,25 +497,37 @@ public class StringExpressionEvaluator {
 					} else {
 						x = parseFactor();
 					}
-					if (func.equals("sqrt")) x = Math.sqrt(x);
-					else if (func.equals("sin")) x = Math.sin(Math.toRadians(x));
-					else if (func.equals("cos")) x = Math.cos(Math.toRadians(x));
-					else if (func.equals("tan")) x = Math.tan(Math.toRadians(x));
-					else throw new RuntimeException("Unknown function: " + func);
+					switch (func) {
+						case "abs":
+							x = Math.abs(x);
+							break;
+						case "sqrt":
+							x = Math.sqrt(x);
+							break;
+						case "sin":
+							x = Math.sin(Math.toRadians(x));
+							break;
+						case "cos":
+							x = Math.cos(Math.toRadians(x));
+							break;
+						case "tan":
+							x = Math.tan(Math.toRadians(x));
+							break;
+						default:
+							throw new RuntimeException("Unknown function: " + func);
+					}
 				} else {
 					System.out.println("wrong expression: " + formattedExpression);
 					throw new RuntimeException("Unexpected: " + (char) ch);
 				}
-
 				if (eat('^')) x = Math.pow(x, parseFactor()); // exponentiation
-
 				return x;
 			}
 		}.parse();
 	}
 
 	public static void main(String[] args) {
-		System.out.println(eval("3*(2+5)"));
+		System.out.println(eval("3*(2+5)+|-6|"));
 	}
 
 }
