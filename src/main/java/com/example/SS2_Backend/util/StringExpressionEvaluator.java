@@ -207,35 +207,6 @@ public class StringExpressionEvaluator {
 	}
 
 
-//	public static PreferenceList getPreferenceListByFunction(List<Individual> Individuals, int index, String function){
-//		System.out.println(function);
-//		PreferenceList a = new PreferenceList();
-//		int set = Individuals.get(index).getIndividualSet();
-//		int numberOfIndividuals = Individuals.size();
-//		int numberOfProperties = Individuals.get(0).getNumberOfProperties();
-//		for (int i = 0; i < numberOfIndividuals; i++) {
-//			if (Individuals.get(i).getIndividualSet() != set) {
-//				for (int j = 0; j < numberOfProperties; j++) {
-//					double PropertyValue = Individuals.get(i).getPropertyValue(j);
-//					Requirement requirement = Individuals.get(index).getRequirement(j);
-//					int PropertyWeight = Individuals.get(index).getPropertyWeight(j);
-//
-//					double Scale = getScale(requirement, PropertyValue);
-//
-//					String pPlaceholder = String.format("\\bP%d\\b", j + 1);
-//					String wPlaceholder = String.format("W%d", j + 1);
-//
-//					function = function.replaceAll(pPlaceholder, formatDouble(Scale));
-//					function = function.replaceAll(wPlaceholder, formatDouble(PropertyWeight));
-//				}
-//				double totalScore = eval(function);
-//				// Add
-//				a.add(new PreferenceList.IndexValue(i, totalScore));
-//			}
-//		}
-//		return a;
-//	}
-
 	public static PreferenceList getPreferenceListByDefault(List<Individual> Individuals, int index) {
 		PreferenceList a = new PreferenceList();
 		int set = Individuals.get(index).getIndividualSet();

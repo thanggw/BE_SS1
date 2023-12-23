@@ -34,14 +34,14 @@ public class StableMatchingProblem implements Problem {
 	private String[] PropertiesName;
 	@Getter
 	@Setter
-	private String evaluateFunctionForSet1;
+	private String evaluateFunctionForSet1 = "";
 	@Getter
 	@Setter
-	private String evaluateFunctionForSet2;
+	private String evaluateFunctionForSet2 = "";
 	@Getter
 	private List<PreferenceList> preferenceLists; // Preference List of each Individual
 	@Getter
-	private String fitnessFunction; // Evaluate total Score of each Solution set
+	private String fitnessFunction = ""; // Evaluate total Score of each Solution set
 	/**
 	 * MOEA Problem Implementations
 	 */
@@ -64,7 +64,7 @@ public class StableMatchingProblem implements Problem {
 		double fitnessScore;
 
 		String fnf = this.fitnessFunction.toUpperCase();
-		if (!fnf.contains("S")) {
+		if (!fnf.contains("S") || this.fitnessFunction.isEmpty()) {
 			assert result != null;
 			fitnessScore = defaultFitnessEvaluation(result);
 		}else{
@@ -106,16 +106,11 @@ public class StableMatchingProblem implements Problem {
 	 */
 	private List<Double> getAllSatisfactoryOfASet(Matches result, int set){
 		List<Double> a = new ArrayList<>();
-		if(set == 0){
-			for(int i = 0; i < numberOfIndividualOfSet0; i++){
-				MatchSet ms = result.getSet(i);
-				double val = getSetSatisfactory(ms);
-				a.add(val);
-			}
-		}else{
-			for(int i = numberOfIndividualOfSet0; i < numberOfIndividual; i++){
-				MatchSet ms = result.getSet(i);
-				double val = getSetSatisfactory(ms);
+		int length = result.size();
+		for(int i = 0; i < length; i++){
+			int tmpSet = Individuals.get(result.getSet(i).getIndividualIndex()).getIndividualSet();
+			if(tmpSet == set){
+				double val = getSetSatisfactory(result.getSet(i));
 				a.add(val);
 			}
 		}
@@ -441,6 +436,9 @@ public class StableMatchingProblem implements Problem {
 	}
 
 	private double getSetSatisfactory(MatchSet matchSet) {
+		if(matchSet.getIndividualMatches().isEmpty()){
+			return 0.0;
+		}
 		int a = matchSet.getIndividualIndex();
 		int cap = Individuals.get(a).getCapacity();
 		PreferenceList ofInd = preferenceLists.get(a);

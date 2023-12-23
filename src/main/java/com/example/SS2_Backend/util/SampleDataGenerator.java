@@ -22,7 +22,7 @@ public class SampleDataGenerator {
 		    15,
 		    3,
 		    false,
-		    45,
+		    60,
 		    1,
 		    false,
 		    4);
@@ -31,13 +31,13 @@ public class SampleDataGenerator {
 
 		String f1 = "(p1*w1)^2+p2*w2+p3*w3+p4*w4";
 		String f2 = "p1*w1+p2*w2+p3*w3+p4*w4/20";
-		String fnf = "SIGMA{6+S0}/6 + SIGMA{S1/(S1+99)}* 3 + M0*2";
+//		String fnf = "SIGMA{6+S0}/6 + SIGMA{S1/(S1+99)}* 3 + M0*2";
 
 		    // Create an Instance of StableMatchingProblem class with randomly generated data
 		StableMatchingProblem problem = new StableMatchingProblem();
 		problem.setEvaluateFunctionForSet1(f1);
 		problem.setEvaluateFunctionForSet2(f2);
-		problem.setFitnessFunction(fnf);
+//		problem.setFitnessFunction(fnf);
 		problem.setPopulation(individuals);
 		problem.setAllPropertyNames(propNames);
 
@@ -67,7 +67,8 @@ public class SampleDataGenerator {
 		    .withProblem(problem)
 		    .withAlgorithm("PESA2")
 		    .withMaxEvaluations(1000)
-		    .withProperty("populationSize", 10)
+		    .withProperty("populationSize", 20)
+		    .distributeOnAllCores()
 		    .run();
 		long endTime = System.currentTimeMillis();
 		double runtime = ((double) (endTime - startTime) / 1000);
