@@ -168,7 +168,7 @@ public class StringExpressionEvaluator {
 						double PropertyValue = Individuals.get(i).getPropertyValue(indexOfP);
 						Requirement requirement = Individuals.get(index).getRequirement(indexOfP);
 						double Scale = getScale(requirement, PropertyValue);
-						tmpSB.append(Scale);
+						tmpSB.append(formatDouble(Scale));
 						c += ssLength;
 					} else if (ch == 'W' || ch == 'w') {
 						//read next char then parse to int (index)

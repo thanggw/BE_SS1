@@ -19,10 +19,10 @@ public class SampleDataGenerator {
 	public static void main(String[] args) {
 		// Generate Individuals data Randomly
 		ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-		    50,
+		    15,
 		    3,
 		    false,
-		    150,
+		    45,
 		    1,
 		    false,
 		    4);
@@ -67,7 +67,7 @@ public class SampleDataGenerator {
 		    .withProblem(problem)
 		    .withAlgorithm("PESA2")
 		    .withMaxEvaluations(1000)
-		    .withProperty("populationSize", 20)
+		    .withProperty("populationSize", 10)
 		    .run();
 		long endTime = System.currentTimeMillis();
 		double runtime = ((double) (endTime - startTime) / 1000);
