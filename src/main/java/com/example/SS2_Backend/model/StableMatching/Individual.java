@@ -149,6 +149,7 @@ public class Individual {
     public String toString(){
         System.out.println("Name: " + IndividualName);
         System.out.println("Belong to set: " + IndividualSet);
+        System.out.println("Capacity: " + Capacity);
         System.out.println("Properties:");
         System.out.println("---------------------------------");
         for (Property property : Properties) {

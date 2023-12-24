@@ -179,6 +179,7 @@ public class StableMatchingProblem implements Problem {
 			}
 		}
 		while (!UnMatchedNode.isEmpty()) {
+			printPreferenceLists();
 			System.out.println(matches);
 			System.out.println(UnMatchedNode);
 			int Node;
@@ -532,11 +533,17 @@ public class StableMatchingProblem implements Problem {
 	}
 
 	public String toString() {
+		System.out.println("Problem: " + "\n");
+		System.out.println("Num of Individuals: " + this.numberOfIndividual);
 		StringBuilder sb = new StringBuilder();
 		for (Individual individual : Individuals) {
 			sb.append(individual.toString()).append("\n");
 		}
-		return numberOfProperties + "\n" + fitnessFunction + "\n" + sb;
+		return "\nNumber Of Properties: " + numberOfProperties +
+		    "\nFitness Function: " + fitnessFunction +
+		    "\nEvaluate Function For Set 1: " + this.evaluateFunctionForSet1 +
+		    "\nEvaluate Function For Set 2: " + this.evaluateFunctionForSet2 +
+		    "\n" + sb;
 	}
 
 	public String printPreferenceLists() {
