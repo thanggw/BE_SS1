@@ -23,16 +23,16 @@ public class IndividualDeserializer extends StdDeserializer<Individual> {
 	public Individual deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
 		JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
-		String individualName = node.get("IndividualName").asText();
-		int individualSet = node.get("SetType").asInt();
-		int individualCapacity = node.get("Capacity").asInt();
+		String individualName = node.get("individualName").asText();
+		int individualSet = node.get("setType").asInt();
+		int individualCapacity = node.get("capacity").asInt();
 
 		Individual individual = new Individual();
 		individual.setIndividualName(individualName);
 		individual.setIndividualSet(individualSet);
 		individual.setCapacity(individualCapacity);
 
-		JsonNode propertiesNode = node.get("Properties");
+		JsonNode propertiesNode = node.get("argument");
 
 		if (propertiesNode != null && propertiesNode.isArray()) {
 			Iterator<JsonNode> propertiesIterator = propertiesNode.elements();
