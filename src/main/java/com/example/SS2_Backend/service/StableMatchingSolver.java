@@ -39,13 +39,12 @@ public class StableMatchingSolver {
 			System.out.println("\nProblem loaded!");
 			long startTime = System.currentTimeMillis();
 
-//			NondominatedPopulation results = new NondominatedPopulation();
 			NondominatedPopulation results = solveProblem(
 			    problem,
 			    request.getAlgorithm(),
-			    10,
-			    20,
-			    100000,
+			    request.getPopulationSize(),
+			    request.getGeneration(),
+			    request.getMaxTime(),
 			    request.getDistributedCores()
 			);
 			System.out.println(results);
@@ -56,7 +55,8 @@ public class StableMatchingSolver {
 			runtime = (runtime * 1000.0);
 			System.out.println("Runtime: " + runtime + " Millisecond(s).");
 			String algorithm = request.getAlgorithm();
-			MatchingSolution matchingSolution = formatSolution(problem, algorithm, results, runtime);
+			assert results != null;
+			MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
 			matchingSolution.setIndividuals(individualsList);
 			System.out.println("RESPOND TO FRONT_END:");
 			System.out.println(matchingSolution);
@@ -80,7 +80,7 @@ public class StableMatchingSolver {
 		}
 	}
 
-	private MatchingSolution formatSolution(StableMatchingProblem problem, String algorithm, NondominatedPopulation result, double Runtime) {
+	private MatchingSolution formatSolution(String algorithm, NondominatedPopulation result, double Runtime) {
 		Solution solution = result.get(0);
 		MatchingSolution matchingSolution = new MatchingSolution();
 		double fitnessValue = solution.getObjective(0);
@@ -109,9 +109,9 @@ public class StableMatchingSolver {
 			distributedCores = "all";
 		}
 		TypedProperties properties = new TypedProperties();
-		properties.setInt("populationSize", 20);
+		properties.setInt("populationSize", populationSize);
 		properties.setInt("maxTime", maxTime);
-		TerminationCondition maxEval = new MaxFunctionEvaluations(100);
+		TerminationCondition maxEval = new MaxFunctionEvaluations(generation * populationSize);
 		try {
 			if (distributedCores.equals("all")) {
 				result = new Executor()
@@ -128,6 +128,7 @@ public class StableMatchingSolver {
 				    .withProblem(problem)
 				    .withAlgorithm(algorithm)
 				    .withMaxEvaluations(generation * populationSize)
+				    .withTerminationCondition(maxEval)
 				    .withProperties(properties)
 				    .distributeOn(numberOfCores)
 				    .run();
