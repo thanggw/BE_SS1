@@ -1,6 +1,5 @@
 package com.example.SS2_Backend.model.StableMatching;
 
-import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
 import lombok.Getter;
 import lombok.Setter;
 import org.moeaframework.core.Problem;
@@ -224,7 +223,7 @@ public class StableMatchingProblem implements Problem {
 					//System.out.println("Found Loser: " + Loser);
 					if (Loser == Node) {
 						if (LastChoice(Node) == preferNode) {
-							//System.out.println(Node + " has no where to go. Go to LeftOvers!");
+							//System.out.println(Node + " has nowhere to go. Go to LeftOvers!");
 							matches.addLeftOver(Loser);
 							break;
 						}
@@ -286,10 +285,25 @@ public class StableMatchingProblem implements Problem {
 		return fitnessScore;
 	}
 	/*
+	 *
 	 * Fitness Function Grammar:
 	 * $: i - index of MatchSet in "matches"
 	 * $: set - value (1 or 2) represent set 1 (0) or set 2 (1)
 	 * $: S(set) - Sum of all payoff scores of "set" evaluate by opposite set
+	 * $: M(i) - Value of specific matchSet's satisfaction eg: M0 (satisfactory of Individual no 0)
+	 *
+	 * Supported functions:
+	 * #: SIGMA{S1} calculate sum of all MatchSet of a belonging set eg: SIGMA{S1}
+	 *
+	 * Supported mathematical calculations:
+	 *     Name             :    Usage
+	 * 1. absolute       : abs(expression)
+	 * 2. exponent      : (expression)^(expression)
+	 * 3. sin                 : sin(expression)
+	 * 4. cos                 : cos(expression)
+	 * 5. tan                : tan(expression)
+	 * 6. logarithm     : log(expression)(expression)
+	 * 7. square root : sqrt(expression)
 	 */
 	private double withFitnessFunctionEvaluation(Matches matches, String fitnessFunction) {
 		StringBuilder tmpSB = new StringBuilder();
@@ -377,53 +391,6 @@ public class StableMatchingProblem implements Problem {
 			}
 		}
 		return num;
-	}
-
-	private double getScale(Requirement requirement, double PropertyValue) {
-		int type = requirement.getType();
-		// Case: Scale
-		if (type == 0) {
-			int TargetValue = requirement.getTargetValue();
-			if (PropertyValue < 0 || PropertyValue > 0) {
-				return 0.0;
-			} else {
-				if (TargetValue != 0.0) {
-					double Distance = Math.abs(PropertyValue - TargetValue);
-					return (TargetValue - Distance) / TargetValue + 1;
-				} else {
-					return 0.0;
-				}
-			}
-			//Case: 1 Bound
-		} else if (type == 1) {
-			Double Bound = requirement.getBound();
-			String expression = requirement.getExpression();
-			if (Objects.equals(expression, "++")) {
-				if (PropertyValue < Bound) {
-					return 0.0;
-				} else {
-					Double distance = Math.abs(PropertyValue - Bound);
-					return (Bound + distance) / Bound;
-				}
-			} else {
-				if (PropertyValue > Bound) {
-					return 0.0;
-				} else {
-					Double distance = Math.abs(PropertyValue - Bound);
-					return (Bound + distance) / Bound;
-				}
-			}
-			//Case: 2 Bounds
-		} else {
-			Double lowerBound = requirement.getLowerBound();
-			Double upperBound = requirement.getUpperBound();
-			if (PropertyValue < lowerBound || PropertyValue > upperBound) {
-				double medium = (lowerBound + upperBound) / 2;
-				double distance = Math.abs(PropertyValue - medium);
-				return (medium - distance) / medium + 1;
-			}
-		}
-		return 0.0;
 	}
 
 	private double getSetSatisfactory(MatchSet matchSet) {
