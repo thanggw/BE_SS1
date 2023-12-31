@@ -64,7 +64,7 @@ public class StableMatchingProblem implements Problem {
 		Matches result = StableMatchingExtra(solution.getVariable(0));
 		double fitnessScore;
 
-		String fnf = this.fitnessFunction.toUpperCase();
+		String fnf = this.fitnessFunction.trim();
 		if (!fnf.contains("S") || this.fitnessFunction.isEmpty()) {
 			assert result != null;
 			fitnessScore = defaultFitnessEvaluation(result);

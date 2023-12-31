@@ -376,8 +376,11 @@ public class StringExpressionEvaluator {
 		System.out.println("Evaluating: ");
 		System.out.println(strExpression);
 
-		String formattedExpression = strExpression.replaceAll("NaN", "0")// replace NaN with 0, so that the expression can be evaluated
-		    .replaceAll("\\s+", "").replaceAll(",", "."); // Removes all NBSP characters from the string (NBSP: matches one or more whitespace characters (including spaces, tabs, and newlines)
+		String formattedExpression = strExpression
+		    .replaceAll("NaN", "0")// Replace NaN(Not A Number) with 0, so that the expression can be evaluated
+		    .replaceAll("\\s+", "")// Removes all NBSP characters from the string (NBSP: matches one or more whitespace characters (including spaces, tabs, and newlines)
+		    .replaceAll(",", "."); // Replace , to . (default double decimal separator)
+
 
 		return new Object() {
 			int pos = -1, ch;
@@ -442,6 +445,22 @@ public class StringExpressionEvaluator {
 				}
 			}
 
+			double getArgForFunction(){
+				double a;
+				if (eat('(')) {
+					if(eat('e') || eat('E')){
+						a = Math.E;
+					}else {
+						a = parseExpression();
+					}
+					if (!eat(')'))
+						throw new RuntimeException("Missing ')' after argument to log");
+				}else{
+					throw new RuntimeException("Incorrect arguments for log function");
+				}
+				return a;
+			}
+
 			double parseFactor() {
 				if (eat('+')) return +parseFactor(); // unary plus
 				if (eat('-')) return -parseFactor(); // unary minus
@@ -461,6 +480,11 @@ public class StringExpressionEvaluator {
 				} else if (ch >= 'a' && ch <= 'z') { // functions
 					while (ch >= 'a' && ch <= 'z') nextChar();
 					String func = formattedExpression.substring(startPos, this.pos);
+					if(Objects.equals(func, "log")){
+						double a = getArgForFunction();
+						double b = getArgForFunction();
+						return customLog(a, b);
+					}
 					if (eat('(')) {
 						x = parseExpression();
 						if (!eat(')'))
@@ -496,9 +520,12 @@ public class StringExpressionEvaluator {
 			}
 		}.parse();
 	}
+	private static double customLog(double base, double logNumber) {
+		return Math.log(logNumber) / Math.log(base);
+	}
 
 	public static void main(String[] args) {
-		System.out.println(eval("3*(2+5)+|-6|"));
+		System.out.println(eval("|log(3)(6)-99|"));
 	}
 
 }
