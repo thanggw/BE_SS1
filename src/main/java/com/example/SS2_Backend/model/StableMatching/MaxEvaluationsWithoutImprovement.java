@@ -24,19 +24,22 @@ public class MaxEvaluationsWithoutImprovement implements TerminationCondition {
 	public boolean shouldTerminate(Algorithm algorithm) {
 		NondominatedPopulation result = algorithm.getResult();
 		boolean isBetter = true;
+
 		for (Solution solution : result) {
 			double fitnessScore = -solution.getObjective(0);
 			if (fitnessScore < this.lastFitness) {
 				isBetter = false;
-			}else{
-				this.lastFitness = fitnessScore;
 			}
 		}
+
 		if (isBetter) {
+			// Update lastFitness with the best fitness
+			this.lastFitness = result.get(0).getObjective(0);
 			evaluationsWithoutImprovement = 0;
 		} else {
 			evaluationsWithoutImprovement++;
 		}
+
 		return evaluationsWithoutImprovement >= maxEvaluationsWithoutImprovement;
 	}
 }

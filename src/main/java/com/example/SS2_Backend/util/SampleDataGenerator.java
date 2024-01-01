@@ -88,7 +88,6 @@ public class SampleDataGenerator {
 			System.out.println("Fitness Score: " + -solution.getObjective(0));
 		}
 		System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "PESA2");
-		System.out.println(problem);
 	}
 
 	public static ArrayList<Individual> generateSampleIndividualsWithCapacity(int numSet1, int set1PeakCap, boolean cap1Randomize, int numSet2, int set2PeakCap, boolean cap2Randomize, int numProps) {
