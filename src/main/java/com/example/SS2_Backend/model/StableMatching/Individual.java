@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.model.StableMatching;
 
 import com.example.SS2_Backend.dto.request.IndividualDeserializer;
+
 import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

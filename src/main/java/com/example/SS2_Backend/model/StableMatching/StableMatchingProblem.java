@@ -23,6 +23,7 @@ import static com.example.SS2_Backend.util.Utils.formatDouble;
  **/
 
 public class StableMatchingProblem implements Problem {
+
 	private ArrayList<Individual> Individuals; // Storing Data of the Whole population
 	@Getter
 	private int numberOfIndividual;
@@ -193,7 +194,6 @@ public class StableMatchingProblem implements Problem {
 			if (MatchedNode.contains(Node)) {
 				continue;
 			}
-			System.out.println("working on Node:" + Node);
 			//Get pref List of LeftNode
 			PreferenceList NodePreference = preferenceLists.get(Node);
 			//Loop through LeftNode's preference list to find a Match
