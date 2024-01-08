@@ -4,8 +4,10 @@ package com.example.SS2_Backend.util;
     import com.example.SS2_Backend.model.NormalPlayer;
     import com.example.SS2_Backend.model.StableMatching.Individual;
     import com.example.SS2_Backend.model.StableMatching.PreferenceList;
+    import com.example.SS2_Backend.model.StableMatching.Requirement.OneBoundRequirement;
     import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
     import com.example.SS2_Backend.model.StableMatching.Requirement.ScaleTargetRequirement;
+    import com.example.SS2_Backend.model.StableMatching.Requirement.TwoBoundRequirement;
     import com.example.SS2_Backend.model.Strategy;
 
     import java.math.BigDecimal;
@@ -234,15 +236,13 @@ public class StringExpressionEvaluator {
 		// Case: Scale
 		if (type == 0) {
 			int TargetValue = requirement.getTargetValue();
-			if (PropertyValue < 0 || PropertyValue > 0) {
+			if (PropertyValue < 0 || PropertyValue > 10) {
 				return 0.0;
 			} else {
-				if (TargetValue != 0.0) {
-					double Distance = Math.abs(PropertyValue - TargetValue);
-					return (TargetValue - Distance) / TargetValue + 1;
-				} else {
-					return 0.0;
-				}
+				double Distance = Math.abs(PropertyValue - TargetValue);
+				if(Distance > 7) return 0;
+				if(Distance > 5) return 1;
+				return (10 - Distance) / 10 + 1;
 			}
 			//Case: 1 Bound
 		} else if (type == 1) {
@@ -252,6 +252,7 @@ public class StringExpressionEvaluator {
 				if (PropertyValue < Bound) {
 					return 0.0;
 				} else {
+					if(Bound == 0) return 2.0;
 					double distance = Math.abs(PropertyValue - Bound);
 					return (Bound + distance) / Bound;
 				}
@@ -259,6 +260,7 @@ public class StringExpressionEvaluator {
 				if (PropertyValue > Bound) {
 					return 0.0;
 				} else {
+					if(Bound == 0) return  2.0;
 					double distance = Math.abs(PropertyValue - Bound);
 					return (Bound + distance) / Bound;
 				}
@@ -267,13 +269,15 @@ public class StringExpressionEvaluator {
 		} else {
 			double lowerBound = requirement.getLowerBound();
 			double upperBound = requirement.getUpperBound();
-			if (PropertyValue < lowerBound || PropertyValue > upperBound) {
+			if (PropertyValue < lowerBound || PropertyValue > upperBound || lowerBound == upperBound) {
+				return 0.0;
+			}else{
 				double medium = (lowerBound + upperBound) / 2;
+				if(medium == 0) return 0;
 				double distance = Math.abs(PropertyValue - medium);
 				return (medium - distance) / medium + 1;
 			}
 		}
-		return 0.0;
 	}
 
 
@@ -528,8 +532,10 @@ public class StringExpressionEvaluator {
 	public static void main(String[] args) {
 		//System.out.println(eval("log(-1)(-2)"));
 		//System.out.println(Math.log(Math.E));
-		Requirement re = new ScaleTargetRequirement(6);
-		Double a = getScale(re,7);
+		Requirement re = new ScaleTargetRequirement(10);
+		Requirement re1 = new OneBoundRequirement(0, "--");
+		Requirement re2 = new TwoBoundRequirement(6.1, 9.1);
+		Double a = getScale(re2,6.1);
 		System.out.println(a);
 	}
 
