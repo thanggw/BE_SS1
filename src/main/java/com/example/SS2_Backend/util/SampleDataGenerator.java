@@ -19,10 +19,10 @@ public class SampleDataGenerator {
 	public static void main(String[] args) {
 		// Generate Individuals data Randomly
 		ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-		    5,
+		    70,
 		    2,
 		    false,
-		    10,
+		    30,
 		    1,
 		    false,
 		    4);

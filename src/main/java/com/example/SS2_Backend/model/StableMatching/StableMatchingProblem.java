@@ -61,6 +61,7 @@ public class StableMatchingProblem implements Problem {
 	// Evaluate
 	public void evaluate(Solution solution) {
 		System.out.println("Evaluating ... ");
+
 		Matches result = StableMatchingExtra(solution.getVariable(0));
 		double fitnessScore;
 
@@ -144,7 +145,6 @@ public class StableMatchingProblem implements Problem {
 		// return Sorted list
 		return a;
 	}
-
 	// Add to a complete List
 	public List<PreferenceList> getPreferences() {
 		List<PreferenceList> fullList = new ArrayList<>();
@@ -186,9 +186,6 @@ public class StableMatchingProblem implements Problem {
 			//System.out.println(matches);
 			//System.out.println(UnMatchedNode);
 			int Node;
-
-			//assert !UnMatchedNode.isEmpty();
-
 			Node = UnMatchedNode.poll();
 
 			if (MatchedNode.contains(Node)) {
@@ -285,7 +282,6 @@ public class StableMatchingProblem implements Problem {
 		return fitnessScore;
 	}
 	/*
-	 *
 	 * Fitness Function Grammar:
 	 * $: i - index of MatchSet in "matches"
 	 * $: set - value (1 or 2) represent set 1 (0) or set 2 (1)

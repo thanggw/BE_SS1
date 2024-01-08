@@ -157,30 +157,6 @@ public class StableMatchingSolver {
 //            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
 //            System.out.println("Fitness Score: " + -solution.getObjective(0));
 	}
-
-	private NondominatedPopulation solveProblem2(StableMatchingProblem problem,
-					    String inputAlgorithm,
-					    int populationSize,
-					    int generation,
-					    int maxTime,
-					    String distributedCores) {
-		TypedProperties properties = new TypedProperties();
-		Algorithm algorithm = null;
-		try {
-			algorithm = AlgorithmFactory.getInstance().getAlgorithm(inputAlgorithm, properties, problem);
-		} catch (ProviderNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		// Set up the custom termination condition
-		int maxEvaluationsWithoutImprovement = 20;
-		TerminationCondition terminationCondition = new MaxEvaluationsWithoutImprovement(maxEvaluationsWithoutImprovement);
-		// Set the termination condition for the algorithm
-		assert algorithm != null;
-		return new NondominatedPopulation();
-	}
-
-
     public ResponseEntity<Response> getProblemResultInsights(StableMatchingProblemDTO request, String sessionCode) {
 //        log.info("Received request: " + request);
         String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA","MOEAD"};

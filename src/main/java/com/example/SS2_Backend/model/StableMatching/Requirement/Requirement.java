@@ -1,18 +1,25 @@
 package com.example.SS2_Backend.model.StableMatching.Requirement;
-
-//public class Requirement {
-//    private int[] value = new int[3];
-//
-//    public Requirement(int[] value){
-//        this.value = value;
-//    }
-//}
-public interface Requirement {
-    int getType();
-    Double getBound();
-    String getExpression();
-    Double getLowerBound();
-    Double getUpperBound();
-    int getTargetValue();
-    String toString();
+import lombok.Getter;
+@Getter
+public abstract class Requirement {
+    private final int Type;
+    protected Requirement(int type) {
+        this.Type = type;
+    }
+    public int getTargetValue(){
+        return 0;
+    }
+    public double getBound() {
+        return 0;
+    }
+    public String getExpression() {
+        return null;
+    }
+    public double getUpperBound() {
+        return 0;
+    }
+    public double getLowerBound() {
+        return 0;
+    }
+    public abstract String toString();
 }
