@@ -296,9 +296,11 @@ public class StableMatchingProblem implements Problem {
 	 * 1. absolute       : abs(expression)
 	 * 2. exponent      : (expression)^(expression)
 	 * 3. sin                 : sin(expression)
-	 * 4. cos                 : cos(expression)
+	 * 4. cos                 : cos(expressiosn)
 	 * 5. tan                : tan(expression)
-	 * 6. logarithm     : log(expression)(expression)
+	 * 6. logarithm     : log(expression)(expression) Logarithm calculation requires 2 parameters in two separate curly braces
+	 * 								   Default log calculation could be achieved like this: log(e)(expression)
+	 * 								   Make sure expression is not negative or the final outcome might be resulted: NaN / Infinity / - Infinity
 	 * 7. square root : sqrt(expression)
 	 */
 	private double withFitnessFunctionEvaluation(Matches matches, String fitnessFunction) {

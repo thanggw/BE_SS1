@@ -272,10 +272,9 @@ public class StringExpressionEvaluator {
 			if (PropertyValue < lowerBound || PropertyValue > upperBound || lowerBound == upperBound) {
 				return 0.0;
 			}else{
-				double medium = (lowerBound + upperBound) / 2;
-				if(medium == 0) return 0;
-				double distance = Math.abs(PropertyValue - medium);
-				return (medium - distance) / medium + 1;
+				double diff = Math.abs(upperBound - lowerBound)/2;
+				double distance = Math.abs(((lowerBound+upperBound)/2) -PropertyValue);
+				return (diff-distance)/diff;
 			}
 		}
 	}
@@ -530,13 +529,12 @@ public class StringExpressionEvaluator {
 	}
 
 	public static void main(String[] args) {
-		//System.out.println(eval("log(-1)(-2)"));
-		//System.out.println(Math.log(Math.E));
-		Requirement re = new ScaleTargetRequirement(10);
-		Requirement re1 = new OneBoundRequirement(0, "--");
-		Requirement re2 = new TwoBoundRequirement(6.1, 9.1);
-		Double a = getScale(re2,6.1);
-		System.out.println(a);
+		Requirement re2 = new TwoBoundRequirement(0, 9.1);
+		double[] testValues = {4.4,4.8,5.2,5.6,6.1,6.4,6.8,7.2,7.6,8.0,8.4,8.8,9.1};
+		for(double val : testValues){
+			System.out.println(getScale(re2, val));
+			System.out.println();
+		}
 	}
 
 }

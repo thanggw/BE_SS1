@@ -25,6 +25,7 @@ public class Individual {
 
 	public Individual() {
 
+
 	}
 
 	@JsonProperty("Properties")
@@ -122,14 +123,6 @@ public class Individual {
 	public int getNumberOfProperties() {
 		return Properties.size();
 	}
-
-//    public String getPropertyName(int index){
-//        if(index >= 0 && index < this.Properties.size()){
-//            return Properties.get(index).getName();
-//        }else{
-//            return null;
-//        }
-//    }
 
 	public Double getPropertyValue(int index) {
 		if (index >= 0 && index < this.Properties.size()) {
