@@ -274,7 +274,7 @@ public class StringExpressionEvaluator {
 			}else{
 				double diff = Math.abs(upperBound - lowerBound)/2;
 				double distance = Math.abs(((lowerBound+upperBound)/2) -PropertyValue);
-				return (diff-distance)/diff;
+				return (diff-distance)/diff + 1;
 			}
 		}
 	}
@@ -530,7 +530,23 @@ public class StringExpressionEvaluator {
 
 	public static void main(String[] args) {
 		Requirement re2 = new TwoBoundRequirement(0, 9.1);
-		double[] testValues = {4.4,4.8,5.2,5.6,6.1,6.4,6.8,7.2,7.6,8.0,8.4,8.8,9.1};
+		double[] testValues = {-1
+		    ,3.3
+		    ,4.4
+		    ,4.8
+		    ,5.2
+		    ,5.6
+		    ,6.1
+		    ,6.4
+		    ,6.8
+		    ,7.2
+		    ,7.6
+		    ,8.0
+		    ,8.4
+		    ,8.8
+		    ,9.1
+		    ,9.2
+		};
 		for(double val : testValues){
 			System.out.println(getScale(re2, val));
 			System.out.println();
