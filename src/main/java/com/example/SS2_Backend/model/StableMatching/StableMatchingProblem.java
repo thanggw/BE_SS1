@@ -32,21 +32,20 @@ public class StableMatchingProblem implements Problem {
 	private int numberOfProperties;
 	private String[] PropertiesName;
 	@Getter
-	private String evaluateFunctionForSet1 = "";
+	private String evaluateFunctionForSet1;
 	@Getter
-	private String evaluateFunctionForSet2 = "";
+	private String evaluateFunctionForSet2;
 	@Getter
 	private List<PreferenceList> preferenceLists; // Preference List of each Individual
 	@Getter
-	private String fitnessFunction = ""; // Evaluate total Score of each Solution set
+	private String fitnessFunction; // Evaluate total Score of each Solution set
 	private boolean f1Status = false;
 	private boolean f2Status = false;
 	private boolean fnfStatus = false;
 
-	//No Args Constructor
+	//No Args/Default Constructor
 	public StableMatchingProblem() {
 	}
-
 	public void setEvaluateFunctionForSet1(String evaluateFunctionForSet1) {
 		if(evaluateFunctionForSet1.contains("P") || evaluateFunctionForSet1.contains("M")) {
 			this.f1Status = true;
@@ -180,26 +179,29 @@ public class StableMatchingProblem implements Problem {
 		}
 		return a;
 	}
-
 	/*
 	 * Evaluate Methods
 	 */
 	public PreferenceList getPreferenceOfIndividual(int index) {
 		PreferenceList a;
-
 		if(!f1Status && !f2Status){
 			a = getPreferenceListByDefault(Individuals, index);
 			return a;
 		}else {
 			int set = Individuals.get(index).getIndividualSet();
-			String evaluateFunction;
 			if (set == 0) {
-				evaluateFunction = this.evaluateFunctionForSet1;
+				if(f1Status){
+					a = getPreferenceListByFunction(Individuals, index, this.evaluateFunctionForSet1.toUpperCase());
+				}else{
+					a= getPreferenceListByDefault(Individuals, index);
+				}
 			} else {
-				evaluateFunction = this.evaluateFunctionForSet2;
+				if(f2Status){
+					a = getPreferenceListByFunction(Individuals, index, this.evaluateFunctionForSet2.toUpperCase());
+				}else{
+					a= getPreferenceListByDefault(Individuals, index);
+				}
 			}
-			evaluateFunction = evaluateFunction.toUpperCase();
-			a = getPreferenceListByFunction(Individuals, index, evaluateFunction);
 		}
 		// Sort: Individuals with higher score than others sit on the top of the List
 		a.sort();
