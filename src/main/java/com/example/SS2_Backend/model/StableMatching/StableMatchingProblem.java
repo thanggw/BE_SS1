@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variable;
-import org.moeaframework.core.variable.EncodingUtils;
+import org.moeaframework.core.variable.Permutation;
 
 import java.util.*;
 
@@ -113,18 +113,18 @@ public class StableMatchingProblem implements Problem {
 	public Solution newSolution() {
 		Solution solution = new Solution(1, 1);
 		// Randomize the order (from 0 to this.NumberOfIndividual)
-		solution.setVariable(0, EncodingUtils.newPermutation(this.numberOfIndividual));
+		Permutation permutationVar = new Permutation(this.numberOfIndividual);
+		solution.setVariable(0, permutationVar);
 		return solution;
 	}
 
 	// Evaluate
 	public void evaluate(Solution solution) {
 		System.out.println("Evaluating ... ");
-
 		Matches result = StableMatchingExtra(solution.getVariable(0));
+
 		double fitnessScore;
 		if (!this.fnfStatus) {
-			assert result != null;
 			fitnessScore = defaultFitnessEvaluation(result);
 		}else{
 			String fnf = this.fitnessFunction.trim();
@@ -222,26 +222,34 @@ public class StableMatchingProblem implements Problem {
 		//Parse Variable
 		System.out.println("parsing");
 		Matches matches = new Matches();
-		Queue<Integer> UnMatchedNode = new LinkedList<>();
-		List<Integer> MatchedNode = new LinkedList<>();
+		Set<Integer> MatchedNode = new HashSet<>();
 
+		Permutation castVar = (Permutation) var;
+		int[] decodeVar = castVar.toArray();
+		for (int i = 0; i < decodeVar.length; i++) {
+			matches.add(new MatchSet(i, getCapacityOfIndividual(i)));
+		}
+		System.out.println(Arrays.toString(decodeVar));
+
+		Queue<Integer> UnMatchedNode = new LinkedList<>();
+		for (int val : decodeVar){
+			UnMatchedNode.add(val);
+		}
 		String s = var.toString();
 
 		String[] decodedSolution = s.split(",");
-		for (int i = 0; i < decodedSolution.length; i++) {
-			matches.add(new MatchSet(i, getCapacityOfIndividual(i)));
-		}
-		for (String token : decodedSolution) {
-			try {
-				// Convert each token to an Integer and add it to the queue
-				int i = Integer.parseInt(token);
-				UnMatchedNode.add(i);
-			} catch (NumberFormatException e) {
-				// Handle invalid tokens (non-integer values)
-				System.err.println("Skipping invalid token: " + token);
-				return null;
-			}
-		}
+		System.out.println(Arrays.toString(decodedSolution));
+//		for (String token : decodedSolution) {
+//			try {
+//				// Convert each token to an Integer and add it to the queue
+//				int i = Integer.parseInt(token);
+//				UnMatchedNode.add(i);
+//			} catch (NumberFormatException e) {
+//				// Handle invalid tokens (non-integer values)
+//				System.err.println("Skipping invalid token: " + token);
+//				return null;
+//			}
+//		}
 		while (!UnMatchedNode.isEmpty()) {
 			//printPreferenceLists();
 			//System.out.println(matches);
@@ -290,7 +298,7 @@ public class StableMatchingProblem implements Problem {
 						matches.disMatch(preferNode, Loser);
 						matches.disMatch(Loser, preferNode);
 						UnMatchedNode.add(Loser);
-						MatchedNode.remove((Integer) Loser);
+						MatchedNode.remove(Loser);
 						//System.out.println(Loser + " lost the game, waiting for another chance.");
 						matches.addMatch(preferNode, Node);
 						matches.addMatch(Node, preferNode);
@@ -353,7 +361,7 @@ public class StableMatchingProblem implements Problem {
 	 * 1. absolute       : abs(expression)
 	 * 2. exponent      : (expression)^(expression)
 	 * 3. sin                 : sin(expression)
-	 * 4. cos                 : cos(expressiosn)
+	 * 4. cos                 : cos(expression)
 	 * 5. tan                : tan(expression)
 	 * 6. logarithm     : log(expression)(expression) Logarithm calculation requires 2 parameters in two separate curly braces
 	 * 								   Default log calculation could be achieved like this: log(e)(expression)

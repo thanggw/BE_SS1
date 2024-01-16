@@ -3,8 +3,10 @@ package com.example.SS2_Backend.model.StableMatching;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Data Container for Algorithm Result
@@ -15,7 +17,7 @@ import java.util.List;
 public class Matches implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private final List<MatchSet> matches = new LinkedList<>();
-	private final List<Integer> leftOvers = new LinkedList<>();
+	private final Set<Integer> leftOvers = new HashSet<>();
 	private List<Double> coupleFitness = new LinkedList<>();
 
 	public Matches() {
