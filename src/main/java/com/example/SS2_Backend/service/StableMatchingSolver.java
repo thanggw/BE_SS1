@@ -34,7 +34,6 @@ public class StableMatchingSolver {
 	public static ArrayList<Double> coupleFitnessList = new ArrayList<>();
 
 
-
 	public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
 
 		try {
@@ -50,7 +49,6 @@ public class StableMatchingSolver {
 			System.out.println(problem);
 			System.out.println("\nProblem loaded!");
 			long startTime = System.currentTimeMillis();
-
 			NondominatedPopulation results = solveProblem(
 			    problem,
 			    request.getAlgorithm(),
@@ -61,9 +59,8 @@ public class StableMatchingSolver {
 			);
 			System.out.println(results);
 			ArrayList<Individual> individualsList = request.getIndividuals();
-
 			long endTime = System.currentTimeMillis();
-			double runtime = ((double) (endTime - startTime) / 1000 / 60);
+			double runtime = ((double) (endTime - startTime) / 1000);
 			runtime = (runtime * 1000.0);
 			System.out.println("Runtime: " + runtime + " Millisecond(s).");
 			String algorithm = request.getAlgorithm();
@@ -114,10 +111,10 @@ public class StableMatchingSolver {
 					    int maxTime,
 					    String distributedCores) {
 		NondominatedPopulation result;
-		if(algorithm == null){
+		if (algorithm == null) {
 			algorithm = "PESA2";
 		}
-		if(distributedCores == null){
+		if (distributedCores == null) {
 			distributedCores = "all";
 		}
 		TypedProperties properties = new TypedProperties();
@@ -157,115 +154,115 @@ public class StableMatchingSolver {
 //            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
 //            System.out.println("Fitness Score: " + -solution.getObjective(0));
 	}
-    public ResponseEntity<Response> getProblemResultInsights(StableMatchingProblemDTO request, String sessionCode) {
+
+	public ResponseEntity<Response> getProblemResultInsights(StableMatchingProblemDTO request, String sessionCode) {
 //        log.info("Received request: " + request);
-        String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA","MOEAD"};
+		String[] algorithms = {"NSGAII", "NSGAIII", "eMOEA", "PESA2", "VEGA", "MOEAD"};
 
 
-
-        simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Initializing the problem..."));
-        StableMatchingProblem problem = new StableMatchingProblem();
+		simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Initializing the problem..."));
+		StableMatchingProblem problem = new StableMatchingProblem();
 		problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
 		problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
 		problem.setPopulation(request.getIndividuals());
 		problem.setAllPropertyNames(request.getAllPropertyNames());
-        problem.setFitnessFunction(request.getFitnessFunction());
+		problem.setFitnessFunction(request.getFitnessFunction());
 
-        MatchingSolutionInsights matchingSolutionInsights = initMatchingSolutionInsights(algorithms);
+		MatchingSolutionInsights matchingSolutionInsights = initMatchingSolutionInsights(algorithms);
 
-        int runCount = 1;
-        int maxRunCount = algorithms.length * RUN_COUNT_PER_ALGORITHM;
-        // solve the problem with different algorithms and then evaluate the performance of the algorithms
+		int runCount = 1;
+		int maxRunCount = algorithms.length * RUN_COUNT_PER_ALGORITHM;
+		// solve the problem with different algorithms and then evaluate the performance of the algorithms
 //        log.info("Start benchmarking the algorithms...");
-        simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Start benchmarking the algorithms..."));
+		simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Start benchmarking the algorithms..."));
 
-        for (String algorithm : algorithms) {
+		for (String algorithm : algorithms) {
 //            log.info("Running algorithm: " + algorithm + "...");
-            for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
-                System.out.println("Iteration: " + i);
-                long start = System.currentTimeMillis();
+			for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
+				System.out.println("Iteration: " + i);
+				long start = System.currentTimeMillis();
 
-                NondominatedPopulation results = solveProblem(
-                        problem,
-                        algorithm,
-                        request.getPopulationSize(),
-						request.getGeneration(),
-						request.getMaxTime(),
-						request.getDistributedCores()
-                );
+				NondominatedPopulation results = solveProblem(
+				    problem,
+				    algorithm,
+				    request.getPopulationSize(),
+				    request.getGeneration(),
+				    request.getMaxTime(),
+				    request.getDistributedCores()
+				);
 
-                long end = System.currentTimeMillis();
+				long end = System.currentTimeMillis();
 
-                double runtime = (double) (end - start) / 1000;
-                double fitnessValue = getFitnessValue(results);
+				double runtime = (double) (end - start) / 1000;
+				double fitnessValue = getFitnessValue(results);
 
-                // send the progress to the client
-                String message = "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/" + RUN_COUNT_PER_ALGORITHM;
-                Progress progress = createProgress(message, runtime, runCount, maxRunCount);
-                System.out.println(progress);
-                simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", progress);
-                runCount++;
+				// send the progress to the client
+				String message = "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/" + RUN_COUNT_PER_ALGORITHM;
+				Progress progress = createProgress(message, runtime, runCount, maxRunCount);
+				System.out.println(progress);
+				simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", progress);
+				runCount++;
 
-                // add the fitness value and runtime to the insights
-                matchingSolutionInsights.getFitnessValues().get(algorithm).add(-fitnessValue);
-                matchingSolutionInsights.getRuntimes().get(algorithm).add(runtime);
+				// add the fitness value and runtime to the insights
+				matchingSolutionInsights.getFitnessValues().get(algorithm).add(-fitnessValue);
+				matchingSolutionInsights.getRuntimes().get(algorithm).add(runtime);
 
 
-            }
+			}
 
-        }
+		}
 //        log.info("Benchmarking finished!");
-        simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Benchmarking finished!"));
+		simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Benchmarking finished!"));
 
-        return ResponseEntity.ok(
-                Response.builder()
-                        .status(200)
-                        .message("Get problem result insights successfully!")
-                        .data(matchingSolutionInsights)
-                        .build()
-        );
-    }
+		return ResponseEntity.ok(
+		    Response.builder()
+		        .status(200)
+		        .message("Get problem result insights successfully!")
+		        .data(matchingSolutionInsights)
+		        .build()
+		);
+	}
 
-    private MatchingSolutionInsights initMatchingSolutionInsights(String[] algorithms) {
-        MatchingSolutionInsights matchingSolutionInsights = new MatchingSolutionInsights();
-        Map<String, List<Double>> fitnessValueMap = new HashMap<>();
-        Map<String, List<Double>> runtimeMap = new HashMap<>();
+	private MatchingSolutionInsights initMatchingSolutionInsights(String[] algorithms) {
+		MatchingSolutionInsights matchingSolutionInsights = new MatchingSolutionInsights();
+		Map<String, List<Double>> fitnessValueMap = new HashMap<>();
+		Map<String, List<Double>> runtimeMap = new HashMap<>();
 
-        matchingSolutionInsights.setFitnessValues(fitnessValueMap);
-        matchingSolutionInsights.setRuntimes(runtimeMap);
+		matchingSolutionInsights.setFitnessValues(fitnessValueMap);
+		matchingSolutionInsights.setRuntimes(runtimeMap);
 
-        for (String algorithm : algorithms) {
-            fitnessValueMap.put(algorithm, new ArrayList<>());
-            runtimeMap.put(algorithm, new ArrayList<>());
-        }
+		for (String algorithm : algorithms) {
+			fitnessValueMap.put(algorithm, new ArrayList<>());
+			runtimeMap.put(algorithm, new ArrayList<>());
+		}
 
-        return matchingSolutionInsights;
-    }
+		return matchingSolutionInsights;
+	}
 
-    private Progress createProgressMessage(String message) {
-        return Progress.builder()
-                .inProgress(false) // this object is just to send a message to the client, not to show the progress
-                .message(message)
-                .build();
-    }
+	private Progress createProgressMessage(String message) {
+		return Progress.builder()
+		    .inProgress(false) // this object is just to send a message to the client, not to show the progress
+		    .message(message)
+		    .build();
+	}
 
-    private Progress createProgress(String message, Double runtime, Integer runCount, int maxRunCount) {
-        int percent = runCount * 100 / maxRunCount;
-        int minuteLeff = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
-        return Progress.builder()
-                .inProgress(true) // this object is just to send to the client to show the progress
-                .message(message)
-                .runtime(runtime)
-                .minuteLeft(minuteLeff)
-                .percentage(percent)
-                .build();
-    }
+	private Progress createProgress(String message, Double runtime, Integer runCount, int maxRunCount) {
+		int percent = runCount * 100 / maxRunCount;
+		int minuteLeff = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
+		return Progress.builder()
+		    .inProgress(true) // this object is just to send to the client to show the progress
+		    .message(message)
+		    .runtime(runtime)
+		    .minuteLeft(minuteLeff)
+		    .percentage(percent)
+		    .build();
+	}
 
-    private double getFitnessValue(NondominatedPopulation result) {
+	private double getFitnessValue(NondominatedPopulation result) {
 
-        Solution solution = result.get(0);
-        double fitnessValue = solution.getObjective(0);
-        return fitnessValue;
+		Solution solution = result.get(0);
+		double fitnessValue = solution.getObjective(0);
+		return fitnessValue;
 
-    }
+	}
 }

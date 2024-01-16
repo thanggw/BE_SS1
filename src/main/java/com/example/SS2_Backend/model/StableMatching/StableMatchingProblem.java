@@ -1,7 +1,6 @@
 package com.example.SS2_Backend.model.StableMatching;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variable;
@@ -33,21 +32,81 @@ public class StableMatchingProblem implements Problem {
 	private int numberOfProperties;
 	private String[] PropertiesName;
 	@Getter
-	@Setter
 	private String evaluateFunctionForSet1 = "";
 	@Getter
-	@Setter
 	private String evaluateFunctionForSet2 = "";
 	@Getter
 	private List<PreferenceList> preferenceLists; // Preference List of each Individual
 	@Getter
 	private String fitnessFunction = ""; // Evaluate total Score of each Solution set
+	private boolean f1Status = false;
+	private boolean f2Status = false;
+	private boolean fnfStatus = false;
+
+	//No Args Constructor
+	public StableMatchingProblem() {
+	}
+
+	public void setEvaluateFunctionForSet1(String evaluateFunctionForSet1) {
+		if(evaluateFunctionForSet1.contains("P") || evaluateFunctionForSet1.contains("M")) {
+			this.f1Status = true;
+			this.evaluateFunctionForSet1 = evaluateFunctionForSet1;
+		}
+	}
+	public void setEvaluateFunctionForSet2(String evaluateFunctionForSet2) {
+		if(evaluateFunctionForSet2.contains("P") || evaluateFunctionForSet2.contains("M")) {
+			this.f2Status = true;
+			this.evaluateFunctionForSet2 = evaluateFunctionForSet2;
+		}
+	}
+	private int getCapacityOfIndividual(int target) {
+		return Individuals.get(target).getCapacity();
+	}
+	private String getPropertyNameOfIndex(int index) {
+		return PropertiesName[index];
+	}
+
+	public Double getPropertyValueOf(int index, int jndex) {
+		return Individuals.get(index).getPropertyValue(jndex);
+	}
+
+	public int getPropertyWeightOf(int index, int jndex) {
+		return Individuals.get(index).getPropertyWeight(jndex);
+	}
+	public void setFitnessFunction(String fitnessFunction) {
+		if(fitnessFunction.contains("S")) {
+			this.fnfStatus = true;
+			this.fitnessFunction = fitnessFunction;
+		}
+	}
+
+	public void setPopulation(ArrayList<Individual> individuals) {
+		this.Individuals = individuals;
+		this.numberOfIndividual = Individuals.size();
+		this.numberOfIndividualOfSet0 = getNumberOfSet0();
+		this.numberOfProperties = Individuals.get(0).getNumberOfProperties();
+		this.preferenceLists = getPreferences();
+	}
+
+	public int getNumberOfSet0(){
+		int c = 0;
+		for(int i = 0; i < this.numberOfIndividual; i++){
+			if (Individuals.get(i).getIndividualSet() == 0){
+				c++;
+			}else{
+				break;
+			}
+		}
+		return c;
+	}
+
+	public void setAllPropertyNames(String[] allPropertyNames) {
+		this.PropertiesName = allPropertyNames;
+	}
+
 	/**
 	 * MOEA Problem Implementations
 	 */
-	//No Args Constructor & With Args Constructor
-	public StableMatchingProblem() {
-	}
 
 	//Solution Definition
 	@Override
@@ -64,16 +123,17 @@ public class StableMatchingProblem implements Problem {
 
 		Matches result = StableMatchingExtra(solution.getVariable(0));
 		double fitnessScore;
-
-		String fnf = this.fitnessFunction.trim();
-		if (!fnf.contains("S") || this.fitnessFunction.isEmpty()) {
+		if (!this.fnfStatus) {
 			assert result != null;
 			fitnessScore = defaultFitnessEvaluation(result);
 		}else{
+			String fnf = this.fitnessFunction.trim();
 			fitnessScore = withFitnessFunctionEvaluation(result, fnf);
 		}
+
 		solution.setAttribute("matches", result);
 		solution.setObjective(0, -fitnessScore);
+
 		System.out.println("Score: " + -fitnessScore);
 		System.out.println("End of evaluate");
 	}
@@ -126,18 +186,19 @@ public class StableMatchingProblem implements Problem {
 	 */
 	public PreferenceList getPreferenceOfIndividual(int index) {
 		PreferenceList a;
-		// get this Individual set belong to
-		int set = Individuals.get(index).getIndividualSet();
-		String evaluateFunction;
-		if (set == 0) {
-			evaluateFunction = this.evaluateFunctionForSet1;
-		} else {
-			evaluateFunction = this.evaluateFunctionForSet2;
-		}
-		evaluateFunction = evaluateFunction.toUpperCase();
-		if (!evaluateFunction.contains("P")) {
+
+		if(!f1Status && !f2Status){
 			a = getPreferenceListByDefault(Individuals, index);
-		} else {
+			return a;
+		}else {
+			int set = Individuals.get(index).getIndividualSet();
+			String evaluateFunction;
+			if (set == 0) {
+				evaluateFunction = this.evaluateFunctionForSet1;
+			} else {
+				evaluateFunction = this.evaluateFunctionForSet2;
+			}
+			evaluateFunction = evaluateFunction.toUpperCase();
 			a = getPreferenceListByFunction(Individuals, index, evaluateFunction);
 		}
 		// Sort: Individuals with higher score than others sit on the top of the List
@@ -241,10 +302,6 @@ public class StableMatchingProblem implements Problem {
 			}
 		}
 		return matches;
-	}
-
-	private int getCapacityOfIndividual(int target) {
-		return Individuals.get(target).getCapacity();
 	}
 
 	// Stable Matching Algorithm Component: isPreferredOver
@@ -434,18 +491,6 @@ public class StableMatchingProblem implements Problem {
 		return totalScore;
 	}
 
-	private String getPropertyNameOfIndex(int index) {
-		return PropertiesName[index];
-	}
-
-	public Double getPropertyValueOf(int index, int jndex) {
-		return Individuals.get(index).getPropertyValue(jndex);
-	}
-
-	public int getPropertyWeightOf(int index, int jndex) {
-		return Individuals.get(index).getPropertyWeight(jndex);
-	}
-
 	public void printIndividuals() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < this.numberOfProperties; i++) {
@@ -509,33 +554,5 @@ public class StableMatchingProblem implements Problem {
 			sb.append("\n");
 		}
 		return sb.toString();
-	}
-
-	public void setFitnessFunction(String fitnessFunction) {
-		this.fitnessFunction = fitnessFunction;
-	}
-
-	public void setPopulation(ArrayList<Individual> individuals) {
-		this.Individuals = individuals;
-		this.numberOfIndividual = Individuals.size();
-		this.numberOfIndividualOfSet0 = getNumberOfSet0();
-		this.numberOfProperties = Individuals.get(0).getNumberOfProperties();
-		this.preferenceLists = getPreferences();
-	}
-
-	public int getNumberOfSet0(){
-		int c = 0;
-		for(int i = 0; i < this.numberOfIndividual; i++){
-			if (Individuals.get(i).getIndividualSet() == 0){
-				c++;
-			}else{
-				break;
-			}
-		}
-		return c;
-	}
-
-	public void setAllPropertyNames(String[] allPropertyNames) {
-		this.PropertiesName = allPropertyNames;
 	}
 }
