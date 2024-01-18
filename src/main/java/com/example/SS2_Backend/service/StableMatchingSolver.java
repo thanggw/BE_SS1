@@ -3,14 +3,11 @@ package com.example.SS2_Backend.service;
 import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
-import com.example.SS2_Backend.model.GameSolutionInsights;
 import com.example.SS2_Backend.model.StableMatching.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
 import org.moeaframework.core.*;
-import org.moeaframework.core.spi.AlgorithmFactory;
-import org.moeaframework.core.spi.ProviderNotFoundException;
 import org.moeaframework.core.termination.MaxFunctionEvaluations;
 import org.moeaframework.util.TypedProperties;
 import org.springframework.http.HttpStatus;
@@ -261,8 +258,7 @@ public class StableMatchingSolver {
 	private double getFitnessValue(NondominatedPopulation result) {
 
 		Solution solution = result.get(0);
-		double fitnessValue = solution.getObjective(0);
-		return fitnessValue;
+		return solution.getObjective(0);
 
 	}
 }

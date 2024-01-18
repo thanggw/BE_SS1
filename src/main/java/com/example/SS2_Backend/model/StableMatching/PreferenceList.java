@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.example.SS2_Backend.model.StableMatching.PreferenceList.MergeSortPair.mergeSort;
 import static com.example.SS2_Backend.util.Utils.formatDouble;
@@ -36,11 +37,10 @@ public class PreferenceList {
 		return null;
 	}
 
-	public int getLeastNode(int newNode, int[] currentNodes){
+	public int getLeastNode(int newNode, Set<Integer> currentNodes){
 		int leastNode = newNode;
-		for(int i = 0; i < currentNodes.length; i++){
-			int currentNode = currentNodes[i];
-			if(this.getIndexValueByKey(leastNode).getValue() > this.getIndexValueByKey(currentNode).getValue()){
+		for (int currentNode : currentNodes) {
+			if (this.getIndexValueByKey(leastNode).getValue() > this.getIndexValueByKey(currentNode).getValue()) {
 				leastNode = currentNode;
 			}
 		}
@@ -139,9 +139,6 @@ public class PreferenceList {
 		//get leastNode
 		IndexValue newNode = new IndexValue(6, 12.4);
 		pref.add(newNode);
-		int[] currentNodes = {1,2,3};
-		int n = pref.getLeastNode(6, currentNodes);
-		System.out.println(n);
 
 	}
 }
