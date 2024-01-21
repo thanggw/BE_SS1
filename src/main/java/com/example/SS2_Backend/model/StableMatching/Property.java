@@ -15,6 +15,7 @@ import static com.example.SS2_Backend.util.Utils.isInteger;
 public class Property {
 	private final double value;
 	private final int weight;
+	@Getter
 	private final Requirement requirement;
 
 	public Property(double value, int weight, String[] inputRequirement) {
@@ -46,7 +47,6 @@ public class Property {
 			return new OneBoundRequirement(0.0, "++");
 		}
 	}
-
 	@Override
 	public String toString() {
 		return "Value: " + value + " , Requirement " + requirement + " , Weight: " + weight;
@@ -57,5 +57,4 @@ public class Property {
 		Property p = new Property(16.5, 6, strings);
 		System.out.println(p);
 	}
-
 }

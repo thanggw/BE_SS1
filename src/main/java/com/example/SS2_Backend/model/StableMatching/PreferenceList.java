@@ -139,6 +139,7 @@ public class PreferenceList {
 		//get leastNode
 		IndexValue newNode = new IndexValue(6, 12.4);
 		pref.add(newNode);
+		System.out.println(pref);
 
 	}
 }
