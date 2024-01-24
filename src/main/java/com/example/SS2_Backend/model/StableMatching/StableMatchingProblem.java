@@ -186,7 +186,6 @@ public class StableMatchingProblem implements Problem {
 		PreferenceList a;
 		if(!f1Status && !f2Status){
 			a = getPreferenceListByDefault(Individuals, index);
-			return a;
 		}else {
 			int set = Individuals.get(index).getIndividualSet();
 			if (set == 0) {

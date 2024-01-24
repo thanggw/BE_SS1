@@ -57,7 +57,12 @@ public class Matches implements Serializable {
 	}
 
 	public String toString() {
-		return matches.toString() + '\n' + leftOvers + '\n';
+		int i = 0;
+		for(Set<Integer> matchSet : this.matches){
+			System.out.println("[" + i + "] " + " -> " +  matchSet);
+			i++;
+		}
+		return leftOvers + "\n";
 	}
 
 	public static void main(String[] args) {
