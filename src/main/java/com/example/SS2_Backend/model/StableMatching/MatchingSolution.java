@@ -21,11 +21,11 @@ public class MatchingSolution {
     private double runtime;
     private ComputerSpecs computerSpecs;
     private String algorithm;
+    private double[] setSatisfactions;
     public ComputerSpecs getComputerSpecs() {
         return ComputerSpecsUtil.getComputerSpecs();
     }
     @JsonDeserialize(contentUsing = IndividualDeserializer.class)
-    private ArrayList<Individual> Individuals;
 
     @Data
     @NoArgsConstructor

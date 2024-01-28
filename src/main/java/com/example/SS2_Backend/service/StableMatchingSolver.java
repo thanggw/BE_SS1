@@ -4,6 +4,7 @@ import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.model.StableMatching.*;
+import com.example.SS2_Backend.util.Testing;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
@@ -15,10 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -28,7 +26,6 @@ public class StableMatchingSolver {
 	private final SimpMessagingTemplate simpMessagingTemplate;
 
 	private static final int RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
-	public static ArrayList<Double> coupleFitnessList = new ArrayList<>();
 
 
 	public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
@@ -42,9 +39,9 @@ public class StableMatchingSolver {
 			problem.setPopulation(request.getIndividuals());
 			problem.setAllPropertyNames(request.getAllPropertyNames());
 
-			System.out.println("Load Problem...");
+			System.out.println("[Service] Message: Load Problem...");
 			System.out.println(problem);
-			System.out.println("\nProblem loaded!");
+			System.out.println("[Service] Message: Problem loaded!");
 			long startTime = System.currentTimeMillis();
 			NondominatedPopulation results = solveProblem(
 			    problem,
@@ -54,33 +51,38 @@ public class StableMatchingSolver {
 			    request.getMaxTime(),
 			    request.getDistributedCores()
 			);
-			System.out.println(results);
-			ArrayList<Individual> individualsList = request.getIndividuals();
+
+
+			assert results != null;
+			Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"));
+			tester.setCapacities(problem.getCapacities());
+			System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
+//			ArrayList<Individual> individualsList = request.getIndividuals();
 			long endTime = System.currentTimeMillis();
 			double runtime = ((double) (endTime - startTime) / 1000);
 			runtime = (runtime * 1000.0);
-			System.out.println("Runtime: " + runtime + " Millisecond(s).");
+			System.out.println("[Solution] Runtime: " + runtime + " Millisecond(s).");
 			String algorithm = request.getAlgorithm();
-			assert results != null;
 			MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
-			matchingSolution.setIndividuals(individualsList);
-			System.out.println("RESPOND TO FRONT_END:");
+			matchingSolution.setSetSatisfactions(problem.getSatisfactionOfAllSet((Matches) results.get(0).getAttribute("matches")));
+//			matchingSolution.setIndividuals(individualsList);
+			System.out.println("[API] RESPOND TO FRONT_END:");
 			System.out.println(matchingSolution);
-			System.out.println(matchingSolution.getMatches().getCoupleFitness());
+			System.out.println();
 			return ResponseEntity.ok(
 			    Response.builder()
 			        .status(200)
-			        .message("Solve stable matching problem successfully!")
+			        .message("[Service] Message: Solve stable matching problem successfully!")
 			        .data(matchingSolution)
 			        .build()
 			);
 		} catch (Exception e) {
-			log.error("Error solving stable matching problem: {}", e.getMessage(), e);
+			log.error("[Service] Message: Error solving stable matching problem: {}", e.getMessage(), e);
 			// Handle exceptions and return an error response
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 			    .body(Response.builder()
 			        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-			        .message("Error solving stable matching problem.")
+			        .message("[Service] Message: Error solving stable matching problem.")
 			        .data(null)
 			        .build());
 		}
@@ -141,15 +143,9 @@ public class StableMatchingSolver {
 			}
 			return result;
 		} catch (Exception e) {
-			log.error("Error solving the problem using MOEA framework: {}", e.getMessage(), e);
+			log.error("[Service] Message: Error solving the problem using MOEA framework: {}", e.getMessage(), e);
 			return null;
 		}
-
-//        for (Solution solution : result) {
-//            System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
-//            Matches matches = (Matches) solution.getAttribute("matches");
-//            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
-//            System.out.println("Fitness Score: " + -solution.getObjective(0));
 	}
 
 	public ResponseEntity<Response> getProblemResultInsights(StableMatchingProblemDTO request, String sessionCode) {
@@ -203,8 +199,6 @@ public class StableMatchingSolver {
 				// add the fitness value and runtime to the insights
 				matchingSolutionInsights.getFitnessValues().get(algorithm).add(-fitnessValue);
 				matchingSolutionInsights.getRuntimes().get(algorithm).add(runtime);
-
-
 			}
 
 		}
@@ -256,9 +250,7 @@ public class StableMatchingSolver {
 	}
 
 	private double getFitnessValue(NondominatedPopulation result) {
-
 		Solution solution = result.get(0);
 		return solution.getObjective(0);
-
 	}
 }

@@ -61,6 +61,13 @@ public class StableMatchingProblem implements Problem {
 	private int getCapacityOfIndividual(int target) {
 		return Individuals.get(target).getCapacity();
 	}
+	public int[] getCapacities(){
+		int[] capacities = new int[this.numberOfIndividual];
+		for (int i = 0; i < this.numberOfIndividual; i++) {
+			capacities[i] = Individuals.get(i).getCapacity();
+		}
+		return capacities;
+	}
 	private String getPropertyNameOfIndex(int index) {
 		return PropertiesName[index];
 	}
@@ -136,6 +143,7 @@ public class StableMatchingProblem implements Problem {
 		System.out.println("Score: " + -fitnessScore);
 		System.out.println("End of evaluate");
 	}
+
 
 
 	@Override
@@ -463,7 +471,20 @@ public class StableMatchingProblem implements Problem {
 			return setScore;
 		}
 	}
-	private  double calculateSatisfactoryOfASetByDefault(Matches matches, int set){
+	public double[] getSatisfactionOfAllSet(Matches matches){
+		double[] satisfactions = new double[this.numberOfIndividual];
+		for (int i = 0; i < this.numberOfIndividual; i++) {
+			double setScore = 0.0;
+			PreferenceList ofInd = preferenceLists.get(i);
+			Set<Integer> SetMatches = matches.getSet(i);
+			for (int x : SetMatches) {
+				setScore += ofInd.getIndexValueByKey(x).getValue();
+			}
+			satisfactions[i] = setScore;
+		}
+		return satisfactions;
+	}
+	private double calculateSatisfactoryOfASetByDefault(Matches matches, int set){
 		double totalScore = 0.0;
 		if(set == 0){
 			for(int i = 0; i < this.numberOfIndividualOfSet0; i++){

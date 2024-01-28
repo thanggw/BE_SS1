@@ -2,10 +2,7 @@ package com.example.SS2_Backend.util;
 
 import com.example.SS2_Backend.model.StableMatching.Matches;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Testing {
 	private final Matches matches;
@@ -17,19 +14,47 @@ public class Testing {
 		this.capacities = capacities;
 	}
 	public boolean hasDuplicate(){
+		int[] checkArr = capacities;
 		int sz = matches.size();
 		for (int i = 0; i < sz; i++) {
-			Map<Integer, Integer> freq = new HashMap<>();
 			Set<Integer> matchSet = matches.getSet(i);
-			Iterator<Integer> IT = matchSet.iterator();
-			if(IT.hasNext()){
-				int elm = IT.next();
-				freq.compute(elm, (K, V) -> V == null ? 1 : V+1);
-				if(freq.containsValue(2)) return false;
+			for (int elm : matchSet) {
+				checkArr[elm]--;
+				if (checkArr[elm] < 0) return true;
 			}
-			System.out.println(freq);
+			//System.out.println(Arrays.toString(checkArr));
 		}
-		return true;
+		Set<Integer> lefts = matches.getLeftOvers();
+		for(int elm : lefts){
+			checkArr[elm]--;
+			if (checkArr[elm] < 0) return true;
+			//System.out.println(Arrays.toString(checkArr));
+		}
+		return false;
+	}
+
+	public static void main(String[] args) {
+		int[] check = {3,3,3,1,1,1,1,1,1,1,1,1};
+		Matches matches = new Matches(12);
+		matches.addMatch(0, 4);
+		matches.addMatch(0, 5);
+		matches.addMatch(0, 6);
+
+		matches.addMatch(1, 3);
+		matches.addMatch(1, 10);
+		matches.addMatch(1, 8);
+
+		matches.addMatch(2, 7);
+		matches.addMatch(2, 11);
+
+
+		matches.addLeftOver(11);
+		matches.addLeftOver(10);
+		matches.addLeftOver(9);
+
+		Testing tester = new Testing(matches);
+		tester.setCapacities(check);
+		System.out.println(tester.hasDuplicate());
 	}
 
 }

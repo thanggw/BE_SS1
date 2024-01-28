@@ -15,7 +15,11 @@ public class Matches implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private final Vector<Set<Integer>> matches;
 	private final Set<Integer> leftOvers = new HashSet<>();
-	private List<Double> coupleFitness = new LinkedList<>();
+//	@Getter
+//	private double[] coupleFitness;
+//	public void setCoupleFitness(double[] coupleFitness) {
+//		this.coupleFitness = coupleFitness;
+//	}
 
 	public Matches(int cap) {
 		this.matches = new Vector<>(cap);
