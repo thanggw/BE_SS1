@@ -126,22 +126,23 @@ public class StableMatchingProblem implements Problem {
 
 	// Evaluate
 	public void evaluate(Solution solution) {
-		System.out.println("Evaluating ... ");
+		System.out.println("[Service] Evaluating ... ");
 		Matches result = StableMatchingExtra(solution.getVariable(0));
+		double[] Satisfactions = getAllSatisfactions(result);
 
 		double fitnessScore;
 		if (!this.fnfStatus) {
-			fitnessScore = defaultFitnessEvaluation(result);
+			fitnessScore = defaultFitnessEvaluation(Satisfactions);
 		}else{
 			String fnf = this.fitnessFunction.trim();
-			fitnessScore = withFitnessFunctionEvaluation(result, fnf);
+			fitnessScore = withFitnessFunctionEvaluation(Satisfactions, fnf);
 		}
 
 		solution.setAttribute("matches", result);
 		solution.setObjective(0, -fitnessScore);
 
 		System.out.println("Score: " + -fitnessScore);
-		System.out.println("End of evaluate");
+		System.out.println("[Service] End of evaluate");
 	}
 
 
@@ -175,18 +176,6 @@ public class StableMatchingProblem implements Problem {
 	/*
 	 * After Matching Gets
 	 */
-	private List<Double> getAllSatisfactoryOfASet(Matches result, int set){
-		List<Double> a = new ArrayList<>();
-		int length = result.size();
-		for(int i = 0; i < length; i++){
-			int tmpSet = Individuals.get(i).getIndividualSet();
-			if(tmpSet == set){
-				double val = getSetSatisfactory(i, result.getSet(i));
-				a.add(val);
-			}
-		}
-		return a;
-	}
 	/*
 	 * Evaluate Methods
 	 */
@@ -216,7 +205,7 @@ public class StableMatchingProblem implements Problem {
 		return a;
 	}
 	// Add to a complete List
-	public List<PreferenceList> getPreferences() {
+	private List<PreferenceList> getPreferences() {
 		List<PreferenceList> fullList = new ArrayList<>();
 		for (int i = 0; i < numberOfIndividual; i++) {
 			//System.out.println("Adding preference for Individual " + i );
@@ -318,7 +307,7 @@ public class StableMatchingProblem implements Problem {
 		return pref.getByIndex(pref.size() - 1).getIndividualIndex();
 	}
 
-	public int Compete(int SelectorNode, int newNode, Set<Integer> occupiedNodes) {
+	private int Compete(int SelectorNode, int newNode, Set<Integer> occupiedNodes) {
 		PreferenceList prefOfSelectorNode = preferenceLists.get(SelectorNode);
 		if (Individuals.get(SelectorNode).getCapacity() == 1) {
 			Iterator<Integer> iterator = occupiedNodes.iterator();
@@ -332,12 +321,8 @@ public class StableMatchingProblem implements Problem {
 			return prefOfSelectorNode.getLeastNode(newNode, occupiedNodes);
 		}
 	}
-	private double defaultFitnessEvaluation(Matches matches) {
-		double fitnessScore = 0.0;
-		for (int i = 0; i < matches.size(); i++) {
-			fitnessScore += getSetSatisfactory(i, matches.getSet(i));
-		}
-		return fitnessScore;
+	private double defaultFitnessEvaluation(double[] Satisfactions) {
+		return Arrays.stream(Satisfactions).sum();
 	}
 	/*
 	 * Fitness Function Grammar:
@@ -361,7 +346,7 @@ public class StableMatchingProblem implements Problem {
 	 * 								   Make sure expression is not negative or the final outcome might be resulted: NaN / Infinity / - Infinity
 	 * 7. square root : sqrt(expression)
 	 */
-	private double withFitnessFunctionEvaluation(Matches matches, String fitnessFunction) {
+	private double withFitnessFunctionEvaluation(double[] Satisfactions, String fitnessFunction) {
 		StringBuilder tmpSB = new StringBuilder();
 		for (int c = 0; c < fitnessFunction.length(); c++) {
 			char ch = fitnessFunction.charAt(c);
@@ -375,7 +360,7 @@ public class StableMatchingProblem implements Problem {
 						int expressionStartIndex = c + 6;
 						int expressionLength = getFunctionExpressionLength(fitnessFunction, expressionStartIndex);
 						String expression = fitnessFunction.substring(expressionStartIndex, expressionStartIndex+expressionLength);
-						double val = this.sigmaCalculate(matches, expression);
+						double val = sigmaCalculate(Satisfactions, expression);
 						tmpSB.append(val);
 						c += expressionLength + 3;
 					}
@@ -385,28 +370,36 @@ public class StableMatchingProblem implements Problem {
 					if(isNumericValue(fitnessFunction.charAt(c+2))) {
 						int set = Character.getNumericValue(fitnessFunction.charAt(c + 2));
 						//Calculate SUM
-						tmpSB.append(calculateSatisfactoryOfASetByDefault(matches, set));
+						tmpSB.append(getSatisfactoryOfASetByDefault(Satisfactions, set));
 					}
 				}
 				c += 3;
 			} else if (ch == 'M') {
 				int ssLength = AfterTokenLength(fitnessFunction, c);
-				int indexOfM = Integer.parseInt(fitnessFunction.substring(c + 1, c + 1 + ssLength));
-				double valueOfM = getSetSatisfactory(indexOfM, matches.getSet(indexOfM));
+				int positionOfM = Integer.parseInt(fitnessFunction.substring(c + 1, c + 1 + ssLength));
+				if(positionOfM < 0 || positionOfM > this.numberOfIndividual - 1){
+					c+= ssLength;
+					continue;
+				}
+				double valueOfM = Satisfactions[positionOfM];
 				tmpSB.append(valueOfM);
 				c += ssLength;
 			} else {
 					//No occurrence of W/w/P/w
 					tmpSB.append(ch);
-				}
+			}
 		}
 		return eval(tmpSB.toString());
 	}
 
-	private double sigmaCalculate(Matches matches, String expression){
+	/**
+	 * @param Satisfactions - Double value array contains satisfactions of the whole population sequentially (0, 1, 2, ... , n)
+	 * @param expression - Mathematical String that Express how each of the value calculated (S0/2, S1^3)
+	 * @return double value
+	 */
+	private double sigmaCalculate(double[] Satisfactions, String expression){
 		System.out.println("sigma calculating...");
-		StringBuilder parseString = new StringBuilder();
-		List<Double> streamValue = new ArrayList<>();
+		double streamValue = 0 ;
 		String regex = null;
 		int length = expression.length();
 		for(int i = 0; i < length; i++){
@@ -414,27 +407,21 @@ public class StableMatchingProblem implements Problem {
 			if(ch == 'S'){
 				char set = expression.charAt(i+1);
 				if(set == '0'){
-					streamValue = this.getAllSatisfactoryOfASet(matches, 0);
+					streamValue = this.getSatisfactoryOfASetByDefault(Satisfactions, 0);
 					regex = "S0";
 					break;
 				} else if (set == '1') {
-					streamValue = this.getAllSatisfactoryOfASet(matches, 1);
+					streamValue = this.getSatisfactoryOfASetByDefault(Satisfactions, 1);
 					regex = "S1";
 					break;
 				}
 			}
 		}
-		int streamLength = streamValue.size();
-		for(int i = 0; i < streamLength; i++){
-			double value = streamValue.get(i);
-			String updatedExpression = expression.replaceAll(regex, String.valueOf(value));
-			if (i == streamLength - 1) {
-				parseString.append(updatedExpression);
-			} else {
-				parseString.append(updatedExpression).append('+');
-			}
+		if(regex == null){
+			return 0;
 		}
-		return eval(parseString.toString());
+		String updatedExpression = expression.replaceAll(regex, String.valueOf(streamValue));
+		return eval(updatedExpression);
 	}
 	private static int getFunctionExpressionLength(String function, int startIndex){
 		int num = 0;
@@ -461,17 +448,13 @@ public class StableMatchingProblem implements Problem {
 			return ofInd.getIndexValueByKey(IndividualMatch).getValue();
 		}else {
 			double setScore = 0.0;
-//			List<Integer> list = matchSet.getIndividualMatches();
-//			for (int x : list) {
-//				setScore += ofInd.getIndexValueByKey(x).getValue();
-//			}
 			if(it.hasNext()){
 				setScore += ofInd.getIndexValueByKey(it.next()).getValue();
 			}
 			return setScore;
 		}
 	}
-	public double[] getSatisfactionOfAllSet(Matches matches){
+	public double[] getAllSatisfactions(Matches matches){
 		double[] satisfactions = new double[this.numberOfIndividual];
 		for (int i = 0; i < this.numberOfIndividual; i++) {
 			double setScore = 0.0;
@@ -484,26 +467,17 @@ public class StableMatchingProblem implements Problem {
 		}
 		return satisfactions;
 	}
-	private double calculateSatisfactoryOfASetByDefault(Matches matches, int set){
+	private double getSatisfactoryOfASetByDefault(double[] Satisfactions, int set){
 		double totalScore = 0.0;
+		double setScore;
 		if(set == 0){
 			for(int i = 0; i < this.numberOfIndividualOfSet0; i++){
-				Set<Integer> matchSet = matches.getSet(i);
-				PreferenceList ofInd = preferenceLists.get(i);
-				double setScore = 0.0;
-				for (int x : matchSet) {
-					setScore += ofInd.getIndexValueByKey(x).getValue();
-				}
+				setScore = Satisfactions[i];
 				totalScore += setScore;
 			}
 		}else{
 			for(int i = this.numberOfIndividualOfSet0; i < numberOfIndividual; i++){
-				Set<Integer> matchSet = matches.getSet(i);
-				PreferenceList ofInd = preferenceLists.get(i);
-				double setScore = 0.0;
-				for (int x : matchSet) {
-					setScore += ofInd.getIndexValueByKey(x).getValue();
-				}
+				setScore = Satisfactions[i];
 				totalScore += setScore;
 			}
 		}

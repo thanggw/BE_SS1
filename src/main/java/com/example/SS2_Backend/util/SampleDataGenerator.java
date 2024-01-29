@@ -19,11 +19,11 @@ public class SampleDataGenerator {
 	public static void main(String[] args) {
 		// Generate Individuals data Randomly
 		ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-		    100,
+		    5000,
 		    1,
 		    false,
 		    20,
-		    5,
+		    250,
 		    false,
 		    4);
 
@@ -76,6 +76,8 @@ public class SampleDataGenerator {
 		long endTime = System.currentTimeMillis();
 		double runtime = ((double) (endTime - startTime) / 1000);
 		runtime = Math.round(runtime * 100.0) / 100.0;
+
+		Testing tester;
 		for (Solution solution : result) {
 			System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
 			// Turn Solution:Attribute(Serializable Object) to Matches:"matches"(Instance of Matches Class)
@@ -84,6 +86,10 @@ public class SampleDataGenerator {
 			System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
 			// Prints fitness score of this Solution
 			System.out.println("Fitness Score: " + -solution.getObjective(0));
+			// Testing
+			tester = new Testing(matches);
+			tester.setCapacities(problem.getCapacities());
+			System.out.println("Solution has duplicate individual? : " + tester.hasDuplicate());
 		}
 		System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "PESA2");
 	}

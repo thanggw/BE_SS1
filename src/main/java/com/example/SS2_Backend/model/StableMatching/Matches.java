@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.model.StableMatching;
 
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.*;
@@ -15,12 +16,6 @@ public class Matches implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private final Vector<Set<Integer>> matches;
 	private final Set<Integer> leftOvers = new HashSet<>();
-//	@Getter
-//	private double[] coupleFitness;
-//	public void setCoupleFitness(double[] coupleFitness) {
-//		this.coupleFitness = coupleFitness;
-//	}
-
 	public Matches(int cap) {
 		this.matches = new Vector<>(cap);
 		for (int i = 0; i < cap; i++) {

@@ -64,7 +64,7 @@ public class StableMatchingSolver {
 			System.out.println("[Solution] Runtime: " + runtime + " Millisecond(s).");
 			String algorithm = request.getAlgorithm();
 			MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
-			matchingSolution.setSetSatisfactions(problem.getSatisfactionOfAllSet((Matches) results.get(0).getAttribute("matches")));
+			matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results.get(0).getAttribute("matches")));
 //			matchingSolution.setIndividuals(individualsList);
 			System.out.println("[API] RESPOND TO FRONT_END:");
 			System.out.println(matchingSolution);
