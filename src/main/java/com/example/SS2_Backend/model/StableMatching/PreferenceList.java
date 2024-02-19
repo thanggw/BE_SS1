@@ -9,9 +9,15 @@ import java.util.Set;
 import static com.example.SS2_Backend.model.StableMatching.PreferenceList.MergeSortPair.mergeSort;
 import static com.example.SS2_Backend.util.Utils.formatDouble;
 
+/**
+ *{rank,  score}, {r, s}, {r, s}, ...
+ * access by indexes
+ */
 @Getter
 public class PreferenceList {
 	private final List<IndexValue> preferenceList = new ArrayList<>();
+	private int[] ranks;
+	 private double[] scores;
 
 	public PreferenceList() {
 	}
@@ -24,9 +30,11 @@ public class PreferenceList {
 		return this.preferenceList.size();
 	}
 
-	public boolean isEmpty() {
-		return this.preferenceList.isEmpty();
+	public void transferToArray(){
+
 	}
+
+	//public boolean isEmpty() {return this.preferenceList.isEmpty();}
 
 	public IndexValue getIndexValueByKey(int indexOnIndividualList) {
 		for (IndexValue indexValue : this.preferenceList) {

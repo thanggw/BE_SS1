@@ -1,12 +1,16 @@
 package com.example.SS2_Backend.model.StableMatching;
 
 import lombok.Getter;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.Variable;
 import org.moeaframework.core.variable.Permutation;
 
 import java.util.*;
+import java.util.function.DoubleUnaryOperator;
+import java.util.stream.DoubleStream;
 
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 import static com.example.SS2_Backend.util.Utils.fillWithChar;
@@ -208,9 +212,7 @@ public class StableMatchingProblem implements Problem {
 	private List<PreferenceList> getPreferences() {
 		List<PreferenceList> fullList = new ArrayList<>();
 		for (int i = 0; i < numberOfIndividual; i++) {
-			//System.out.println("Adding preference for Individual " + i );
 			PreferenceList a = getPreferenceOfIndividual(i);
-			//System.out.println(a.toString());
 			fullList.add(a);
 		}
 		return fullList;
@@ -399,29 +401,41 @@ public class StableMatchingProblem implements Problem {
 	 */
 	private double sigmaCalculate(double[] Satisfactions, String expression){
 		System.out.println("sigma calculating...");
-		double streamValue = 0 ;
+		double[] streamValue = null;
 		String regex = null;
-		int length = expression.length();
-		for(int i = 0; i < length; i++){
+		for (int i = 0; i < expression.length() - 1; i++) {
 			char ch = expression.charAt(i);
-			if(ch == 'S'){
-				char set = expression.charAt(i+1);
-				if(set == '0'){
-					streamValue = this.getSatisfactoryOfASetByDefault(Satisfactions, 0);
-					regex = "S0";
-					break;
-				} else if (set == '1') {
-					streamValue = this.getSatisfactoryOfASetByDefault(Satisfactions, 1);
-					regex = "S1";
+			if (ch == 'S') {
+				char set = expression.charAt(i + 1);
+				switch (set) {
+					case '0':
+						streamValue = getSatisfactoryOfASetByDefault(Satisfactions, 0);
+						regex = "S0";
+						break;
+					case '1':
+						streamValue = getSatisfactoryOfASetByDefault(Satisfactions, 1);
+						regex = "S1";
+						break;
+				}
+				if (regex != null) {
 					break;
 				}
 			}
 		}
-		if(regex == null){
+		if (regex == null) {
 			return 0;
 		}
-		String updatedExpression = expression.replaceAll(regex, String.valueOf(streamValue));
-		return eval(updatedExpression);
+		Expression exp = new ExpressionBuilder(expression)
+		    .variables(regex)
+		    .build();
+		String finalRegex = regex;
+		DoubleUnaryOperator calculator = x -> {
+			exp.setVariable(finalRegex, x);
+			return exp.evaluate();
+		};
+		return DoubleStream.of(streamValue)
+		    .map(calculator)
+		    .sum();
 	}
 	private static int getFunctionExpressionLength(String function, int startIndex){
 		int num = 0;
@@ -434,25 +448,6 @@ public class StableMatchingProblem implements Problem {
 			}
 		}
 		return num;
-	}
-
-	private double getSetSatisfactory(int individualIndex, Set<Integer> matchSet) {
-		if(matchSet.isEmpty()){
-			return 0.0;
-		}
-		int cap = Individuals.get(individualIndex).getCapacity();
-		PreferenceList ofInd = preferenceLists.get(individualIndex);
-		Iterator<Integer> it = matchSet.iterator();
-		if(cap == 1){
-			int IndividualMatch = it.next();
-			return ofInd.getIndexValueByKey(IndividualMatch).getValue();
-		}else {
-			double setScore = 0.0;
-			if(it.hasNext()){
-				setScore += ofInd.getIndexValueByKey(it.next()).getValue();
-			}
-			return setScore;
-		}
 	}
 	public double[] getAllSatisfactions(Matches matches){
 		double[] satisfactions = new double[this.numberOfIndividual];
@@ -467,21 +462,22 @@ public class StableMatchingProblem implements Problem {
 		}
 		return satisfactions;
 	}
-	private double getSatisfactoryOfASetByDefault(double[] Satisfactions, int set){
-		double totalScore = 0.0;
-		double setScore;
+	private double[] getSatisfactoryOfASetByDefault(double[] Satisfactions, int set){
+		double[] setSatisfactions;
 		if(set == 0){
-			for(int i = 0; i < this.numberOfIndividualOfSet0; i++){
-				setScore = Satisfactions[i];
-				totalScore += setScore;
-			}
+			setSatisfactions = new double[this.numberOfIndividualOfSet0];
+			System.arraycopy(Satisfactions, 0, setSatisfactions, 0, this.numberOfIndividualOfSet0);
 		}else{
-			for(int i = this.numberOfIndividualOfSet0; i < numberOfIndividual; i++){
-				setScore = Satisfactions[i];
-				totalScore += setScore;
+			setSatisfactions = new double[this.numberOfIndividual-this.numberOfIndividualOfSet0];
+			if (numberOfIndividual - this.numberOfIndividualOfSet0 >= 0) {
+				int idx = 0;
+				for (int i = this.numberOfIndividualOfSet0; i < this.numberOfIndividual; i++) {
+					setSatisfactions[idx] = Satisfactions[i];
+					idx++;
+				}
 			}
 		}
-		return totalScore;
+		return setSatisfactions;
 	}
 
 	public void printIndividuals() {

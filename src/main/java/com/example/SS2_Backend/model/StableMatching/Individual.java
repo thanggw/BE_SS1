@@ -22,9 +22,7 @@ public class Individual {
 	private int Capacity;
 	private final List<Property> Properties = new ArrayList<>();
 
-
 	public Individual() {
-
 
 	}
 
