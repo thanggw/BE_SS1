@@ -205,6 +205,7 @@ public class StableMatchingProblem implements Problem {
 		}
 		// Sort: Individuals with higher score than others sit on the top of the List
 		a.sort();
+		a.transform(this.numberOfIndividual);
 		// return Sorted list
 		return a;
 	}
