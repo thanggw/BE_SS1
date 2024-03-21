@@ -2,12 +2,10 @@ package com.example.SS2_Backend.util;
 
 import com.example.SS2_Backend.model.StableMatching.Individual;
 import com.example.SS2_Backend.model.StableMatching.Matches;
-import com.example.SS2_Backend.model.StableMatching.MaxEvaluationsWithoutImprovement;
 import com.example.SS2_Backend.model.StableMatching.StableMatchingProblem;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
 import org.moeaframework.core.Solution;
-import org.moeaframework.core.TerminationCondition;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -79,7 +77,6 @@ public class SampleDataGenerator {
         double runtime = ((double) (endTime - startTime) / 1000);
         runtime = Math.round(runtime * 100.0) / 100.0;
 
-        Testing tester;
         for (Solution solution : result) {
             System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
             // Turn Solution:Attribute(Serializable Object) to Matches:"matches"(Instance of Matches Class)
@@ -89,8 +86,7 @@ public class SampleDataGenerator {
             // Prints fitness score of this Solution
             System.out.println("Fitness Score: " + -solution.getObjective(0));
             // Testing
-            tester = new Testing(matches);
-            tester.setCapacities(problem.getCapacities());
+            Testing tester = new Testing(matches, problem.getNumberOfIndividual(), problem.getCapacities());
             System.out.println("Solution has duplicate individual? : " + tester.hasDuplicate());
         }
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "PESA2");

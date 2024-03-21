@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -21,6 +22,7 @@ public class MatchingSolution {
     private double runtime;
     private ComputerSpecs computerSpecs;
     private String algorithm;
+    private List<PreferenceList> Preferences;
     private double[] setSatisfactions;
     public ComputerSpecs getComputerSpecs() {
         return ComputerSpecsUtil.getComputerSpecs();

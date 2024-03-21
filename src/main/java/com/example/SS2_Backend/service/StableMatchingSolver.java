@@ -54,8 +54,7 @@ public class StableMatchingSolver {
 
 
 			assert results != null;
-			Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"));
-			tester.setCapacities(problem.getCapacities());
+			Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"), problem.getNumberOfIndividual(), problem.getCapacities());
 			System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
 //			ArrayList<Individual> individualsList = request.getIndividuals();
 			long endTime = System.currentTimeMillis();
@@ -65,7 +64,7 @@ public class StableMatchingSolver {
 			String algorithm = request.getAlgorithm();
 			MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
 			matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results.get(0).getAttribute("matches")));
-//			matchingSolution.setIndividuals(individualsList);
+			matchingSolution.setPreferences(problem.getPreferenceLists());
 			System.out.println("[API] RESPOND TO FRONT_END:");
 			System.out.println(matchingSolution);
 			System.out.println();

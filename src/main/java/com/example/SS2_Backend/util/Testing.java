@@ -5,14 +5,17 @@ import com.example.SS2_Backend.model.StableMatching.Matches;
 import java.util.*;
 
 public class Testing {
+	private final int nums;
 	private final Matches matches;
 	private int[] capacities;
-	public Testing(Matches matches){
+	public Testing(Matches matches, int num, int[] capacities) {
+		this.nums = num;
+		this.capacities = capacities;
 		this.matches = matches;
 	}
-	public void setCapacities(int[] capacities){
-		this.capacities = capacities;
-	}
+//	public boolean isValidQuantity(){
+//
+//	}
 	public boolean hasDuplicate(){
 		int[] checkArr = capacities;
 		int sz = matches.size();
@@ -52,9 +55,6 @@ public class Testing {
 		matches.addLeftOver(10);
 		matches.addLeftOver(9);
 
-		Testing tester = new Testing(matches);
-		tester.setCapacities(check);
-		System.out.println(tester.hasDuplicate());
 	}
 
 }
