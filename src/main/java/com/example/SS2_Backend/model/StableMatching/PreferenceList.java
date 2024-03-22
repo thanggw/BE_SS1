@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.example.SS2_Backend.model.StableMatching.PreferenceList.MergeSortPair.mergeSort;
+import static com.example.SS2_Backend.util.StringExpressionEvaluator.AfterTokenLength;
+import static com.example.SS2_Backend.util.StringExpressionEvaluator.eval;
 import static com.example.SS2_Backend.util.Utils.formatDouble;
 
 /**
@@ -139,6 +141,48 @@ public class PreferenceList {
                 listIndex++;
             }
         }
+    }
+
+    public static PreferenceList getPreferenceListByFunction(List<Individual> Individuals, int index, String function) {
+        PreferenceList a = new PreferenceList();
+        int set = Individuals.get(index).getIndividualSet();
+        int numberOfIndividual = Individuals.size();
+        for (int i = 0; i < numberOfIndividual; i++) {
+            if (Individuals.get(i).getIndividualSet() != set) {
+                StringBuilder tmpSB = new StringBuilder();
+                for (int c = 0; c < function.length(); c++) {
+                    char ch = function.charAt(c);
+                    if (ch == 'P' || ch == 'p') {
+                        // read next char then parse to int (index)
+                        int subStringLength = AfterTokenLength(function, c);
+                        int indexOfP = Integer.parseInt(function.substring(c + 1, c + 1 + subStringLength)) - 1;
+                        double propertyValue = Individuals.get(i).getPropertyValue(indexOfP);
+                        tmpSB.append(propertyValue);
+                        c += subStringLength;
+                    } else if (ch == 'W' || ch == 'w') {
+                        //read next char then parse to int (index)
+                        int subStringLength = AfterTokenLength(function, c);
+                        int indexOfW = Integer.parseInt(function.substring(c + 1, c + 1 + subStringLength)) - 1;
+                        int weight = Individuals.get(index).getPropertyWeight(indexOfW);
+                        tmpSB.append(weight);
+                        c += subStringLength;
+                    } else if (ch == 'R' || ch == 'r') {
+                        int subStringLength = AfterTokenLength(function, c);
+                        int indexOfR = Integer.parseInt(function.substring(c + 1, c + 1 + subStringLength)) - 1;
+                        int requirement = Individuals.get(index).getRequirement(indexOfR).getTargetValue();
+                        tmpSB.append(requirement);
+                        c += subStringLength;
+                    } else {
+                        //No occurrence of W/w/P/w
+                        tmpSB.append(ch);
+                    }
+                }
+                double totalScore = eval(tmpSB.toString());
+                // Add
+                a.add(new PreferenceList.IndexValue(i, totalScore));
+            }
+        }
+        return a;
     }
 
     public static void main(String[] args) {

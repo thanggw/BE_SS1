@@ -4,6 +4,9 @@ import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Progress;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.model.StableMatching.*;
+import com.example.SS2_Backend.model.StableMatching.Matches.Matches;
+import com.example.SS2_Backend.model.StableMatching.Matches.MatchingSolution;
+import com.example.SS2_Backend.model.StableMatching.Matches.MatchingSolutionInsights;
 import com.example.SS2_Backend.util.Testing;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +24,10 @@ import java.util.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-
 public class StableMatchingSolver {
 	private final SimpMessagingTemplate simpMessagingTemplate;
 
-	private static final int RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
+	private static final Integer RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
 
 
 	public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {

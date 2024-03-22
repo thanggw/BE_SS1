@@ -4,10 +4,8 @@ package com.example.SS2_Backend.util;
     import com.example.SS2_Backend.model.NormalPlayer;
     import com.example.SS2_Backend.model.StableMatching.Individual;
     import com.example.SS2_Backend.model.StableMatching.PreferenceList;
-    import com.example.SS2_Backend.model.StableMatching.Requirement.OneBoundRequirement;
-    import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
-    import com.example.SS2_Backend.model.StableMatching.Requirement.ScaleTargetRequirement;
-    import com.example.SS2_Backend.model.StableMatching.Requirement.TwoBoundRequirement;
+    import com.example.SS2_Backend.model.StableMatching.DefaultEvaluation.Requirement;
+    import com.example.SS2_Backend.model.StableMatching.DefaultEvaluation.TwoBoundRequirement;
     import com.example.SS2_Backend.model.Strategy;
 
     import java.math.BigDecimal;
@@ -150,48 +148,6 @@ public class StringExpressionEvaluator {
 		}
 
 	}
-
-	/*
-	 * Stable Matching Calculation:
-	 */
-
-	public static PreferenceList getPreferenceListByFunction(List<Individual> Individuals, int index, String function) {
-		PreferenceList a = new PreferenceList();
-		int set = Individuals.get(index).getIndividualSet();
-		int numberOfIndividual = Individuals.size();
-		for (int i = 0; i < numberOfIndividual; i++) {
-			if (Individuals.get(i).getIndividualSet() != set) {
-				StringBuilder tmpSB = new StringBuilder();
-				for (int c = 0; c < function.length(); c++) {
-					char ch = function.charAt(c);
-					if (ch == 'P' || ch == 'p') {
-						// read next char then parse to int (index)
-						int ssLength = AfterTokenLength(function, c);
-						int indexOfP = Integer.parseInt(function.substring(c + 1, c + 1 + ssLength)) - 1;
-						double PropertyValue = Individuals.get(i).getPropertyValue(indexOfP);
-						Requirement requirement = Individuals.get(index).getRequirement(indexOfP);
-						double Scale = getScale(requirement, PropertyValue);
-						tmpSB.append(formatDouble(Scale));
-						c += ssLength;
-					} else if (ch == 'W' || ch == 'w') {
-						//read next char then parse to int (index)
-						int ssLength = AfterTokenLength(function, c);
-						int indexOfW = Integer.parseInt(function.substring(c + 1, c + 1 + ssLength)) - 1;
-						int weight = Individuals.get(index).getPropertyWeight(indexOfW);
-						tmpSB.append(weight);
-						c += ssLength;
-					} else {
-						//No occurrence of W/w/P/w
-						tmpSB.append(ch);
-					}
-				}
-				double totalScore = eval(tmpSB.toString());
-				// Add
-				a.add(new PreferenceList.IndexValue(i, totalScore));
-			}
-		}
-		return a;
-	}
 	public static int AfterTokenLength(String function, int startIndex) {
 		int length = 0;
 		for (int c = startIndex + 1; c < function.length(); c++) {
@@ -209,75 +165,6 @@ public class StringExpressionEvaluator {
 		return c >= '0' && c <= '9';
 	}
 
-
-	public static PreferenceList getPreferenceListByDefault(List<Individual> Individuals, int index) {
-		PreferenceList a = new PreferenceList();
-		int set = Individuals.get(index).getIndividualSet();
-		int numberOfIndividuals = Individuals.size();
-		int numberOfProperties = Individuals.get(0).getNumberOfProperties();
-		for (int i = 0; i < numberOfIndividuals; i++) {
-			if (Individuals.get(i).getIndividualSet() != set) {
-				double totalScore = 0;
-				for (int j = 0; j < numberOfProperties; j++) {
-					Double PropertyValue = Individuals.get(i).getPropertyValue(j);
-					Requirement requirement = Individuals.get(index).getRequirement(j);
-					int PropertyWeight = Individuals.get(index).getPropertyWeight(j);
-					totalScore += getScale(requirement, PropertyValue) * PropertyWeight;
-				}
-				// Add
-				a.add(new PreferenceList.IndexValue(i, totalScore));
-			}
-		}
-		return a;
-	}
-
-	private static double getScale(Requirement requirement, double PropertyValue) {
-		int type = requirement.getType();
-		// Case: Scale
-		if (type == 0) {
-			int TargetValue = requirement.getTargetValue();
-			if (PropertyValue < 0 || PropertyValue > 10) {
-				return 0.0;
-			} else {
-				double Distance = Math.abs(PropertyValue - TargetValue);
-				if(Distance > 7) return 0;
-				if(Distance > 5) return 1;
-				return (10 - Distance) / 10 + 1;
-			}
-			//Case: 1 Bound
-		} else if (type == 1) {
-			double Bound = requirement.getBound();
-			String expression = requirement.getExpression();
-			if (Objects.equals(expression, "++")) {
-				if (PropertyValue < Bound) {
-					return 0.0;
-				} else {
-					if(Bound == 0) return 2.0;
-					double distance = Math.abs(PropertyValue - Bound);
-					return (Bound + distance) / Bound;
-				}
-			} else {
-				if (PropertyValue > Bound) {
-					return 0.0;
-				} else {
-					if(Bound == 0) return  2.0;
-					double distance = Math.abs(PropertyValue - Bound);
-					return (Bound + distance) / Bound;
-				}
-			}
-			//Case: 2 Bounds
-		} else {
-			double lowerBound = requirement.getLowerBound();
-			double upperBound = requirement.getUpperBound();
-			if (PropertyValue < lowerBound || PropertyValue > upperBound || lowerBound == upperBound) {
-				return 0.0;
-			}else{
-				double diff = Math.abs(upperBound - lowerBound)/2;
-				double distance = Math.abs(((lowerBound+upperBound)/2) -PropertyValue);
-				return (diff-distance)/diff + 1;
-			}
-		}
-	}
 
 
 	private static String formatDouble(double propertyValue) {
@@ -527,32 +414,6 @@ public class StringExpressionEvaluator {
 	private static double customLog(double base, double logNumber) {
 		return Math.log(logNumber) / Math.log(base);
 	}
-
-	public static void main(String[] args) {
-		Requirement re2 = new TwoBoundRequirement(0, 9.1);
-		double[] testValues = {-1
-		    ,3.3
-		    ,4.4
-		    ,4.8
-		    ,5.2
-		    ,5.6
-		    ,6.1
-		    ,6.4
-		    ,6.8
-		    ,7.2
-		    ,7.6
-		    ,8.0
-		    ,8.4
-		    ,8.8
-		    ,9.1
-		    ,9.2
-		};
-		for(double val : testValues){
-			System.out.println(getScale(re2, val));
-			System.out.println();
-		}
-	}
-
 }
 
 

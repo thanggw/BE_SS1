@@ -1,7 +1,7 @@
 package com.example.SS2_Backend.util;
 
 import com.example.SS2_Backend.model.StableMatching.Individual;
-import com.example.SS2_Backend.model.StableMatching.Matches;
+import com.example.SS2_Backend.model.StableMatching.Matches.Matches;
 import com.example.SS2_Backend.model.StableMatching.StableMatchingProblem;
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;
@@ -19,7 +19,7 @@ public class SampleDataGenerator {
     public static void main(String[] args) {
         // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-                2000,
+                2200,
                 1,
                 false,
                 10,
@@ -31,7 +31,7 @@ public class SampleDataGenerator {
 
         String f1 = "(p1*w1)^2+p2*w2+p3*w3+p4*w4";
         String f2 = "p1*w1+p2*w2+p3*w3+p4*w4/20";
-        String fnf = "SIGMA{6+S0}/6 + SIGMA{S1/(S1+99)}* 3 + M0*2  + abs(-9)";
+        String fnf = "SIGMA{6+S1}/6 + SIGMA{S2/(S2+99)}* 3 + M0*2  + abs(-9)";
 //		String f1 = "none";
 //		String f2 = "none";
 //		String fnf = "none";

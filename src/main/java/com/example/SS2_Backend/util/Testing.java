@@ -1,6 +1,6 @@
 package com.example.SS2_Backend.util;
 
-import com.example.SS2_Backend.model.StableMatching.Matches;
+import com.example.SS2_Backend.model.StableMatching.Matches.Matches;
 
 import java.util.*;
 

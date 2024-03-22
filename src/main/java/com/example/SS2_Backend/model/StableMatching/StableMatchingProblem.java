@@ -1,5 +1,6 @@
 package com.example.SS2_Backend.model.StableMatching;
 
+import com.example.SS2_Backend.model.StableMatching.Matches.Matches;
 import lombok.Getter;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
@@ -12,26 +13,63 @@ import java.util.*;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
 
+import static com.example.SS2_Backend.model.StableMatching.DefaultEvaluation.DefaultPreferenceEvaluate.getPreferenceListByDefault;
+import static com.example.SS2_Backend.model.StableMatching.PreferenceList.getPreferenceListByFunction;
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 import static com.example.SS2_Backend.util.Utils.fillWithChar;
 import static com.example.SS2_Backend.util.Utils.formatDouble;
 
 /**
- * Base case of Stable Matching Problem (One to One) : Number of Individuals in two sets are Equal (n1 = n2)
- * : Every Individual inside the Population have equal number of Properties
- * : Every Individual inside the Population have the same way to evaluate Partner
- * Wish to test this Class? Run "src.main.java.com.example.SS2_Backend.util.SampleDataGenerator.java"
  * <p>
- * Problems viewing code? press: Ctrl + Alt + L (Windows)
+ *     Advanced Stable Matching Problem (Many to Many)
+ * </p>
+ * <p>
+ *     Problem properties:
+ * </p>
+ * <ul>
+ *   <li> Number of Individuals in two sets (n1, n2) could be different </li>
+ *   <li> n1 > 1 && n2 > 1</li>
+ *   <li> Every Individual inside the Population have same Properties
+ *   	<i>property that an object does not have should be treated as null/zero<i/>
+ *   </li>
+ * </ul>
+ * <p>
+ *     Core components of this class:
+ * </p>
+ *  <ul>
+ *      <li> Population Data </li>
+ *      <li> Preference List of All Match Objects (Nodes) </li>
+ *      <li> Stable Matching Algorithm </li>
+ *  </ul>
+ * <pre>
+ *     Wish to test this Class? Run <i>com.example.SS2_Backend.util.SampleDataGenerator</i>
+ * </pre>
  **/
 
 public class StableMatchingProblem implements Problem {
 
-	private ArrayList<Individual> Individuals; // Storing Data of the Whole population
+	/*
+	Storing Data of the Whole population as an array[object1, object2, ...]
+	 */
+	private List<Individual> Individuals;
 	@Getter
+	/*
+	Number of objects that must be matched
+	 */
 	private int numberOfIndividual;
+	/**
+	Number of objects in the first set
+	We accumulate number of the other set by
+	@var numberOfIndividual -
+	 @var numberOfIndividualOfSet0
+	 */
 	@Getter
 	private int numberOfIndividualOfSet0;
+	/**
+	 Properties name eg: person[age, salary, height, ...]
+	 @var NumberOfProperties is the size of
+	 @var PropertiesName array
+	 */
 	@Getter
 	private int numberOfProperties;
 	private String[] PropertiesName;
@@ -39,6 +77,9 @@ public class StableMatchingProblem implements Problem {
 	private String evaluateFunctionForSet1;
 	@Getter
 	private String evaluateFunctionForSet2;
+	/**
+	 * Preference List of each individual/object inside this whole population
+	 */
 	@Getter
 	private List<PreferenceList> preferenceLists; // Preference List of each Individual
 	@Getter
@@ -47,24 +88,95 @@ public class StableMatchingProblem implements Problem {
 	private boolean f2Status = false;
 	private boolean fnfStatus = false;
 
+	/**
+	 * first setter for the class
+	 * @param individuals array of individual Objects
+	 */
+	public void setPopulation(ArrayList<Individual> individuals) {
+		this.Individuals = individuals;
+		initializeFields();
+	}
+
+	/**
+	 * Initializes fields related to the population data.
+	 *------------------------------------------
+	 * This method is executed only after the Individuals list has been initialized.
+	 * It sets up various fields such as the number of individuals, number of individuals in set 0,
+	 * number of properties, and preference lists based on the Individuals list.
+	 *
+	 * @throws IllegalArgumentException if the number of individuals is less than 3, as matching would make no sense.
+	 */
+	private void initializeFields() {
+		numberOfIndividual = Individuals.size();
+		if (numberOfIndividual < 3) {
+			throw new IllegalArgumentException("Invalid number of individuals, number must be greater or equal to 3 (int) as matching makes no sense");
+		}
+		numberOfIndividualOfSet0 = getNumberOfSet0();
+		numberOfProperties = Individuals.isEmpty() ? 0 : Individuals.get(0).getNumberOfProperties();
+		preferenceLists = getPreferences();
+	}
+
 	//No Args/Default Constructor
 	public StableMatchingProblem() {
 	}
+	//Args constructor
+//	public StableMatchingProblem(ArrayList<Individual> individuals){
+//		setPopulation(individuals);
+//	}
+
+	/**
+	 * Sets the evaluation function for Set 1 and checks its validity.
+	 *------------------------------------------------------
+	 * This method sets the evaluation function for Set 1 and updates the status accordingly.
+	 * If the input function contains "P" or "M", indicating it as a valid function,
+	 * the status for function 1 is set to true and the input function is assigned.
+	 *
+	 * @param evaluateFunctionForSet1 The input function for Set 1 evaluation.
+	 *                                It will be validated to contain "P" or "M".
+	 */
 	public void setEvaluateFunctionForSet1(String evaluateFunctionForSet1) {
-		if(evaluateFunctionForSet1.contains("P") || evaluateFunctionForSet1.contains("M")) {
+		if(evaluateFunctionForSet1.contains("P") || evaluateFunctionForSet1.contains("W") || evaluateFunctionForSet1.contains("R")) {
 			this.f1Status = true;
 			this.evaluateFunctionForSet1 = evaluateFunctionForSet1;
 		}
 	}
+	/**
+	 * Vice versa
+	 * @param evaluateFunctionForSet2 Input function for Set 2 evaluate Set 1
+	 */
 	public void setEvaluateFunctionForSet2(String evaluateFunctionForSet2) {
-		if(evaluateFunctionForSet2.contains("P") || evaluateFunctionForSet2.contains("M")) {
+		if(evaluateFunctionForSet2.contains("P") || evaluateFunctionForSet2.contains("W") || evaluateFunctionForSet2.contains("R")) {
 			this.f2Status = true;
 			this.evaluateFunctionForSet2 = evaluateFunctionForSet2;
 		}
 	}
-	private int getCapacityOfIndividual(int target) {
-		return Individuals.get(target).getCapacity();
+
+	/**
+	 * Sets the fitness function and checks its validity.
+	 *-------------------------------------------
+	 * This method sets the fitness function and updates the status accordingly.
+	 * If the input function contains "S", indicating it as a valid fitness function,
+	 * the status for the fitness function is set to true and the input function is assigned.
+	 *
+	 * @param fitnessFunction The fitness function to be set.
+	 *                        It will be validated to contain "S".
+	 */
+	public void setFitnessFunction(String fitnessFunction) {
+		if(fitnessFunction.contains("S") || fitnessFunction.contains("SIGMA{") || fitnessFunction.contains("M")) {
+			this.fnfStatus = true;
+			this.fitnessFunction = fitnessFunction;
+		}
 	}
+
+	/**
+	 * Retrieves the capacity of each object.
+	 * ---------------------------------
+	 * This method returns an array containing the capacity of each object.
+	 * The capacity of a single object can be obtained by passing its index (in the individual list) to this array.
+	 * For example: The capacity of the person at index 0 can be accessed as capacities[0].
+	 *
+	 * @return An array of integers representing the capacities of each object.
+	 */
 	public int[] getCapacities(){
 		int[] capacities = new int[this.numberOfIndividual];
 		for (int i = 0; i < this.numberOfIndividual; i++) {
@@ -72,31 +184,23 @@ public class StableMatchingProblem implements Problem {
 		}
 		return capacities;
 	}
-	private String getPropertyNameOfIndex(int index) {
+	private String getPropertyNameByIndex(int index) {
 		return PropertiesName[index];
 	}
 
-	public Double getPropertyValueOf(int index, int jndex) {
-		return Individuals.get(index).getPropertyValue(jndex);
+	public Double getPropertyValueOf(int indexOfObject, int indexOfProperty) {
+		return Individuals.get(indexOfObject).getPropertyValue(indexOfProperty);
 	}
-
-	public int getPropertyWeightOf(int index, int jndex) {
-		return Individuals.get(index).getPropertyWeight(jndex);
+	public int getPropertyWeightOf(int indexOfObject, int indexOfProperty) {
+		return Individuals.get(indexOfObject).getPropertyWeight(indexOfProperty);
 	}
-	public void setFitnessFunction(String fitnessFunction) {
-		if(fitnessFunction.contains("S")) {
-			this.fnfStatus = true;
-			this.fitnessFunction = fitnessFunction;
-		}
-	}
-
-	public void setPopulation(ArrayList<Individual> individuals) {
-		this.Individuals = individuals;
-		this.numberOfIndividual = Individuals.size();
-		this.numberOfIndividualOfSet0 = getNumberOfSet0();
-		this.numberOfProperties = Individuals.get(0).getNumberOfProperties();
-		this.preferenceLists = getPreferences();
-	}
+//	public void setPopulation(ArrayList<Individual> individuals) {
+//		this.Individuals = individuals;
+//		this.numberOfIndividual = Individuals.size();
+//		this.numberOfIndividualOfSet0 = getNumberOfSet0();
+//		this.numberOfProperties = Individuals.get(0).getNumberOfProperties();
+//		this.preferenceLists = getPreferences();
+//	}
 
 	public int getNumberOfSet0(){
 		int c = 0;
@@ -221,7 +325,7 @@ public class StableMatchingProblem implements Problem {
 
 	private Matches StableMatchingExtra(Variable var) {
 		//Parse Variable
-		System.out.println("parsing");
+		//System.out.println("parsing");
 		Matches matches = new Matches(this.numberOfIndividual);
 		Set<Integer> MatchedNode = new HashSet<>();
 
@@ -357,8 +461,8 @@ public class StableMatchingProblem implements Problem {
 			if (ch == 'S') {
 				if(Objects.equals(fitnessFunction.substring(c, c+5), "SIGMA")){
 					if (fitnessFunction.charAt(c+5) != '{') {
-						System.out.println("Missing '{'");
-						System.out.println(fitnessFunction);
+						System.err.println("Missing '{'");
+						System.err.println(fitnessFunction);
 						throw new RuntimeException("Missing '{' after Sigma function");
 					}else{
 						int expressionStartIndex = c + 6;
@@ -374,7 +478,7 @@ public class StableMatchingProblem implements Problem {
 					if(isNumericValue(fitnessFunction.charAt(c+2))) {
 						int set = Character.getNumericValue(fitnessFunction.charAt(c + 2));
 						//Calculate SUM
-						tmpSB.append(getSatisfactoryOfASetByDefault(Satisfactions, set));
+						tmpSB.append(DoubleStream.of(getSatisfactoryOfASetByDefault(Satisfactions, set)).sum());
 					}
 				}
 				c += 3;
@@ -397,9 +501,20 @@ public class StableMatchingProblem implements Problem {
 	}
 
 	/**
-	 * @param Satisfactions - Double value array contains satisfactions of the whole population sequentially (0, 1, 2, ... , n)
-	 * @param expression - Mathematical String that Express how each of the value calculated (S0/2, S1^3)
-	 * @return double value
+	 * @param Satisfactions - Double array contains satisfactions of the whole population sequentially (0, 1, 2, ... , n)
+	 * @param expression - Mathematical String that Express how each of the value calculated. Example: S0/2, S1^3
+	 *  <i>
+	 *        Cases:
+	 *                   <ol>
+	 *                   <li>
+	 *                      <i>S1</i>represents satisfactions of set 1 (array)
+	 *                   </li>
+	 *                   <li>
+	 * 	                <i>S2</i>represents satisfactions of set 2 (array)
+	 *                   </li>
+	 *                   </ol>
+	 *  </i>
+	 * @return double value - Sum of satisfactions of the whole set sequentially
 	 */
 	private double sigmaCalculate(double[] Satisfactions, String expression){
 		System.out.println("sigma calculating...");
@@ -410,17 +525,15 @@ public class StableMatchingProblem implements Problem {
 			if (ch == 'S') {
 				char set = expression.charAt(i + 1);
 				switch (set) {
-					case '0':
-						streamValue = getSatisfactoryOfASetByDefault(Satisfactions, 0);
-						regex = "S0";
-						break;
 					case '1':
-						streamValue = getSatisfactoryOfASetByDefault(Satisfactions, 1);
+						streamValue = getSatisfactoryOfASetByDefault(Satisfactions, 0);
 						regex = "S1";
 						break;
-				}
-				if (regex != null) {
-					break;
+					case '2':
+						streamValue = getSatisfactoryOfASetByDefault(Satisfactions, 1);
+						regex = "S2";
+						break;
+					default: throw new IllegalArgumentException("Illegal value after S regex in sigma calculation step: " + expression);
 				}
 			}
 		}
@@ -485,7 +598,7 @@ public class StableMatchingProblem implements Problem {
 	public void printIndividuals() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < this.numberOfProperties; i++) {
-			sb.append(String.format("%-16s| ", this.getPropertyNameOfIndex(i)));
+			sb.append(String.format("%-16s| ", this.getPropertyNameByIndex(i)));
 		}
 		String propName = sb.toString();
 		sb.delete(0, sb.length());

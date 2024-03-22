@@ -1,9 +1,9 @@
 package com.example.SS2_Backend.model.StableMatching;
 
-import com.example.SS2_Backend.model.StableMatching.Requirement.OneBoundRequirement;
-import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
-import com.example.SS2_Backend.model.StableMatching.Requirement.ScaleTargetRequirement;
-import com.example.SS2_Backend.model.StableMatching.Requirement.TwoBoundRequirement;
+import com.example.SS2_Backend.model.StableMatching.DefaultEvaluation.OneBoundRequirement;
+import com.example.SS2_Backend.model.StableMatching.DefaultEvaluation.Requirement;
+import com.example.SS2_Backend.model.StableMatching.DefaultEvaluation.ScaleTargetRequirement;
+import com.example.SS2_Backend.model.StableMatching.DefaultEvaluation.TwoBoundRequirement;
 import lombok.Getter;
 
 import java.util.Objects;
