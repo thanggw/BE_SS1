@@ -131,8 +131,8 @@ public class PreferencesProvider {
     }
 
     public PreferenceList getPreferenceListByDefault(int index){
-        PreferenceList a = new PreferenceList();
-        getPreferenceListByDefaultt(individuals, index);
+        PreferenceList a;
+        a = getPreferenceListByDefaultt(individuals, index);
         a.sort();
         return a;
     }
