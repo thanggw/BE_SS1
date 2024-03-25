@@ -13,8 +13,6 @@ import java.util.*;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
 
-import static com.example.SS2_Backend.model.StableMatching.DefaultEvaluation.DefaultPreferenceEvaluate.getPreferenceListByDefault;
-import static com.example.SS2_Backend.model.StableMatching.PreferenceList.getPreferenceListByFunction;
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 import static com.example.SS2_Backend.util.Utils.fillWithChar;
 import static com.example.SS2_Backend.util.Utils.formatDouble;
@@ -27,10 +25,13 @@ import static com.example.SS2_Backend.util.Utils.formatDouble;
  *     Problem properties:
  * </p>
  * <ul>
- *   <li> Number of Individuals in two sets (n1, n2) could be different </li>
- *   <li> n1 > 1 && n2 > 1</li>
- *   <li> Every Individual inside the Population have same Properties
- *   	<i>property that an object does not have should be treated as null/zero<i/>
+ *   <li> Number of Individuals in two sets (n1, n2) could be different follow the under conditions</li>
+ *   <li>        n1 > 1
+ *           && n2 > 1
+ *           && (n1+n2) >= 3
+ *   </li>
+ *   <li> Every Individual inside the Population has the exactly same number and order of Properties
+ *   	<i>For an object that doesn't have or absent a property, that property field should be expressed as null or zero<i/>
  *   </li>
  * </ul>
  * <p>
@@ -51,7 +52,7 @@ public class StableMatchingProblem implements Problem {
 	/*
 	Storing Data of the Whole population as an array[object1, object2, ...]
 	 */
-	private List<Individual> Individuals;
+	private List<Individual> individuals;
 	@Getter
 	/*
 	Number of objects that must be matched
@@ -84,6 +85,7 @@ public class StableMatchingProblem implements Problem {
 	private List<PreferenceList> preferenceLists; // Preference List of each Individual
 	@Getter
 	private String fitnessFunction; // Evaluate total Score of each Solution set
+	private final PreferencesProvider preferencesProvider = new PreferencesProvider();
 	private boolean f1Status = false;
 	private boolean f2Status = false;
 	private boolean fnfStatus = false;
@@ -93,7 +95,8 @@ public class StableMatchingProblem implements Problem {
 	 * @param individuals array of individual Objects
 	 */
 	public void setPopulation(ArrayList<Individual> individuals) {
-		this.Individuals = individuals;
+		this.individuals = individuals;
+		this.preferencesProvider.setIndividuals(individuals);
 		initializeFields();
 	}
 
@@ -107,13 +110,23 @@ public class StableMatchingProblem implements Problem {
 	 * @throws IllegalArgumentException if the number of individuals is less than 3, as matching would make no sense.
 	 */
 	private void initializeFields() {
-		numberOfIndividual = Individuals.size();
+		numberOfIndividual = individuals.size();
 		if (numberOfIndividual < 3) {
 			throw new IllegalArgumentException("Invalid number of individuals, number must be greater or equal to 3 (int) as matching makes no sense");
 		}
+		initializePrefProvider();
 		numberOfIndividualOfSet0 = getNumberOfSet0();
-		numberOfProperties = Individuals.isEmpty() ? 0 : Individuals.get(0).getNumberOfProperties();
+		numberOfProperties = individuals.isEmpty() ? 0 : individuals.get(0).getNumberOfProperties();
 		preferenceLists = getPreferences();
+	}
+
+	private void initializePrefProvider() {
+		if(this.evaluateFunctionForSet1 != null) {
+			this.preferencesProvider.setEvaluateFunctionForSet1(evaluateFunctionForSet1);
+		}
+		if(this.evaluateFunctionForSet2 != null) {
+			this.preferencesProvider.setEvaluateFunctionForSet2(evaluateFunctionForSet2);
+		}
 	}
 
 	//No Args/Default Constructor
@@ -135,7 +148,7 @@ public class StableMatchingProblem implements Problem {
 	 *                                It will be validated to contain "P" or "M".
 	 */
 	public void setEvaluateFunctionForSet1(String evaluateFunctionForSet1) {
-		if(evaluateFunctionForSet1.contains("P") || evaluateFunctionForSet1.contains("W") || evaluateFunctionForSet1.contains("R")) {
+		if(evaluateFunctionForSet1.contains("p") || evaluateFunctionForSet1.contains("w") || evaluateFunctionForSet1.contains("r")) {
 			this.f1Status = true;
 			this.evaluateFunctionForSet1 = evaluateFunctionForSet1;
 		}
@@ -145,7 +158,7 @@ public class StableMatchingProblem implements Problem {
 	 * @param evaluateFunctionForSet2 Input function for Set 2 evaluate Set 1
 	 */
 	public void setEvaluateFunctionForSet2(String evaluateFunctionForSet2) {
-		if(evaluateFunctionForSet2.contains("P") || evaluateFunctionForSet2.contains("W") || evaluateFunctionForSet2.contains("R")) {
+		if(evaluateFunctionForSet2.contains("p") || evaluateFunctionForSet2.contains("w") || evaluateFunctionForSet2.contains("r")) {
 			this.f2Status = true;
 			this.evaluateFunctionForSet2 = evaluateFunctionForSet2;
 		}
@@ -180,7 +193,7 @@ public class StableMatchingProblem implements Problem {
 	public int[] getCapacities(){
 		int[] capacities = new int[this.numberOfIndividual];
 		for (int i = 0; i < this.numberOfIndividual; i++) {
-			capacities[i] = Individuals.get(i).getCapacity();
+			capacities[i] = individuals.get(i).getCapacity();
 		}
 		return capacities;
 	}
@@ -189,23 +202,16 @@ public class StableMatchingProblem implements Problem {
 	}
 
 	public Double getPropertyValueOf(int indexOfObject, int indexOfProperty) {
-		return Individuals.get(indexOfObject).getPropertyValue(indexOfProperty);
+		return individuals.get(indexOfObject).getPropertyValue(indexOfProperty);
 	}
 	public int getPropertyWeightOf(int indexOfObject, int indexOfProperty) {
-		return Individuals.get(indexOfObject).getPropertyWeight(indexOfProperty);
+		return individuals.get(indexOfObject).getPropertyWeight(indexOfProperty);
 	}
-//	public void setPopulation(ArrayList<Individual> individuals) {
-//		this.Individuals = individuals;
-//		this.numberOfIndividual = Individuals.size();
-//		this.numberOfIndividualOfSet0 = getNumberOfSet0();
-//		this.numberOfProperties = Individuals.get(0).getNumberOfProperties();
-//		this.preferenceLists = getPreferences();
-//	}
 
 	public int getNumberOfSet0(){
 		int c = 0;
 		for(int i = 0; i < this.numberOfIndividual; i++){
-			if (Individuals.get(i).getIndividualSet() == 0){
+			if (individuals.get(i).getIndividualSet() == 0){
 				c++;
 			}else{
 				break;
@@ -219,7 +225,7 @@ public class StableMatchingProblem implements Problem {
 	}
 
 	/**
-	 * MOEA Problem Implementations
+	 * MOEA Framework Problem Implementations
 	 */
 
 	//Solution Definition
@@ -290,26 +296,13 @@ public class StableMatchingProblem implements Problem {
 	public PreferenceList getPreferenceOfIndividual(int index) {
 		PreferenceList a;
 		if(!f1Status && !f2Status){
-			a = getPreferenceListByDefault(Individuals, index);
-		}else {
-			int set = Individuals.get(index).getIndividualSet();
-			if (set == 0) {
-				if(f1Status){
-					a = getPreferenceListByFunction(Individuals, index, this.evaluateFunctionForSet1.toUpperCase());
-				}else{
-					a= getPreferenceListByDefault(Individuals, index);
-				}
-			} else {
-				if(f2Status){
-					a = getPreferenceListByFunction(Individuals, index, this.evaluateFunctionForSet2.toUpperCase());
-				}else{
-					a= getPreferenceListByDefault(Individuals, index);
-				}
-			}
+			a = preferencesProvider.getPreferenceListByDefault(index);
+		}else{
+			a = preferencesProvider.getPreferenceListByFunction(index);
 		}
 		// Sort: Individuals with higher score than others sit on the top of the List
 		a.sort();
-		a.transform(this.numberOfIndividual);
+		a.transfer(this.numberOfIndividual);
 		// return Sorted list
 		return a;
 	}
@@ -360,7 +353,7 @@ public class StableMatchingProblem implements Problem {
 					break;
 				}
 				//If the RightNode Capacity is not full -> create connection between LeftNode - RightNode
-				if (!matches.isFull(preferNode, this.Individuals.get(preferNode).getCapacity())) {
+				if (!matches.isFull(preferNode, this.individuals.get(preferNode).getCapacity())) {
 					//System.out.println(preferNode + " is not full.");
 					//AddMatch (Node, NodeToConnect)
 					matches.addMatch(preferNode, Node);
@@ -416,7 +409,7 @@ public class StableMatchingProblem implements Problem {
 
 	private int Compete(int SelectorNode, int newNode, Set<Integer> occupiedNodes) {
 		PreferenceList prefOfSelectorNode = preferenceLists.get(SelectorNode);
-		if (Individuals.get(SelectorNode).getCapacity() == 1) {
+		if (individuals.get(SelectorNode).getCapacity() == 1) {
 			Iterator<Integer> iterator = occupiedNodes.iterator();
 			int currentNode = iterator.next();
 			if (isPreferredOver(newNode, currentNode, SelectorNode)) {
@@ -506,12 +499,12 @@ public class StableMatchingProblem implements Problem {
 	 *  <i>
 	 *        Cases:
 	 *                   <ol>
-	 *                   <li>
-	 *                      <i>S1</i>represents satisfactions of set 1 (array)
-	 *                   </li>
-	 *                   <li>
-	 * 	                <i>S2</i>represents satisfactions of set 2 (array)
-	 *                   </li>
+	 *                   	<li>
+	 *                      		<i>S1</i>represents satisfactions of set 1 (array)
+	 *                   	</li>
+	 *                   	<li>
+	 * 	                		<i>S2</i>represents satisfactions of set 2 (array)
+	 *                  	 </li>
 	 *                   </ol>
 	 *  </i>
 	 * @return double value - Sum of satisfactions of the whole set sequentially
@@ -533,7 +526,7 @@ public class StableMatchingProblem implements Problem {
 						streamValue = getSatisfactoryOfASetByDefault(Satisfactions, 1);
 						regex = "S2";
 						break;
-					default: throw new IllegalArgumentException("Illegal value after S regex in sigma calculation step: " + expression);
+					default: throw new IllegalArgumentException("Illegal value after S regex in sigma calculation: " + expression);
 				}
 			}
 		}
@@ -611,8 +604,8 @@ public class StableMatchingProblem implements Problem {
 		for (int i = 0; i < this.numberOfIndividual; i++) {
 			//name / set
 			sb.append(String.format("%-3d| ", i));
-			sb.append(String.format("%-4d| ", Individuals.get(i).getIndividualSet()));
-			sb.append(String.format("%-20s| ", Individuals.get(i).getIndividualName()));
+			sb.append(String.format("%-4d| ", individuals.get(i).getIndividualSet()));
+			sb.append(String.format("%-20s| ", individuals.get(i).getIndividualName()));
 			// prop value
 			StringBuilder ss = new StringBuilder();
 			for (int j = 0; j < this.numberOfProperties; j++) {
@@ -622,7 +615,7 @@ public class StableMatchingProblem implements Problem {
 			ss.delete(0, sb.length());
 			ss.append(String.format("%33s", "Requirement: | "));
 			for (int j = 0; j < this.numberOfProperties; j++) {
-				ss.append(String.format("%-16s| ", this.Individuals.get(i).getRequirement(j).toString()));
+				ss.append(String.format("%-16s| ", this.individuals.get(i).getRequirement(j).toString()));
 			}
 			sb.append(ss).append("\n");
 			ss.delete(0, sb.length());
@@ -640,7 +633,7 @@ public class StableMatchingProblem implements Problem {
 		System.out.println("Problem: " + "\n");
 		System.out.println("Num of Individuals: " + this.numberOfIndividual);
 		StringBuilder sb = new StringBuilder();
-		for (Individual individual : Individuals) {
+		for (Individual individual : individuals) {
 			sb.append(individual.toString()).append("\n");
 		}
 		return "\nNumber Of Properties: " + numberOfProperties +

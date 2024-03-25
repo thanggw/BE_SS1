@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model.StableMatching.DefaultEvaluation;
+package com.example.SS2_Backend.model.StableMatching.Requirement;
 
 import lombok.Getter;
 
@@ -13,6 +13,12 @@ public class TwoBoundRequirement extends Requirement {
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
     }
+
+    @Override
+    public double getValueForFunction() {
+        return (lowerBound + upperBound) / 2;
+    }
+
     public String toString(){
         return "[" + formatDouble(lowerBound) + ", " + formatDouble(upperBound) + "]";
     }

@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model.StableMatching.DefaultEvaluation;
+package com.example.SS2_Backend.model.StableMatching.Requirement;
 
 import com.example.SS2_Backend.model.StableMatching.Individual;
 import com.example.SS2_Backend.model.StableMatching.PreferenceList;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class DefaultPreferenceEvaluate {
-    public static PreferenceList getPreferenceListByDefault(List<Individual> Individuals, int index) {
+    public static PreferenceList getPreferenceListByDefaultt(List<Individual> Individuals, int index) {
         PreferenceList a = new PreferenceList();
         int set = Individuals.get(index).getIndividualSet();
         int numberOfIndividuals = Individuals.size();

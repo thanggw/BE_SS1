@@ -1,11 +1,12 @@
-package com.example.SS2_Backend.model.StableMatching.DefaultEvaluation;
+package com.example.SS2_Backend.model.StableMatching.Requirement;
 import lombok.Getter;
 @Getter
 public abstract class Requirement {
-    private final int Type;
+    private final int type;
     protected Requirement(int type) {
-        this.Type = type;
+        this.type = type;
     }
+    public abstract double getValueForFunction();
     public int getTargetValue(){
         return 0;
     }

@@ -1,4 +1,4 @@
-package com.example.SS2_Backend.model.StableMatching.DefaultEvaluation;
+package com.example.SS2_Backend.model.StableMatching.Requirement;
 
 import lombok.Getter;
 
@@ -18,6 +18,11 @@ public class OneBoundRequirement extends Requirement {
 
 	private String expressionToString(boolean expression){
 		return expression ? "++" : "--";
+	}
+
+	@Override
+	public double getValueForFunction() {
+		return bound;
 	}
 
 	public String toString() {
