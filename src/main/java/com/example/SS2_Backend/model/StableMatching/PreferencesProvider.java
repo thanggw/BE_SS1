@@ -52,13 +52,13 @@ public class PreferencesProvider {
         for (int c = 0; c < evaluateFunction.length(); c++) {
             char ch = evaluateFunction.charAt(c);
             switch (ch) {
-                case 'p':
-                case 'w':
-                case 'r':
+                case 'P':
+                case 'W':
+                case 'R':
                     String prefix = String.valueOf(ch);
                     Optional<Integer> nextIdx = getNextIndex(evaluateFunction, c);
                     if(nextIdx.isPresent()){
-                        int idx = nextIdx.get().intValue();
+                        int idx = nextIdx.get();
                         variables.compute(prefix, (key, value) -> {
                             if (value == null) {
                                 Set<Integer> set = new HashSet<>();
@@ -104,19 +104,19 @@ public class PreferencesProvider {
             String key = entry.getKey();
             Set<Integer> values = entry.getValue();
                 switch (key) {
-                    case "p":
+                    case "P":
                         for(Integer value : values) {
                             double val = individuals.get(idx2).getPropertyValue(value-1);
                             variablesValues.put(key + value, val);
                         }
                         break;
-                    case "w":
+                    case "W":
                         for(Integer value : values) {
                             double val = individuals.get(idx1).getPropertyWeight(value-1);
                             variablesValues.put(key + value, val);
                         }
                         break;
-                    case "r":
+                    case "R":
                         for(Integer value : values){
                         double val = individuals.get(idx1).getRequirement(value-1).getValueForFunction();
                         variablesValues.put(key + value, val);

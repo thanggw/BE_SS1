@@ -29,12 +29,12 @@ public class SampleDataGenerator {
 
         String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4",};
 
-//        String f1 = "(p1*w1)^2+p2*w2+p3*w3+p4*w4";
-//        String f2 = "p1*w1+p2*w2+p3*w3+p4*w4/20";
-//        String fnf = "SIGMA{6+S1}/6 + SIGMA{S2/(S2+99)}* 3 + M0*2  + abs(-9)";
-		String f1 = "none";
-		String f2 = "none";
-		String fnf = "none";
+        String f1 = "(P1*W1)^2+P2*W2+P3*W3+P4*W4";
+        String f2 = "P1*W1+P2*W2+P3*W3+P4*W4/20";
+        String fnf = "SIGMA{6+S1}/6 + SIGMA{S2/(S2+99)}* 3 + M0*2";
+//		String f1 = "none";
+//		String f2 = "none";
+//		String fnf = "none";
 
         // Create an Instance of StableMatchingProblem class with randomly generated data
         StableMatchingProblem problem = new StableMatchingProblem();
@@ -90,6 +90,7 @@ public class SampleDataGenerator {
             System.out.println("Solution has duplicate individual? : " + tester.hasDuplicate());
         }
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "PESA2");
+//        System.out.println(problem);
     }
 
     public static ArrayList<Individual> generateSampleIndividualsWithCapacity(int numSet1, int set1PeakCap, boolean cap1Randomize, int numSet2, int set2PeakCap, boolean cap2Randomize, int numProps) {
