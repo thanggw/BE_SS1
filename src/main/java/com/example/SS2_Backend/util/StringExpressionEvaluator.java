@@ -162,6 +162,16 @@ public class StringExpressionEvaluator {
 	}
 
 
+	public static String convertToStringWithoutScientificNotation(double value) {
+		String stringValue;
+		if (value > 9999999) {
+			stringValue = String.format("%.15f", value);
+		} else {
+			stringValue = Double.toString(value);
+		}
+		stringValue = stringValue.replaceAll("0*$", "");
+		return stringValue;
+	}
 
 	private static String formatDouble(double propertyValue) {
 		// if the property value is too small it can be written as for example 1.0E-4, so we need to format it to 0.0001

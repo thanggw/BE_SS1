@@ -44,7 +44,9 @@ public class StableMatchingSolver {
 			System.out.println("[Service] Message: Load Problem...");
 			System.out.println(problem);
 			System.out.println("[Service] Message: Problem loaded!");
+
 			long startTime = System.currentTimeMillis();
+
 			NondominatedPopulation results = solveProblem(
 			    problem,
 			    request.getAlgorithm(),
@@ -56,17 +58,20 @@ public class StableMatchingSolver {
 
 
 			assert results != null;
-			Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"), problem.getNumberOfIndividual(), problem.getCapacities());
-			System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
-//			ArrayList<Individual> individualsList = request.getIndividuals();
+//			Testing tester = new Testing((Matches) results.get(0).getAttribute("matches"), problem.getNumberOfIndividual(), problem.getCapacities());
+//			System.out.println("[Testing] Solution has duplicate: " + tester.hasDuplicate());
 			long endTime = System.currentTimeMillis();
+
 			double runtime = ((double) (endTime - startTime) / 1000);
 			runtime = (runtime * 1000.0);
 			System.out.println("[Solution] Runtime: " + runtime + " Millisecond(s).");
 			String algorithm = request.getAlgorithm();
+
 			MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
 			matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results.get(0).getAttribute("matches")));
 			matchingSolution.setPreferences(problem.getPreferenceLists());
+			matchingSolution.setIndividuals(problem.getIndividuals());
+
 			System.out.println("[API] RESPOND TO FRONT_END:");
 			System.out.println(matchingSolution);
 			System.out.println();

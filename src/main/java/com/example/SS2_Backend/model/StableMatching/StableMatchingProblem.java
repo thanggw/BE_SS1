@@ -52,6 +52,7 @@ public class StableMatchingProblem implements Problem {
 	/*
 	Storing Data of the Whole population as an array[object1, object2, ...]
 	 */
+	@Getter
 	private List<Individual> individuals;
 	@Getter
 	/*
@@ -255,7 +256,7 @@ public class StableMatchingProblem implements Problem {
 		solution.setAttribute("matches", result);
 		solution.setObjective(0, -fitnessScore);
 
-		System.out.println("Score: " + -fitnessScore);
+		System.out.println("Score: " + convertToStringWithoutScientificNotation(fitnessScore));
 		System.out.println("[Service] End of evaluate");
 	}
 
@@ -462,7 +463,7 @@ public class StableMatchingProblem implements Problem {
 						int expressionLength = getFunctionExpressionLength(fitnessFunction, expressionStartIndex);
 						String expression = fitnessFunction.substring(expressionStartIndex, expressionStartIndex+expressionLength);
 						double val = sigmaCalculate(Satisfactions, expression);
-						tmpSB.append(val);
+						tmpSB.append(convertToStringWithoutScientificNotation(val));
 						c += expressionLength + 3;
 					}
 				}
@@ -471,7 +472,13 @@ public class StableMatchingProblem implements Problem {
 					if(isNumericValue(fitnessFunction.charAt(c+2))) {
 						int set = Character.getNumericValue(fitnessFunction.charAt(c + 2));
 						//Calculate SUM
-						tmpSB.append(DoubleStream.of(getSatisfactoryOfASetByDefault(Satisfactions, set)).sum());
+						tmpSB
+						.append(
+							convertToStringWithoutScientificNotation(
+								DoubleStream
+									.of(
+										getSatisfactoryOfASetByDefault(
+											Satisfactions, set)).sum()));
 					}
 				}
 				c += 3;
