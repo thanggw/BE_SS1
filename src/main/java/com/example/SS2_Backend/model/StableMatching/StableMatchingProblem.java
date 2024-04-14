@@ -496,7 +496,7 @@ public class StableMatchingProblem implements Problem {
 					tmpSB.append(ch);
 			}
 		}
-		return eval(tmpSB.toString());
+		return new ExpressionBuilder(tmpSB.toString()).build().evaluate();
 	}
 
 	/**
