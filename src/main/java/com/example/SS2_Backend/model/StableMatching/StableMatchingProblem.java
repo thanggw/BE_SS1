@@ -430,7 +430,7 @@ public class StableMatchingProblem implements Problem {
 	 * $: i - index of MatchSet in "matches"
 	 * $: set - value (1 or 2) represent set 1 (0) or set 2 (1)
 	 * $: S(set) - Sum of all payoff scores of "set" evaluate by opposite set
-	 * $: M(i) - Value of specific matchSet's satisfaction eg: M0 (satisfactory of Individual no 0)
+	 * $: M(i) - Value of specific matchSet's satisfaction eg: M1 (satisfactory of Individual no 1, index 0 in "matches")
 	 *
 	 * Supported functions:
 	 * #: SIGMA{S1} calculate sum of all MatchSet of a belonging set eg: SIGMA{S1}
@@ -485,11 +485,10 @@ public class StableMatchingProblem implements Problem {
 			} else if (ch == 'M') {
 				int ssLength = AfterTokenLength(fitnessFunction, c);
 				int positionOfM = Integer.parseInt(fitnessFunction.substring(c + 1, c + 1 + ssLength));
-				if(positionOfM < 0 || positionOfM > this.numberOfIndividual - 1){
-					c+= ssLength;
-					continue;
+				if(positionOfM < 0 || positionOfM > this.numberOfIndividual){
+					throw new IllegalArgumentException("invalid position after variable M: " + positionOfM);
 				}
-				double valueOfM = Satisfactions[positionOfM];
+				double valueOfM = Satisfactions[positionOfM - 1];
 				tmpSB.append(valueOfM);
 				c += ssLength;
 			} else {

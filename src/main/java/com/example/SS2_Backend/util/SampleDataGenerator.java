@@ -31,7 +31,7 @@ public class SampleDataGenerator {
 
         String f1 = "(P1*W1)^2+P2*W2+P3*W3+P4*W4";
         String f2 = "P1*W1+P2*W2+P3*W3+P4*W4/20";
-        String fnf = "SIGMA{6+S1}/6 + SIGMA{S2/(S2+99)}* 3 + M0*2";
+        String fnf = "SIGMA{6+S1}/6 + SIGMA{S2/(S2+99)}* 3 + M1*2";
 //		String f1 = "none";
 //		String f2 = "none";
 //		String fnf = "none";
