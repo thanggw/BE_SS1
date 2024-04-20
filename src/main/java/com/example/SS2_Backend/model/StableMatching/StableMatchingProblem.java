@@ -397,8 +397,8 @@ public class StableMatchingProblem implements Problem {
 	// Stable Matching Algorithm Component: isPreferredOver
 	private boolean isPreferredOver(int newNode, int currentNode, int SelectorNode) {
 		PreferenceList preferenceOfSelectorNode = preferenceLists.get(SelectorNode);
-		double ofNewNode = preferenceOfSelectorNode.getIndexValueByKey(newNode).getValue();
-		double ofCurrentNode = preferenceOfSelectorNode.getIndexValueByKey(currentNode).getValue();
+		double ofNewNode = preferenceOfSelectorNode.getIndexValueByKey(newNode).getScore();
+		double ofCurrentNode = preferenceOfSelectorNode.getIndexValueByKey(currentNode).getScore();
 		return ofNewNode > ofCurrentNode;
 	}
 
@@ -570,7 +570,7 @@ public class StableMatchingProblem implements Problem {
 			PreferenceList ofInd = preferenceLists.get(i);
 			Set<Integer> SetMatches = matches.getSet(i);
 			for (int x : SetMatches) {
-				setScore += ofInd.getIndexValueByKey(x).getValue();
+				setScore += ofInd.getIndexValueByKey(x).getScore();
 			}
 			satisfactions[i] = setScore;
 		}

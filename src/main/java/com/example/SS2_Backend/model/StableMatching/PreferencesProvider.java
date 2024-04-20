@@ -157,7 +157,7 @@ public class PreferencesProvider {
             if (individuals.get(i).getIndividualSet() != set) {
                 e.setVariables(set == 0 ? this.getVariableValuesForSet1(index, i) : this.getVariableValuesForSet2(index, i));
                 double totalScore = e.evaluate();
-                a.add(new PreferenceList.IndexValue(i, totalScore));
+                a.add(new PreferenceList.IndexScore(i, totalScore));
             }
         }
         a.sort();

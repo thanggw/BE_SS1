@@ -22,7 +22,7 @@ public class DefaultPreferenceEvaluate {
                     totalScore += getScale(requirement, PropertyValue) * PropertyWeight;
                 }
                 // Add
-                a.add(new PreferenceList.IndexValue(i, totalScore));
+                a.add(new PreferenceList.IndexScore(i, totalScore));
             }
         }
         return a;

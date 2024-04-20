@@ -13,7 +13,7 @@ import static com.example.SS2_Backend.util.Utils.formatDouble;
  */
 @Getter
 public class PreferenceList {
-    private final List<IndexValue> preferenceList = new ArrayList<>();
+    private final List<IndexScore> preferenceList = new ArrayList<>();
     private double[] scores;
 
     public PreferenceList() {
@@ -22,9 +22,9 @@ public class PreferenceList {
     public void transfer(int numberOfIndividual) {
         if (this.preferenceList.isEmpty()) return;
         this.scores = new double[numberOfIndividual];
-        for (IndexValue value : this.preferenceList) {
+        for (IndexScore value : this.preferenceList) {
             int index = value.getIndividualIndex();
-            this.scores[index] = value.getValue();
+            this.scores[index] = value.getScore();
         }
     }
 
@@ -33,16 +33,16 @@ public class PreferenceList {
         return this.preferenceList.size();
     }
 
-    public IndexValue getByIndex(int indexOnPreferenceList) {
+    public IndexScore getByIndex(int indexOnPreferenceList) {
         return this.preferenceList.get(indexOnPreferenceList);
     }
 
     //public boolean isEmpty() {return this.preferenceList.isEmpty();}
 
-    public IndexValue getIndexValueByKey(int indexOnIndividualList) {
-        for (IndexValue indexValue : this.preferenceList) {
-            if (indexValue.getIndividualIndex() == indexOnIndividualList) {
-                return indexValue;
+    public IndexScore getIndexValueByKey(int indexOnIndividualList) {
+            for (IndexScore indexScore : this.preferenceList) {
+            if (indexScore.getIndividualIndex() == indexOnIndividualList) {
+                return indexScore;
             }
         }
         return null;
@@ -58,8 +58,8 @@ public class PreferenceList {
         return leastNode;
     }
 
-    public void add(IndexValue indexValue) {
-        this.preferenceList.add(indexValue);
+    public void add(IndexScore indexScore) {
+        this.preferenceList.add(indexScore);
     }
 
     public void sort() {
@@ -73,36 +73,36 @@ public class PreferenceList {
             sb.append("Rank ").append(i + 1).append(": ");
             sb.append(preferenceList.get(i).getIndividualIndex()).append("\t");
             sb.append("Score: ");
-            sb.append(formatDouble(preferenceList.get(i).getValue())).append(" |");
+            sb.append(formatDouble(preferenceList.get(i).getScore())).append(" |");
         }
         sb.append("]\n");
         return sb.toString();
     }
 
     @Getter
-    public static class IndexValue {
-        private final int IndividualIndex;
-        private final double Value;
+    public static class IndexScore {
+        private final int individualIndex;
+        private final double score;
 
-        public IndexValue(int IndividualIndex, double Value) {
-            this.IndividualIndex = IndividualIndex;
-            this.Value = Value;
+        public IndexScore(int IndividualIndex, double score) {
+            this.individualIndex = IndividualIndex;
+            this.score = score;
         }
 
         public String toString() {
-            return "Index: " + IndividualIndex + " Score: " + Value;
+            return "Index: " + individualIndex + " Score: " + score;
         }
     }
 
     public static class MergeSortPair {
-        public static void mergeSort(List<IndexValue> list) {
+        public static void mergeSort(List<IndexScore> list) {
             if (list == null || list.size() <= 1) {
                 return; // Nothing to sort
             }
 
             int middle = list.size() / 2;
-            List<IndexValue> left = new ArrayList<>(list.subList(0, middle));
-            List<IndexValue> right = new ArrayList<>(list.subList(middle, list.size()));
+            List<IndexScore> left = new ArrayList<>(list.subList(0, middle));
+            List<IndexScore> right = new ArrayList<>(list.subList(middle, list.size()));
 
             mergeSort(left);
             mergeSort(right);
@@ -110,13 +110,13 @@ public class PreferenceList {
             merge(list, left, right);
         }
 
-        private static void merge(List<IndexValue> list, List<IndexValue> left, List<IndexValue> right) {
+        private static void merge(List<IndexScore> list, List<IndexScore> left, List<IndexScore> right) {
             int leftIndex = 0;
             int rightIndex = 0;
             int listIndex = 0;
 
             while (leftIndex < left.size() && rightIndex < right.size()) {
-                if (left.get(leftIndex).getValue() >= right.get(rightIndex).getValue()) {
+                if (left.get(leftIndex).getScore() >= right.get(rightIndex).getScore()) {
                     list.set(listIndex, left.get(leftIndex));
                     leftIndex++;
                 } else {
@@ -142,15 +142,15 @@ public class PreferenceList {
 
     public static void main(String[] args) {
         PreferenceList pref = new PreferenceList();
-        pref.add(new IndexValue(1, 12.4));
-        pref.add(new IndexValue(2, 62.4));
-        pref.add(new IndexValue(3, 45.9));
+        pref.add(new IndexScore(1, 12.4));
+        pref.add(new IndexScore(2, 62.4));
+        pref.add(new IndexScore(3, 45.9));
         System.out.println(pref);
         pref.sort();
         pref.transfer(100);
         System.out.println(pref);
         //get leastNode
-        IndexValue newNode = new IndexValue(6, 12.4);
+        IndexScore newNode = new IndexScore(6, 12.4);
         pref.add(newNode);
         System.out.println(pref);
         System.out.println(pref.getLeastNode(2, Set.of(1,2,3)));
