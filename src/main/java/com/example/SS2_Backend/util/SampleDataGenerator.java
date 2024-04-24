@@ -19,17 +19,17 @@ public class SampleDataGenerator {
     public static void main(String[] args) {
         // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-                4000,
+                2000,
                 1,
                 false,
-                400,
-                9,
+                1000,
+                3,
                 false,
                 10);
 
         String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4",};
 
-        String f1 = "(P1*W1)^2+P2*W2+P3*W3+P4*W4";
+        String f1 = "(P1*W1)^2+P2*W2+P3*W3+P4*W4+sqrt(P1)";
         String f2 = "P1*W1+P2*W2+P3*W3+P4*W4/20";
         String fnf = "SIGMA{6+S1}/6 + SIGMA{S2/(S2+99)}* 3 + M1*2";
 //		String f1 = "none";
@@ -69,7 +69,7 @@ public class SampleDataGenerator {
         NondominatedPopulation result = new Executor()
                 .withProblem(problem)
                 .withAlgorithm("PESA2")
-                .withMaxEvaluations(1000)
+                .withMaxEvaluations(100)
                 .withProperty("populationSize", 1000)
                 .distributeOnAllCores()
                 .run();

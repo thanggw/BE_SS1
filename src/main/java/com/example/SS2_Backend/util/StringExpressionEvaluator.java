@@ -169,7 +169,7 @@ public class StringExpressionEvaluator {
 		} else {
 			stringValue = Double.toString(value);
 		}
-		stringValue = stringValue.replaceAll("0*$", "");
+		stringValue = stringValue.replaceAll("0*$", "").replaceAll(",",".");
 		return stringValue;
 	}
 
@@ -419,6 +419,10 @@ public class StringExpressionEvaluator {
 	}
 	private static double customLog(double base, double logNumber) {
 		return Math.log(logNumber) / Math.log(base);
+	}
+
+	public static void main(String[] args) {
+		System.out.println(convertToStringWithoutScientificNotation(222222222222.2222222222222));
 	}
 }
 

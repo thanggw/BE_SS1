@@ -448,7 +448,7 @@ public class StableMatchingProblem implements Problem {
 	 * 								   resulted in: NaN / Infinity / - Infinity
 	 * 7. square root : sqrt(expression)
 	 */
-	private double withFitnessFunctionEvaluation(double[] Satisfactions, String fitnessFunction) {
+	private double withFitnessFunctionEvaluation(double[] satisfactions, String fitnessFunction) {
 		StringBuilder tmpSB = new StringBuilder();
 		for (int c = 0; c < fitnessFunction.length(); c++) {
 			char ch = fitnessFunction.charAt(c);
@@ -462,7 +462,7 @@ public class StableMatchingProblem implements Problem {
 						int expressionStartIndex = c + 6;
 						int expressionLength = getFunctionExpressionLength(fitnessFunction, expressionStartIndex);
 						String expression = fitnessFunction.substring(expressionStartIndex, expressionStartIndex+expressionLength);
-						double val = sigmaCalculate(Satisfactions, expression);
+						double val = sigmaCalculate(satisfactions, expression);
 						tmpSB.append(convertToStringWithoutScientificNotation(val));
 						c += expressionLength + 3;
 					}
@@ -478,7 +478,7 @@ public class StableMatchingProblem implements Problem {
 								DoubleStream
 									.of(
 										getSatisfactoryOfASetByDefault(
-											Satisfactions, set)).sum()));
+											satisfactions, set)).sum()));
 					}
 				}
 				c += 3;
@@ -488,7 +488,7 @@ public class StableMatchingProblem implements Problem {
 				if(positionOfM < 0 || positionOfM > this.numberOfIndividual){
 					throw new IllegalArgumentException("invalid position after variable M: " + positionOfM);
 				}
-				double valueOfM = Satisfactions[positionOfM - 1];
+				double valueOfM = satisfactions[positionOfM - 1];
 				tmpSB.append(valueOfM);
 				c += ssLength;
 			} else {
@@ -496,6 +496,7 @@ public class StableMatchingProblem implements Problem {
 					tmpSB.append(ch);
 			}
 		}
+		System.out.println(tmpSB);
 		return new ExpressionBuilder(tmpSB.toString()).build().evaluate();
 	}
 

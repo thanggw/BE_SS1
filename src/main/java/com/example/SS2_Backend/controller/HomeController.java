@@ -5,7 +5,8 @@ import com.example.SS2_Backend.dto.request.StableMatchingProblemDTO;
 import com.example.SS2_Backend.dto.response.Response;
 import com.example.SS2_Backend.service.GameTheorySolver;
 import com.example.SS2_Backend.service.StableMatchingSolver;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,12 +15,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class HomeController {
-
-
 	@Autowired
 	private GameTheorySolver gameTheorySolver;
 	@Autowired
 	private StableMatchingSolver stableMatchingSolver;
+
+	Logger logger = LoggerFactory.getLogger(HomeController.class);
 
 	@PostMapping("/stable-matching-solver")
 	public ResponseEntity<Response> getJson(@RequestBody StableMatchingProblemDTO object) {
