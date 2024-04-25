@@ -26,6 +26,11 @@ public class HomeController {
 
 	Logger logger = LoggerFactory.getLogger(HomeController.class);
 
+	@GetMapping("/")
+	public String home() {
+		return "index";
+	}
+
 	@Async("taskExecutor")
 	@PostMapping("/stable-matching-solver")
 	public CompletableFuture<ResponseEntity<Response>> getJson(@RequestBody StableMatchingProblemDTO object) {
