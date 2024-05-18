@@ -73,8 +73,8 @@ public class StableMatchingSolver {
 			matchingSolution.setIndividuals(problem.getIndividuals());
 
 			System.out.println("[API] RESPOND TO FRONT_END:");
-			System.out.println(matchingSolution);
-			System.out.println();
+			System.out.println(matchingSolution.getMatches());
+			//System.out.println();
 			return ResponseEntity.ok(
 			    Response.builder()
 			        .status(200)
