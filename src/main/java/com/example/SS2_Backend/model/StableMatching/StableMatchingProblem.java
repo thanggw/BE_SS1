@@ -71,15 +71,6 @@ public class StableMatchingProblem implements Problem {
 	 @var NumberOfProperties is the size of
 	 @var PropertiesName array
 	 */
-<<<<<<< Updated upstream
-	@Getter
-	private int numberOfProperties;
-	private String[] PropertiesName;
-=======
-	//@Getter
-	//private int numberOfProperties;
-	//private int[] capacities;
->>>>>>> Stashed changes
 	@Getter
 	private String evaluateFunctionForSet1;
 	@Getter
@@ -178,28 +169,7 @@ public class StableMatchingProblem implements Problem {
 
 
 
-<<<<<<< Updated upstream
-	public int getNumberOfSet0(){
-		int c = 0;
-		for(int i = 0; i < this.numberOfIndividual; i++){
-			if (individuals.get(i).getIndividualSet() == 0){
-				c++;
-			}else{
-				break;
-			}
-		}
-		return c;
-	}
 
-	public void setAllPropertyNames(String[] allPropertyNames) {
-		this.PropertiesName = allPropertyNames;
-	}
-=======
-
-//	public void setAllPropertyNames(String[] allPropertyNames) {
-//		this.PropertiesName = allPropertyNames;
-//	}
->>>>>>> Stashed changes
 
 	/**
 	 * MOEA Framework Problem Implementations
@@ -278,14 +248,9 @@ public class StableMatchingProblem implements Problem {
 			a = preferencesProvider.getPreferenceListByFunction(index);
 		}
 		// Sort: Individuals with higher score than others sit on the top of the List
-<<<<<<< Updated upstream
-		a.sort();
-		a.transfer(this.numberOfIndividual);
-=======
 		//a.sort();
 		//temporary solution for CPU performance
 		//a.transfer(this.numberOfIndividual);
->>>>>>> Stashed changes
 		// return Sorted list
 		return a;
 	}
@@ -330,11 +295,7 @@ public class StableMatchingProblem implements Problem {
 			//Loop through LeftNode's preference list to find a Match
 			for (int i = 0; i < nodePreference.size(); i++) {
 				//Next Match (RightNode) is found on the list
-<<<<<<< Updated upstream
-				int preferNode = NodePreference.getByIndex(i).getIndividualIndex();
-=======
 				int preferNode = nodePreference.getIndexByPosition(i);
->>>>>>> Stashed changes
 				//System.out.println(Node + " Prefer : " + preferNode);
 				if (matches.isAlreadyMatch(preferNode, newNode)) {
 					//System.out.println(Node + " is already match with " + preferNode);
@@ -386,17 +347,9 @@ public class StableMatchingProblem implements Problem {
 	// Stable Matching Algorithm Component: isPreferredOver
 	private boolean isPreferredOver(int newNode, int currentNode, int SelectorNode) {
 		PreferenceList preferenceOfSelectorNode = preferenceLists.get(SelectorNode);
-		double scoreOfNewNode = preferenceOfSelectorNode.getScoreByIndex(newNode);
-		double scoreOfCurrentNode = preferenceOfSelectorNode.getScoreByIndex(currentNode);
-		return scoreOfNewNode > scoreOfCurrentNode;
+		return preferenceOfSelectorNode.isScoreGreater(newNode, currentNode);
 	}
 
-<<<<<<< Updated upstream
-	// return true if TargetNode is the last choice of Loser
-	private int LastChoice(int loser) {
-		PreferenceList pref = preferenceLists.get(loser);
-		return pref.getByIndex(pref.size() - 1).getIndividualIndex();
-=======
 	/**
 	 *
 	 * @param target - The index of the individual whose last choice is to be found
@@ -405,7 +358,6 @@ public class StableMatchingProblem implements Problem {
 	private int getLastChoiceOf(int target) {
 		PreferenceList pref = preferenceLists.get(target);
 		return pref.getIndexByPosition(pref.size() - 1);
->>>>>>> Stashed changes
 	}
 
 //	private int Compete(int selectorNode, int newNode, Integer[] occupiedNodes) {
@@ -594,7 +546,7 @@ public class StableMatchingProblem implements Problem {
 			PreferenceList ofInd = preferenceLists.get(i);
 			Set<Integer> SetMatches = matches.getSet(i);
 			for (int x : SetMatches) {
-				setScore += ofInd.getIndexValueByKey(x).getScore();
+				setScore += ofInd.getScoreByIndex(x);
 			}
 			satisfactions[i] = setScore;
 		}

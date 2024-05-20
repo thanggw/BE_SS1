@@ -71,16 +71,9 @@ public class StableMatchingSolver {
 
 			MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
 			matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results.get(0).getAttribute("matches")));
-			matchingSolution.setPreferences(StableMatchingProblem.getPreferenceLists());
+			matchingSolution.setPreferences(problem.getPreferenceLists());
 			matchingSolution.setIndividuals(problem.getIndividuals().getIndividuals());
 
-<<<<<<< Updated upstream
-			System.out.println("[API] RESPOND TO FRONT_END:");
-			System.out.println(matchingSolution.getMatches());
-			//System.out.println();
-=======
-			//System.out.println(matchingSolution.getMatches());
->>>>>>> Stashed changes
 			return ResponseEntity.ok(
 			    Response.builder()
 			        .status(200)

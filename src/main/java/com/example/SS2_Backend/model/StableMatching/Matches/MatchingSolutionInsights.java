@@ -18,8 +18,4 @@ public class MatchingSolutionInsights {
     Map<String, List<Double>> fitnessValues;
     Map<String, List<Double>> runtimes;
     private ComputerSpecs computerSpecs;
-
-    public ComputerSpecs getComputerSpecs() {
-        return ComputerSpecsUtil.getComputerSpecs();
-    }
 }
