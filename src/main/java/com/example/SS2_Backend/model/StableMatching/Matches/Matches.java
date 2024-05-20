@@ -1,7 +1,6 @@
 package com.example.SS2_Backend.model.StableMatching.Matches;
 
 import lombok.Data;
-import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.*;
@@ -51,17 +50,17 @@ public class Matches implements Serializable {
 		matches.get(target).remove(nodeToRemove);
 	}
 
-	public Set<Integer> getIndividualMatches(int target) {
-		return matches.get(target);
+	public Integer[] getIndividualMatches(int target) {
+		return matches.get(target).toArray(new Integer[0]);
 	}
 
 	public String toString() {
 		int i = 0;
 		for(Set<Integer> matchSet : this.matches){
-			System.out.println("[" + i + "] " + " -> " +  matchSet);
+			System.out.println("[" + i +  " -> " +  matchSet + "] " );
 			i++;
 		}
-		return leftOvers + "\n";
+		return "Left Overs: " + leftOvers + "\n";
 	}
 
 	public static void main(String[] args) {

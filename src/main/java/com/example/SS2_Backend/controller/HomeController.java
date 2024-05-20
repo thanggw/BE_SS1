@@ -24,11 +24,11 @@ public class HomeController {
 	@Autowired
 	private StableMatchingSolver stableMatchingSolver;
 
-	Logger logger = LoggerFactory.getLogger(HomeController.class);
+
 
 	@Async("taskExecutor")
 	@PostMapping("/stable-matching-solver")
-	public CompletableFuture<ResponseEntity<Response>> getJson(@RequestBody StableMatchingProblemDTO object) {
+	public CompletableFuture<ResponseEntity<Response>> solveStableMatching(@RequestBody StableMatchingProblemDTO object) {
 		return CompletableFuture.completedFuture(stableMatchingSolver.solveStableMatching(object));
 	}
 
@@ -45,11 +45,6 @@ public class HomeController {
 //		);
 //	}
 
-
-//    @GetMapping("/stable-matching-result")
-//    public ResponseEntity<Response> getNameList() {
-//        return dataFromWeb;
-//    }
 	@Async("taskExecutor")
 	@PostMapping("/game-theory-solver")
 	public CompletableFuture<ResponseEntity<Response>> solveGameTheory(@RequestBody GameTheoryProblemDTO gameTheoryProblem) {

@@ -92,7 +92,7 @@
 						</exclude>
 					</excludes>
 					<jvmArguments>
-						-Xmx4g
+						-Xmx8G
 					</jvmArguments>
 				</configuration>
 			</plugin>

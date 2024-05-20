@@ -28,22 +28,24 @@ public class StableMatchingSolver {
 	private final SimpMessagingTemplate simpMessagingTemplate;
 
 	private static final Integer RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
+	private static final Integer MATCHING_RUN_COUNT_PER_ALGORITHM = 5;
 
 
 	public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
 
 		try {
+			log.info("[Service] Stable Matching: Load problem...");
+			log.info("[Service] Stable Matching: Building preference list...");
 			StableMatchingProblem problem = new StableMatchingProblem();
 
+			problem.setProblemName(request.getProblemName());
 			problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
 			problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
 			problem.setFitnessFunction(request.getFitnessFunction());
-			problem.setPopulation(request.getIndividuals());
-			problem.setAllPropertyNames(request.getAllPropertyNames());
+			problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
 
-			System.out.println("[Service] Message: Load Problem...");
-			System.out.println(problem);
-			System.out.println("[Service] Message: Problem loaded!");
+
+			log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() + " loaded successfully!");
 
 			long startTime = System.currentTimeMillis();
 
@@ -64,31 +66,35 @@ public class StableMatchingSolver {
 
 			double runtime = ((double) (endTime - startTime) / 1000);
 			runtime = (runtime * 1000.0);
-			System.out.println("[Solution] Runtime: " + runtime + " Millisecond(s).");
+			log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
 			String algorithm = request.getAlgorithm();
 
 			MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
 			matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results.get(0).getAttribute("matches")));
-			matchingSolution.setPreferences(problem.getPreferenceLists());
-			matchingSolution.setIndividuals(problem.getIndividuals());
+			matchingSolution.setPreferences(StableMatchingProblem.getPreferenceLists());
+			matchingSolution.setIndividuals(problem.getIndividuals().getIndividuals());
 
+<<<<<<< Updated upstream
 			System.out.println("[API] RESPOND TO FRONT_END:");
 			System.out.println(matchingSolution.getMatches());
 			//System.out.println();
+=======
+			//System.out.println(matchingSolution.getMatches());
+>>>>>>> Stashed changes
 			return ResponseEntity.ok(
 			    Response.builder()
 			        .status(200)
-			        .message("[Service] Message: Solve stable matching problem successfully!")
+			        .message("[Service] Stable Matching: Solve stable matching problem successfully!")
 			        .data(matchingSolution)
 			        .build()
 			);
 		} catch (Exception e) {
-			log.error("[Service] Message: Error solving stable matching problem: {}", e.getMessage(), e);
+			log.error("[Service] Stable Matching: Error solving stable matching problem: {}", e.getMessage(), e);
 			// Handle exceptions and return an error response
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 			    .body(Response.builder()
 			        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-			        .message("[Service] Message: Error solving stable matching problem.")
+			        .message("[Service] Stable Matching: Error solving stable matching problem.")
 			        .data(null)
 			        .build());
 		}
@@ -147,9 +153,10 @@ public class StableMatchingSolver {
 				    .distributeOn(numberOfCores)
 				    .run();
 			}
+			//log.info("[Service] Stable Matching: Problem solved successfully!");
 			return result;
 		} catch (Exception e) {
-			log.error("[Service] Message: Error solving the problem using MOEA framework: {}", e.getMessage(), e);
+			log.error("[Service] Stable Matching: Error solving the problem {}", e.getMessage(), e);
 			return null;
 		}
 	}
@@ -163,8 +170,7 @@ public class StableMatchingSolver {
 		StableMatchingProblem problem = new StableMatchingProblem();
 		problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
 		problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
-		problem.setPopulation(request.getIndividuals());
-		problem.setAllPropertyNames(request.getAllPropertyNames());
+		problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
 		problem.setFitnessFunction(request.getFitnessFunction());
 
 		MatchingSolutionInsights matchingSolutionInsights = initMatchingSolutionInsights(algorithms);

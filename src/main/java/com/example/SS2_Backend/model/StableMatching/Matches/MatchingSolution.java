@@ -29,15 +29,15 @@ public class MatchingSolution {
     public ComputerSpecs getComputerSpecs() {
         return ComputerSpecsUtil.getComputerSpecs();
     }
-    @JsonDeserialize(contentUsing = IndividualDeserializer.class)
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Pair {
-        private String Individual1Name;
-        private String Individual2Name;
-        private double PairScore;
-    }
+//    @JsonDeserialize(contentUsing = IndividualDeserializer.class)
+//
+//    @Data
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+//    @Builder
+//    public static class Pair {
+//        private String Individual1Name;
+//        private String Individual2Name;
+//        private double PairScore;
+//    }
 }
