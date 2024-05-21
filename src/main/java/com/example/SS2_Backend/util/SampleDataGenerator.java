@@ -19,20 +19,15 @@ public class SampleDataGenerator {
     public static void main(String[] args) {
         // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
-<<<<<<< Updated upstream
+
                 2000,
-=======
                 2,
-                450,
                 false,
+                2,
                 1000,
->>>>>>> Stashed changes
-                1,
                 false,
-                1000,
-                3,
-                false,
-                10);
+                10
+                );
 
         String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4",};
 

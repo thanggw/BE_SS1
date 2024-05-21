@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.DoubleStream;
 
+import lombok.extern.slf4j.Slf4j;
+
 import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 
 /**
@@ -45,7 +47,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
  *     Wish to test this Class? Run <i>com.example.SS2_Backend.util.SampleDataGenerator</i>
  * </pre>
  **/
-
+@Slf4j
 public class StableMatchingProblem implements Problem {
 
 	/*
@@ -187,7 +189,7 @@ public class StableMatchingProblem implements Problem {
 
 	// Evaluate
 	public void evaluate(Solution solution) {
-		System.out.println("[Service] Evaluating ... ");
+		log.info("[Stable Matching] Evaluating ... ");
 		Matches result = StableMatchingExtra(solution.getVariable(0));
 		double[] Satisfactions = getAllSatisfactions(result);
 
@@ -202,8 +204,8 @@ public class StableMatchingProblem implements Problem {
 		solution.setAttribute("matches", result);
 		solution.setObjective(0, -fitnessScore);
 
-		System.out.println("Score: " + convertToStringWithoutScientificNotation(fitnessScore));
-		System.out.println("[Service] End of evaluate");
+		log.info("[Stable Matching] Score: " + convertToStringWithoutScientificNotation(fitnessScore));
+		//System.out.println("[Service] End of evaluate");
 	}
 
 
