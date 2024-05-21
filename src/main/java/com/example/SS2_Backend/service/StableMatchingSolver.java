@@ -7,7 +7,6 @@ import com.example.SS2_Backend.model.StableMatching.*;
 import com.example.SS2_Backend.model.StableMatching.Matches.Matches;
 import com.example.SS2_Backend.model.StableMatching.Matches.MatchingSolution;
 import com.example.SS2_Backend.model.StableMatching.Matches.MatchingSolutionInsights;
-import com.example.SS2_Backend.util.Testing;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
@@ -169,14 +168,14 @@ public class StableMatchingSolver {
 		MatchingSolutionInsights matchingSolutionInsights = initMatchingSolutionInsights(algorithms);
 
 		int runCount = 1;
-		int maxRunCount = algorithms.length * RUN_COUNT_PER_ALGORITHM;
+		int maxRunCount = algorithms.length * MATCHING_RUN_COUNT_PER_ALGORITHM;
 		// solve the problem with different algorithms and then evaluate the performance of the algorithms
 //        log.info("Start benchmarking the algorithms...");
 		simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Start benchmarking the algorithms..."));
 
 		for (String algorithm : algorithms) {
 //            log.info("Running algorithm: " + algorithm + "...");
-			for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
+			for (int i = 0; i < MATCHING_RUN_COUNT_PER_ALGORITHM; i++) {
 				System.out.println("Iteration: " + i);
 				long start = System.currentTimeMillis();
 
@@ -244,12 +243,12 @@ public class StableMatchingSolver {
 
 	private Progress createProgress(String message, Double runtime, Integer runCount, int maxRunCount) {
 		int percent = runCount * 100 / maxRunCount;
-		int minuteLeff = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
+		int minuteLeft = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
 		return Progress.builder()
 		    .inProgress(true) // this object is just to send to the client to show the progress
 		    .message(message)
 		    .runtime(runtime)
-		    .minuteLeft(minuteLeff)
+		    .minuteLeft(minuteLeft)
 		    .percentage(percent)
 		    .build();
 	}
