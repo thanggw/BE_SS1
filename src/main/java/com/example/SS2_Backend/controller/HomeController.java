@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class HomeController {
+	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	@Autowired
 	private GameTheorySolver gameTheorySolver;
 	@Autowired
