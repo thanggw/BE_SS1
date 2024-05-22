@@ -25,8 +25,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class StableMatchingSolver {
 	private final SimpMessagingTemplate simpMessagingTemplate;
-
-	private static final Integer RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
 	private static final Integer MATCHING_RUN_COUNT_PER_ALGORITHM = 10;
 
 
@@ -70,8 +68,8 @@ public class StableMatchingSolver {
 
 			MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
 			matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results.get(0).getAttribute("matches")));
-			matchingSolution.setPreferences(problem.getPreferenceLists());
-			matchingSolution.setIndividuals(problem.getIndividuals().getIndividuals());
+			//matchingSolution.setPreferences(problem.getPreferenceLists());
+			//matchingSolution.setIndividuals(problem.getIndividuals().getIndividuals());
 
 			return ResponseEntity.ok(
 			    Response.builder()

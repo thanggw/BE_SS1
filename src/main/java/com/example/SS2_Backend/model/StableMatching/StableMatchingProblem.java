@@ -103,7 +103,7 @@ public class StableMatchingProblem implements Problem {
 
 
 	private void initializeFields() {
-		this.preferencesProvider = new PreferencesProvider(individuals);
+		this.preferencesProvider = PreferencesProvider.getInstance(individuals);
 		initializePrefProvider();
 		preferenceLists = getPreferences();
 	}

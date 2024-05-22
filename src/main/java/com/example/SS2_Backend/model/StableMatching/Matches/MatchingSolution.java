@@ -23,7 +23,7 @@ public class MatchingSolution {
     private double runtime;
     private ComputerSpecs computerSpecs;
     private String algorithm;
-    private List<PreferenceList> Preferences;
-    private List<Individual> individuals;
+    //private List<PreferenceList> Preferences;
+    //private List<Individual> individuals;
     private double[] setSatisfactions;
 }
