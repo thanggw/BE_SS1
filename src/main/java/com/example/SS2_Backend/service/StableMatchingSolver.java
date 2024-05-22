@@ -7,7 +7,6 @@ import com.example.SS2_Backend.model.StableMatching.*;
 import com.example.SS2_Backend.model.StableMatching.Matches.Matches;
 import com.example.SS2_Backend.model.StableMatching.Matches.MatchingSolution;
 import com.example.SS2_Backend.model.StableMatching.Matches.MatchingSolutionInsights;
-import com.example.SS2_Backend.util.Testing;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.moeaframework.Executor;
@@ -28,22 +27,24 @@ public class StableMatchingSolver {
 	private final SimpMessagingTemplate simpMessagingTemplate;
 
 	private static final Integer RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
+	private static final Integer MATCHING_RUN_COUNT_PER_ALGORITHM = 5;
 
 
 	public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
 
 		try {
+			log.info("[Service] Stable Matching: Load problem...");
+			log.info("[Service] Stable Matching: Building preference list...");
 			StableMatchingProblem problem = new StableMatchingProblem();
 
+			problem.setProblemName(request.getProblemName());
 			problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
 			problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
 			problem.setFitnessFunction(request.getFitnessFunction());
-			problem.setPopulation(request.getIndividuals());
-			problem.setAllPropertyNames(request.getAllPropertyNames());
+			problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
 
-			System.out.println("[Service] Message: Load Problem...");
-			System.out.println(problem);
-			System.out.println("[Service] Message: Problem loaded!");
+
+			log.info("[Service] Stable Matching: Problem: " + problem.getProblemName() + " loaded successfully!");
 
 			long startTime = System.currentTimeMillis();
 
@@ -64,31 +65,28 @@ public class StableMatchingSolver {
 
 			double runtime = ((double) (endTime - startTime) / 1000);
 			runtime = (runtime * 1000.0);
-			System.out.println("[Solution] Runtime: " + runtime + " Millisecond(s).");
+			log.info("[Service] Runtime: " + runtime + " Millisecond(s).");
 			String algorithm = request.getAlgorithm();
 
 			MatchingSolution matchingSolution = formatSolution(algorithm, results, runtime);
 			matchingSolution.setSetSatisfactions(problem.getAllSatisfactions((Matches) results.get(0).getAttribute("matches")));
 			matchingSolution.setPreferences(problem.getPreferenceLists());
-			matchingSolution.setIndividuals(problem.getIndividuals());
+			matchingSolution.setIndividuals(problem.getIndividuals().getIndividuals());
 
-			System.out.println("[API] RESPOND TO FRONT_END:");
-			System.out.println(matchingSolution);
-			System.out.println();
 			return ResponseEntity.ok(
 			    Response.builder()
 			        .status(200)
-			        .message("[Service] Message: Solve stable matching problem successfully!")
+			        .message("[Service] Stable Matching: Solve stable matching problem successfully!")
 			        .data(matchingSolution)
 			        .build()
 			);
 		} catch (Exception e) {
-			log.error("[Service] Message: Error solving stable matching problem: {}", e.getMessage(), e);
+			log.error("[Service] Stable Matching: Error solving stable matching problem: {}", e.getMessage(), e);
 			// Handle exceptions and return an error response
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 			    .body(Response.builder()
 			        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-			        .message("[Service] Message: Error solving stable matching problem.")
+			        .message("[Service] Stable Matching: Error solving stable matching problem.")
 			        .data(null)
 			        .build());
 		}
@@ -147,9 +145,10 @@ public class StableMatchingSolver {
 				    .distributeOn(numberOfCores)
 				    .run();
 			}
+			//log.info("[Service] Stable Matching: Problem solved successfully!");
 			return result;
 		} catch (Exception e) {
-			log.error("[Service] Message: Error solving the problem using MOEA framework: {}", e.getMessage(), e);
+			log.error("[Service] Stable Matching: Error solving the problem {}", e.getMessage(), e);
 			return null;
 		}
 	}
@@ -163,21 +162,20 @@ public class StableMatchingSolver {
 		StableMatchingProblem problem = new StableMatchingProblem();
 		problem.setEvaluateFunctionForSet1(request.getEvaluateFunction()[0]);
 		problem.setEvaluateFunctionForSet2(request.getEvaluateFunction()[1]);
-		problem.setPopulation(request.getIndividuals());
-		problem.setAllPropertyNames(request.getAllPropertyNames());
+		problem.setPopulation(request.getIndividuals(), request.getAllPropertyNames());
 		problem.setFitnessFunction(request.getFitnessFunction());
 
 		MatchingSolutionInsights matchingSolutionInsights = initMatchingSolutionInsights(algorithms);
 
 		int runCount = 1;
-		int maxRunCount = algorithms.length * RUN_COUNT_PER_ALGORITHM;
+		int maxRunCount = algorithms.length * MATCHING_RUN_COUNT_PER_ALGORITHM;
 		// solve the problem with different algorithms and then evaluate the performance of the algorithms
 //        log.info("Start benchmarking the algorithms...");
 		simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Start benchmarking the algorithms..."));
 
 		for (String algorithm : algorithms) {
 //            log.info("Running algorithm: " + algorithm + "...");
-			for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
+			for (int i = 0; i < MATCHING_RUN_COUNT_PER_ALGORITHM; i++) {
 				System.out.println("Iteration: " + i);
 				long start = System.currentTimeMillis();
 
@@ -245,12 +243,12 @@ public class StableMatchingSolver {
 
 	private Progress createProgress(String message, Double runtime, Integer runCount, int maxRunCount) {
 		int percent = runCount * 100 / maxRunCount;
-		int minuteLeff = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
+		int minuteLeft = (int) Math.ceil(((maxRunCount - runCount) * runtime) / 60); // runtime is in seconds
 		return Progress.builder()
 		    .inProgress(true) // this object is just to send to the client to show the progress
 		    .message(message)
 		    .runtime(runtime)
-		    .minuteLeft(minuteLeff)
+		    .minuteLeft(minuteLeft)
 		    .percentage(percent)
 		    .build();
 	}

@@ -46,7 +46,7 @@ public class IndividualDeserializer extends StdDeserializer<Individual> {
 				individual.setProperty(propertyValue, propertyWeight, inputRequirement);
 			}
 		}
-		System.out.println("end custom deserializer");
+//		System.out.println("end custom deserializer");
 		return individual;
 	}
 

@@ -1,17 +1,17 @@
 package com.example.SS2_Backend.model.StableMatching;
 
+import com.example.SS2_Backend.model.StableMatching.Requirement.Requirement;
 import lombok.Getter;
-import lombok.Setter;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.util.*;
 
-import static com.example.SS2_Backend.model.StableMatching.Requirement.DefaultPreferenceEvaluate.getPreferenceListByDefaultt;
-
 public class PreferencesProvider {
-    @Setter
-    private List<Individual> individuals;
+    private final IndividualList individuals;
+    private final int numberOfIndividuals;
+    private final int sizeOf1;
+    private final int sizeOf2;
     @Getter
     private Expression expressionOfSet1;
     @Getter
@@ -19,7 +19,11 @@ public class PreferencesProvider {
     private Map<String, Set<Integer>> variablesOfSet1;
     private Map<String, Set<Integer>> variablesOfSet2;
 
-    public PreferencesProvider() {
+    public PreferencesProvider(IndividualList individuals) {
+        this.individuals = individuals;
+        this.numberOfIndividuals = individuals.getNumberOfIndividual();
+        this.sizeOf1 = individuals.getNumberOfIndividualForSet0();
+        this.sizeOf2 = numberOfIndividuals - sizeOf1;
     }
 
     public void setEvaluateFunctionForSet1(String EvaluateFunction1) {
@@ -56,7 +60,7 @@ public class PreferencesProvider {
                 case 'W':
                 case 'R':
                     String prefix = String.valueOf(ch);
-                    Optional<Integer> nextIdx = getNextIndex(evaluateFunction, c);
+                    Optional<Integer> nextIdx = getNextIndexToken(evaluateFunction, c);
                     if(nextIdx.isPresent()){
                         int idx = nextIdx.get();
                         variables.compute(prefix, (key, value) -> {
@@ -77,7 +81,7 @@ public class PreferencesProvider {
         return variables;
     }
 
-    public Optional<Integer> getNextIndex(String evaluateFunction, int currentIndex) {
+    public Optional<Integer> getNextIndexToken(String evaluateFunction, int currentIndex) {
         int nextIndex = currentIndex + 1;
         while (nextIndex < evaluateFunction.length() && Character.isDigit(evaluateFunction.charAt(nextIndex))) {
             nextIndex++;
@@ -106,19 +110,19 @@ public class PreferencesProvider {
                 switch (key) {
                     case "P":
                         for(Integer value : values) {
-                            double val = individuals.get(idx2).getPropertyValue(value-1);
+                            double val = individuals.getPropertyValueOf(idx2, value-1);
                             variablesValues.put(key + value, val);
                         }
                         break;
                     case "W":
                         for(Integer value : values) {
-                            double val = individuals.get(idx1).getPropertyWeight(value-1);
+                            double val = individuals.getPropertyWeightOf(idx1, value-1);
                             variablesValues.put(key + value, val);
                         }
                         break;
                     case "R":
                         for(Integer value : values){
-                        double val = individuals.get(idx1).getRequirement(value-1).getValueForFunction();
+                        double val = individuals.getRequirementOf(idx1, value-1).getValueForFunction();
                         variablesValues.put(key + value, val);
                         }
                         break;
@@ -130,37 +134,118 @@ public class PreferencesProvider {
         return variablesValues;
     }
 
-    public PreferenceList getPreferenceListByDefault(int index){
-        PreferenceList a;
-        a = getPreferenceListByDefaultt(individuals, index);
-        a.sort();
-        return a;
-    }
-
     public PreferenceList getPreferenceListByFunction(int index) {
-        int set = individuals.get(index).getIndividualSet();
-        PreferenceList a = new PreferenceList();
+        int set = individuals.getSetOf(index);
+        PreferenceList a;
         Expression e;
         if(set == 0){
+            a = new PreferenceList(this.sizeOf2, this.sizeOf1);
             if(this.expressionOfSet1 == null){
                 return this.getPreferenceListByDefault(index);
             }
             e = this.expressionOfSet1;
-        }else{
-            if(this.expressionOfSet2 == null){
-                return this.getPreferenceListByDefault(index);
-            }
-            e = this.expressionOfSet2;
-        }
-        int numberOfIndividual = individuals.size();
-        for (int i = 0; i < numberOfIndividual; i++) {
-            if (individuals.get(i).getIndividualSet() != set) {
-                e.setVariables(set == 0 ? this.getVariableValuesForSet1(index, i) : this.getVariableValuesForSet2(index, i));
+            for (int i = this.sizeOf1; i < numberOfIndividuals; i++) {
+                e.setVariables(this.getVariableValuesForSet1(index, i));
                 double totalScore = e.evaluate();
-                a.add(new PreferenceList.IndexScore(i, totalScore));
+                a.add(totalScore);
+            }
+        }else{
+               a = new PreferenceList(this.sizeOf1, 0);
+                if(this.expressionOfSet2 == null){
+                    return this.getPreferenceListByDefault(index);
+                }
+                e = this.expressionOfSet2;
+                for (int i = 0; i < sizeOf1; i++) {
+                    e.setVariables(this.getVariableValuesForSet2(index, i));
+                    double totalScore = e.evaluate();
+                    a.add(totalScore);
+                }
+        }
+
+        a.sort();
+        return a;
+    }
+
+    public PreferenceList getPreferenceListByDefault(int index) {
+        int set = individuals.getSetOf(index);
+        int numberOfProperties = individuals.getNumberOfProperties();
+        PreferenceList a;
+        if(set == 0){
+            a = new PreferenceList(this.sizeOf2, this.sizeOf1);
+            for (int i = sizeOf1; i < numberOfIndividuals; i++) {
+                    double totalScore = 0;
+                    for (int j = 0; j < numberOfProperties; j++) {
+                        double PropertyValue = individuals.getPropertyValueOf(i, j);
+                        Requirement requirement = individuals.getRequirementOf(index, j);
+                        int PropertyWeight = individuals.getPropertyWeightOf(index, j);
+                        totalScore += getScale(requirement, PropertyValue) * PropertyWeight;
+                    }
+                    // Add
+                    a.add(totalScore);
+            }
+        }else{
+            a = new PreferenceList(this.sizeOf1, 0);
+            for (int i = 0; i < sizeOf1; i++) {
+                    double totalScore = 0;
+                    for (int j = 0; j < numberOfProperties; j++) {
+                        double PropertyValue = individuals.getPropertyValueOf(i, j);
+                        Requirement requirement = individuals.getRequirementOf(index, j);
+                        int PropertyWeight = individuals.getPropertyWeightOf(index, j);
+                        totalScore += getScale(requirement, PropertyValue) * PropertyWeight;
+                    }
+                    // Add
+                    a.add(totalScore);
             }
         }
         a.sort();
         return a;
+    }
+
+    public static double getScale(Requirement requirement, double PropertyValue) {
+        int type = requirement.getType();
+        // Case: Scale
+        if (type == 0) {
+            int TargetValue = requirement.getTargetValue();
+            if (PropertyValue < 0 || PropertyValue > 10) {
+                return 0.0;
+            } else {
+                double Distance = Math.abs(PropertyValue - TargetValue);
+                if(Distance > 7) return 0;
+                if(Distance > 5) return 1;
+                return (10 - Distance) / 10 + 1;
+            }
+            //Case: 1 Bound
+        } else if (type == 1) {
+            double Bound = requirement.getBound();
+            String expression = requirement.getExpression();
+            if (Objects.equals(expression, "++")) {
+                if (PropertyValue < Bound) {
+                    return 0.0;
+                } else {
+                    if(Bound == 0) return 2.0;
+                    double distance = Math.abs(PropertyValue - Bound);
+                    return (Bound + distance) / Bound;
+                }
+            } else {
+                if (PropertyValue > Bound) {
+                    return 0.0;
+                } else {
+                    if(Bound == 0) return  2.0;
+                    double distance = Math.abs(PropertyValue - Bound);
+                    return (Bound + distance) / Bound;
+                }
+            }
+            //Case: 2 Bounds
+        } else {
+            double lowerBound = requirement.getLowerBound();
+            double upperBound = requirement.getUpperBound();
+            if (PropertyValue < lowerBound || PropertyValue > upperBound || lowerBound == upperBound) {
+                return 0.0;
+            }else{
+                double diff = Math.abs(upperBound - lowerBound)/2;
+                double distance = Math.abs(((lowerBound+upperBound)/2) -PropertyValue);
+                return (diff-distance)/diff + 1;
+            }
+        }
     }
 }

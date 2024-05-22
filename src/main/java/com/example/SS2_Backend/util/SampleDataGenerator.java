@@ -19,30 +19,31 @@ public class SampleDataGenerator {
     public static void main(String[] args) {
         // Generate Individuals data Randomly
         ArrayList<Individual> individuals = generateSampleIndividualsWithCapacity(
+
                 2000,
-                1,
+                2,
                 false,
+                2,
                 1000,
-                3,
                 false,
-                10);
+                10
+                );
 
         String[] propNames = {"Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4", "Prop1", "Prop2", "Prop3", "Prop4",};
 
-        String f1 = "(P1*W1)^2+P2*W2+P3*W3+P4*W4+sqrt(P1)";
-        String f2 = "P1*W1+P2*W2+P3*W3+P4*W4/20";
-        String fnf = "SIGMA{6+S1}/6 + SIGMA{S2/(S2+99)}* 3 + M1*2";
-//		String f1 = "none";
-//		String f2 = "none";
-//		String fnf = "none";
+//        String f1 = "(P1*W1)^2+P2*W2+P3*W3+P4*W4+sqrt(P1)";
+//        String f2 = "P1*W1+P2*W2+P3*W3+P4*W4/20";
+//        String fnf = "SIGMA{6+S1}/6 + SIGMA{S2/(S2+99)}* 3 + M1*2";
+		String f1 = "none";
+		String f2 = "none";
+		String fnf = "none";
 
         // Create an Instance of StableMatchingProblem class with randomly generated data
         StableMatchingProblem problem = new StableMatchingProblem();
         problem.setEvaluateFunctionForSet1(f1);
         problem.setEvaluateFunctionForSet2(f2);
         problem.setFitnessFunction(fnf);
-        problem.setPopulation(individuals);
-        problem.setAllPropertyNames(propNames);
+        problem.setPopulation(individuals, propNames);
 
         // Print the whole Populations
         System.out.println(
@@ -51,13 +52,7 @@ public class SampleDataGenerator {
         problem.printIndividuals();
 
         // Number of Individuals inside this problem
-        System.out.println("Number Of Individual: " + problem.getNumberOfIndividual());
-
-        // Preference List Produced by Algorithm
-        System.out.println(
-                "\n[ Preference List Produced By the Program ]\n"
-        );
-        System.out.println(problem.printPreferenceLists());
+        System.out.println("Number Of Individual: " + problem.getIndividuals().getNumberOfIndividual());
 
         System.out.println(
                 "\n[ Algorithm Output Solution ]\n"
@@ -78,17 +73,23 @@ public class SampleDataGenerator {
         runtime = Math.round(runtime * 100.0) / 100.0;
 
         for (Solution solution : result) {
+            Matches matches = (Matches) solution.getAttribute("matches");
+            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
+
             System.out.println("Randomized Individuals Input Order (by MOEA): " + solution.getVariable(0).toString());
             // Turn Solution:Attribute(Serializable Object) to Matches:"matches"(Instance of Matches Class)
-            Matches matches = (Matches) solution.getAttribute("matches");
             // Prints matches
-            System.out.println("Output Matches (by Gale Shapley):\n" + matches.toString());
             // Prints fitness score of this Solution
             System.out.println("Fitness Score: " + -solution.getObjective(0));
             // Testing
-            Testing tester = new Testing(matches, problem.getNumberOfIndividual(), problem.getCapacities());
+            Testing tester = new Testing(matches, problem.getIndividuals().getNumberOfIndividual(), problem.getIndividuals().getCapacities());
             System.out.println("Solution has duplicate individual? : " + tester.hasDuplicate());
         }
+        // Preference List Produced by Algorithm
+//        System.out.println(
+//                "\n[ Preference List Produced By the Program ]\n"
+//        );
+//        System.out.println(problem.printPreferenceLists());
         System.out.println("\nExecution time: " + runtime + " Second(s) with Algorithm: " + "PESA2");
 //        System.out.println(problem);
     }
