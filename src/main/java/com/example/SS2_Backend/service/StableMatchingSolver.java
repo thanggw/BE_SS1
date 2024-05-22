@@ -27,7 +27,7 @@ public class StableMatchingSolver {
 	private final SimpMessagingTemplate simpMessagingTemplate;
 
 	private static final Integer RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
-	private static final Integer MATCHING_RUN_COUNT_PER_ALGORITHM = 5;
+	private static final Integer MATCHING_RUN_COUNT_PER_ALGORITHM = 10;
 
 
 	public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
@@ -194,7 +194,7 @@ public class StableMatchingSolver {
 				double fitnessValue = getFitnessValue(results);
 
 				// send the progress to the client
-				String message = "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/" + RUN_COUNT_PER_ALGORITHM;
+				String message = "Algorithm " + algorithm + " finished iteration: #" + (i + 1) + "/" + MATCHING_RUN_COUNT_PER_ALGORITHM;
 				Progress progress = createProgress(message, runtime, runCount, maxRunCount);
 				System.out.println(progress);
 				simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", progress);
