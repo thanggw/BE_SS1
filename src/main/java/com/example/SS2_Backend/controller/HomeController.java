@@ -19,12 +19,18 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/api")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class HomeController {
+	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	@Autowired
 	private GameTheorySolver gameTheorySolver;
 	@Autowired
 	private StableMatchingSolver stableMatchingSolver;
 
 
+
+	@GetMapping("/")
+	public String home() {
+		return "index";
+	}
 
 	@Async("taskExecutor")
 	@PostMapping("/stable-matching-solver")
@@ -33,17 +39,17 @@ public class HomeController {
 	}
 
 
-//	@Async("taskExecutor")
-//	@GetMapping("/test")
-//	public CompletableFuture<ResponseEntity<Set<String>>> test() throws InterruptedException {
-//		logger.info("Test Called");
-//		Thread.sleep(5000);
-//		return CompletableFuture.completedFuture(
-//				ResponseEntity.ok(Set.of(
-//						"Tst", "Test", "Test1", "Test2", "Test3", "Test4"
-//				))
-//		);
-//	}
+	@Async("taskExecutor")
+	@GetMapping("/test")
+	public CompletableFuture<ResponseEntity<Set<String>>> test() throws InterruptedException {
+		logger.info("Test Called");
+		//Thread.sleep(5000);
+		return CompletableFuture.completedFuture(
+				ResponseEntity.ok(Set.of(
+						"Tst", "Test", "Test1", "Test2", "Test3", "Test4"
+				))
+		);
+	}
 
 	@Async("taskExecutor")
 	@PostMapping("/game-theory-solver")
