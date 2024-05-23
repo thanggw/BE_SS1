@@ -27,7 +27,7 @@ public class StableMatchingSolver {
 	private final SimpMessagingTemplate simpMessagingTemplate;
 
 	private static final Integer RUN_COUNT_PER_ALGORITHM = 10; // for insight running, each algorithm will be run for 10 times
-	private static final Integer MATCHING_RUN_COUNT_PER_ALGORITHM = 5;
+	//private static final Integer MATCHING_RUN_COUNT_PER_ALGORITHM = 10;
 
 
 	public ResponseEntity<Response> solveStableMatching(StableMatchingProblemDTO request) {
@@ -168,14 +168,14 @@ public class StableMatchingSolver {
 		MatchingSolutionInsights matchingSolutionInsights = initMatchingSolutionInsights(algorithms);
 
 		int runCount = 1;
-		int maxRunCount = algorithms.length * MATCHING_RUN_COUNT_PER_ALGORITHM;
+		int maxRunCount = algorithms.length * RUN_COUNT_PER_ALGORITHM;
 		// solve the problem with different algorithms and then evaluate the performance of the algorithms
 //        log.info("Start benchmarking the algorithms...");
 		simpMessagingTemplate.convertAndSendToUser(sessionCode, "/progress", createProgressMessage("Start benchmarking the algorithms..."));
 
 		for (String algorithm : algorithms) {
 //            log.info("Running algorithm: " + algorithm + "...");
-			for (int i = 0; i < MATCHING_RUN_COUNT_PER_ALGORITHM; i++) {
+			for (int i = 0; i < RUN_COUNT_PER_ALGORITHM; i++) {
 				System.out.println("Iteration: " + i);
 				long start = System.currentTimeMillis();
 
