@@ -20,7 +20,7 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
 
 /**
  * <p>
- *     Advanced Stable Matching Problem (Many to Many)
+ *     Advanced Stable Matching Problem Class (Many to Many)
  * </p>
  * <p>
  *     Problem properties:
@@ -49,30 +49,9 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
  **/
 @Slf4j
 public class StableMatchingProblem implements Problem {
-
-	/*
-	Storing Data of the Whole population as an array[object1, object2, ...]
-	 */
 	@Getter
 	private IndividualList individuals;
-	//@Getter
-	/*
-	Number of objects that must be matched
-	 */
-	//private int numberOfIndividual;
-	/**
-	Number of objects in the first set
-	We accumulate number of the other set by
-	@var numberOfIndividual -
-	 @var numberOfIndividualOfSet0
-	 */
-	//@Getter
-	//private int numberOfIndividualOfSet0;
-	/**
-	 Properties name eg: person[age, salary, height, ...]
-	 @var NumberOfProperties is the size of
-	 @var PropertiesName array
-	 */
+
 	@Getter
 	private String evaluateFunctionForSet1;
 	@Getter
@@ -92,6 +71,8 @@ public class StableMatchingProblem implements Problem {
 	@Setter
 	private String problemName;
 
+	private static final List<String> validEvaluateFunctionKeywords = Arrays.asList("P", "W", "R");
+
 	/**
 	 * first setter for the class
 	 * @param individuals array of individual Objects
@@ -100,7 +81,6 @@ public class StableMatchingProblem implements Problem {
 		this.individuals = new IndividualList(individuals, propertiesNames);
 		initializeFields();
 	}
-
 
 	private void initializeFields() {
 		this.preferencesProvider = new PreferencesProvider(individuals);
@@ -120,10 +100,10 @@ public class StableMatchingProblem implements Problem {
 	//No Args/Default Constructor
 	public StableMatchingProblem() {
 	}
-	//Args constructor
-//	public StableMatchingProblem(ArrayList<Individual> individuals){
-//		setPopulation(individuals);
-//	}
+
+	private boolean isValidEvaluateFunction(String function) {
+		return StableMatchingProblem.validEvaluateFunctionKeywords.stream().anyMatch(function::contains);
+	}
 
 	/**
 	 * Sets the evaluation function for Set 1 and checks its validity.
@@ -136,7 +116,7 @@ public class StableMatchingProblem implements Problem {
 	 *                                It will be validated to contain "P" or "M".
 	 */
 	public void setEvaluateFunctionForSet1(String evaluateFunctionForSet1) {
-		if(evaluateFunctionForSet1.contains("p") || evaluateFunctionForSet1.contains("w") || evaluateFunctionForSet1.contains("r")) {
+		if (isValidEvaluateFunction(evaluateFunctionForSet1)) {
 			this.f1Status = true;
 			this.evaluateFunctionForSet1 = evaluateFunctionForSet1;
 		}
@@ -146,7 +126,7 @@ public class StableMatchingProblem implements Problem {
 	 * @param evaluateFunctionForSet2 Input function for Set 2 evaluate Set 1
 	 */
 	public void setEvaluateFunctionForSet2(String evaluateFunctionForSet2) {
-		if(evaluateFunctionForSet2.contains("p") || evaluateFunctionForSet2.contains("w") || evaluateFunctionForSet2.contains("r")) {
+		if (isValidEvaluateFunction(evaluateFunctionForSet2)) {
 			this.f2Status = true;
 			this.evaluateFunctionForSet2 = evaluateFunctionForSet2;
 		}
@@ -169,12 +149,8 @@ public class StableMatchingProblem implements Problem {
 		}
 	}
 
-
-
-
-
 	/**
-	 * MOEA Framework Problem Implementations
+	 * MOEA Framework Problem Class implementations
 	 */
 
 	//Solution Definition
@@ -189,10 +165,9 @@ public class StableMatchingProblem implements Problem {
 
 	// Evaluate
 	public void evaluate(Solution solution) {
-		log.info("[Stable Matching] Evaluating ... ");
+		log.info("Evaluating ... "); // Start matching & collect result
 		Matches result = StableMatchingExtra(solution.getVariable(0));
-		double[] Satisfactions = getAllSatisfactions(result);
-
+		double[] Satisfactions = getAllSatisfactions(result); // Get all satisfactions
 		double fitnessScore;
 		if (!this.fnfStatus) {
 			fitnessScore = defaultFitnessEvaluation(Satisfactions);
@@ -200,15 +175,10 @@ public class StableMatchingProblem implements Problem {
 			String fnf = this.fitnessFunction.trim();
 			fitnessScore = withFitnessFunctionEvaluation(Satisfactions, fnf);
 		}
-
 		solution.setAttribute("matches", result);
 		solution.setObjective(0, -fitnessScore);
-
-		log.info("[Stable Matching] Score: " + convertToStringWithoutScientificNotation(fitnessScore));
-		//System.out.println("[Service] End of evaluate");
+        log.info("Score: {}", convertToStringWithoutScientificNotation(fitnessScore));
 	}
-
-
 
 	@Override
 	public String getName() {
@@ -235,13 +205,6 @@ public class StableMatchingProblem implements Problem {
 	/**
 	 * Extra Methods for  Stable Matching Problem
 	 */
-
-	/*
-	 * After Matching Gets
-	 */
-	/*
-	 * Evaluate Methods
-	 */
 	public PreferenceList getPreferenceOfIndividual(int index) {
 		PreferenceList a;
 		if(!f1Status && !f2Status){
@@ -249,11 +212,6 @@ public class StableMatchingProblem implements Problem {
 		}else{
 			a = preferencesProvider.getPreferenceListByFunction(index);
 		}
-		// Sort: Individuals with higher score than others sit on the top of the List
-		//a.sort();
-		//temporary solution for CPU performance
-		//a.transfer(this.numberOfIndividual);
-		// return Sorted list
 		return a;
 	}
 	// Add to a complete List
@@ -316,7 +274,7 @@ public class StableMatchingProblem implements Problem {
 					//Loser will be the return value
 					//System.out.println(preferNode + " is full! Begin making a Compete game involve: " + Node + " ..." );
 
-					int Loser = getLoser(preferNode, newNode, matches.getIndividualMatches(preferNode));
+					int Loser = getLeastScoreNode(preferNode, newNode, matches.getIndividualMatches(preferNode));
 
 					//If RightNode is the LastChoice of Loser -> then
 					// Loser will be terminated and Saved in Matches.LeftOvers Container
@@ -362,21 +320,7 @@ public class StableMatchingProblem implements Problem {
 		return pref.getIndexByPosition(pref.size() - 1);
 	}
 
-//	private int Compete(int selectorNode, int newNode, Integer[] occupiedNodes) {
-//		PreferenceList prefOfSelectorNode = preferenceLists.get(selectorNode);
-//		if (individuals.getCapacityOf(selectorNode) == 1) {
-//			int currentNode = occupiedNodes[0];
-//			if (isPreferredOver(newNode, currentNode, selectorNode)) {
-//				return currentNode;
-//			} else {
-//				return newNode;
-//			}
-//		} else {
-//			return prefOfSelectorNode.getLeastNode(newNode, occupiedNodes);
-//		}
-//	}
-
-	private int getLoser(int selectorNode, int newNode, Integer[] occupiedNodes){
+	private int getLeastScoreNode(int selectorNode, int newNode, Integer[] occupiedNodes){
 		PreferenceList prefOfSelectorNode = preferenceLists.get(selectorNode);
 		if (individuals.getCapacityOf(selectorNode) == 1) {
 			int currentNode = occupiedNodes[0];
@@ -427,7 +371,7 @@ public class StableMatchingProblem implements Problem {
 						throw new RuntimeException("Missing '{' after Sigma function");
 					}else{
 						int expressionStartIndex = c + 6;
-						int expressionLength = getFunctionExpressionLength(fitnessFunction, expressionStartIndex);
+						int expressionLength = getSigmaFunctionExpressionLength(fitnessFunction, expressionStartIndex);
 						String expression = fitnessFunction.substring(expressionStartIndex, expressionStartIndex+expressionLength);
 						double val = sigmaCalculate(satisfactions, expression);
 						tmpSB.append(convertToStringWithoutScientificNotation(val));
@@ -468,7 +412,7 @@ public class StableMatchingProblem implements Problem {
 	}
 
 	/**
-	 * @param Satisfactions - Double array contains satisfactions of the whole population sequentially (0, 1, 2, ... , n)
+	 * @param satisfactions - Double array contains satisfactions of the whole population sequentially (0, 1, 2, ... , n)
 	 * @param expression - Mathematical String that Express how each of the value calculated. Example: S0/2, S1^3
 	 *  <i>
 	 *        Cases:
@@ -483,7 +427,7 @@ public class StableMatchingProblem implements Problem {
 	 *  </i>
 	 * @return double value - Sum of satisfactions of the whole set sequentially
 	 */
-	private double sigmaCalculate(double[] Satisfactions, String expression){
+	private double sigmaCalculate(double[] satisfactions, String expression){
 		System.out.println("sigma calculating...");
 		double[] streamValue = null;
 		String regex = null;
@@ -493,11 +437,11 @@ public class StableMatchingProblem implements Problem {
 				char set = expression.charAt(i + 1);
 				switch (set) {
 					case '1':
-						streamValue = getSatisfactoryOfASetByDefault(Satisfactions, 0);
+						streamValue = getSatisfactoryOfASetByDefault(satisfactions, 0);
 						regex = "S1";
 						break;
 					case '2':
-						streamValue = getSatisfactoryOfASetByDefault(Satisfactions, 1);
+						streamValue = getSatisfactoryOfASetByDefault(satisfactions, 1);
 						regex = "S2";
 						break;
 					default: throw new IllegalArgumentException("Illegal value after S regex in sigma calculation: " + expression);
@@ -519,7 +463,7 @@ public class StableMatchingProblem implements Problem {
 		    .map(calculator)
 		    .sum();
 	}
-	private static int getFunctionExpressionLength(String function, int startIndex){
+	private static int getSigmaFunctionExpressionLength(String function, int startIndex){
 		int num = 0;
 		for(int i = startIndex; i < function.charAt(i); i++){
 			char ch = function.charAt(i);
@@ -531,6 +475,7 @@ public class StableMatchingProblem implements Problem {
 		}
 		return num;
 	}
+
 	public double[] getAllSatisfactions(Matches matches){
 		double[] satisfactions = new double[individuals.getNumberOfIndividual()];
 		int numSet0 = individuals.getNumberOfIndividualForSet0();
@@ -578,25 +523,24 @@ public class StableMatchingProblem implements Problem {
 		this.individuals.print();
 	}
 
+	@Override
 	public String toString() {
-		System.out.println("Problem: " + "\n");
-		System.out.println("Num of Individuals: " + this.individuals.getNumberOfIndividual());
-         String sb = this.individuals.toString();
-		return "\nNumber Of Properties: " + individuals.getNumberOfProperties() +
-		    "\nFitness Function: " + fitnessFunction +
-		    "\nEvaluate Function For Set 1: " + this.evaluateFunctionForSet1 +
-		    "\nEvaluate Function For Set 2: " + this.evaluateFunctionForSet2 +
-		    "\n" + sb;
+		return "Problem: " + "\n" +
+				"Num of Individuals: " + this.individuals.getNumberOfIndividual() +
+				"\nNumber Of Properties: " + individuals.getNumberOfProperties() +
+				"\nFitness Function: " + fitnessFunction +
+				"\nEvaluate Function For Set 1: " + this.evaluateFunctionForSet1 +
+				"\nEvaluate Function For Set 2: " + this.evaluateFunctionForSet2 +
+				"\n" + individuals;
 	}
 
-	public String printPreferenceLists() {
+	public String getPreferenceListsString() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < preferenceLists.size(); i++) {
-			sb.append("Individual ").append(i).append(" : ");
+			sb.append("ID ").append(i).append(" : ");
 			sb.append(preferenceLists.get(i).toString());
 			sb.append("\n");
 		}
 		return sb.toString();
 	}
-
 }
