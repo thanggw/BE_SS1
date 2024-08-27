@@ -3,8 +3,10 @@ package com.example.SS2_Backend.model.StableMatching.Requirement;
 import lombok.Getter;
 
 @Getter
-public class ScaleTargetRequirement extends Requirement{
+public class ScaleTargetRequirement extends Requirement {
+
     private final int targetValue;
+
     public ScaleTargetRequirement(int targetValue) {
         super(0);
         this.targetValue = targetValue;
@@ -19,4 +21,5 @@ public class ScaleTargetRequirement extends Requirement{
     public String toString() {
         return "[" + this.targetValue + "]";
     }
+
 }

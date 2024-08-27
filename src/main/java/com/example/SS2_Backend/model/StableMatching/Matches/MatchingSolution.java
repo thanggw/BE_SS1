@@ -18,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class MatchingSolution {
+
     private Matches matches;
     private double fitnessValue;
     private double runtime;
@@ -26,4 +27,5 @@ public class MatchingSolution {
     //private List<PreferenceList> Preferences;
     //private List<Individual> individuals;
     private double[] setSatisfactions;
+
 }

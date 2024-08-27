@@ -15,7 +15,9 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class MatchingSolutionInsights {
+
     Map<String, List<Double>> fitnessValues;
     Map<String, List<Double>> runtimes;
     private ComputerSpecs computerSpecs;
+
 }

@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.model.StableMatching;
 
 import lombok.Getter;
+
 import static com.example.SS2_Backend.util.Utils.formatDouble;
 
 /**
@@ -9,15 +10,17 @@ import static com.example.SS2_Backend.util.Utils.formatDouble;
  */
 @Getter
 public class PreferenceList {
+
     private final double[] scores;
     private final int[] positions;
     private int current;
     private final int padding;
+
     public PreferenceList(int size, int padding) {
-            scores = new double[size];
-            positions = new int[size];
-            current = 0;
-            this.padding = padding;
+        scores = new double[size];
+        positions = new int[size];
+        current = 0;
+        this.padding = padding;
     }
 
     public int size() {
@@ -26,7 +29,6 @@ public class PreferenceList {
 
 
     //public boolean isEmpty() {return this.preferenceList.isEmpty();}
-
 
 
     public int getLeastNode(int newNode, Integer[] currentNodes) {
@@ -40,8 +42,6 @@ public class PreferenceList {
     }
 
 
-
-
     public boolean isScoreGreater(int node, int nodeToCompare) {
         return this.scores[node - this.padding] > this.scores[nodeToCompare - this.padding];
     }
@@ -51,10 +51,10 @@ public class PreferenceList {
      * @param position position (rank best <-- 0, 1, 2, 3, ... --> worst) on the preference list
      * @return unique identifier of the competitor instance that holds the respective position on the list
      */
-    public int getIndexByPosition(int position) throws ArrayIndexOutOfBoundsException{
-        try{
+    public int getIndexByPosition(int position) throws ArrayIndexOutOfBoundsException {
+        try {
             return positions[position] + this.padding;
-        }catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             System.err.println("Position " + position + " not found: " + e.getMessage());
             return -1;
         }
@@ -62,10 +62,9 @@ public class PreferenceList {
 
 
     /**
-     *
      * @param score score of the respective competitor
-     *
-     * this method registers new competitor instance to the preference list (OrderedMap)
+     *              <p>
+     *              this method registers new competitor instance to the preference list (OrderedMap)
      */
     public void add(double score) {
         this.scores[current] = score;
@@ -139,8 +138,13 @@ public class PreferenceList {
         StringBuilder result = new StringBuilder("{");
         for (int i = 0; i < scores.length; i++) {
             int pos = positions[i];
-            result.append("[").append(pos).append(" -> ").append(formatDouble(scores[pos])).append("]");
-            if(i < scores.length - 1) result.append(", ");
+            result
+                    .append("[")
+                    .append(pos)
+                    .append(" -> ")
+                    .append(formatDouble(scores[pos]))
+                    .append("]");
+            if (i < scores.length - 1) result.append(", ");
         }
         result.append("}");
         return result.toString();
