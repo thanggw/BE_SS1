@@ -1,6 +1,7 @@
 package com.example.SS2_Backend.model.StableMatching;
 
 import com.example.SS2_Backend.model.StableMatching.Matches.Matches;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import net.objecthunter.exp4j.Expression;
@@ -48,31 +49,29 @@ import static com.example.SS2_Backend.util.StringExpressionEvaluator.*;
  * </pre>
  **/
 @Slf4j
+@Data
 public class StableMatchingProblem implements Problem {
 
-    @Getter
     private IndividualList individuals;
 
-    @Getter
     private String evaluateFunctionForSet1;
-    @Getter
+
     private String evaluateFunctionForSet2;
     /**
      * Preference List of each individual/object inside this whole population
      */
-    @Getter
+
     private List<PreferenceList> preferenceLists; // Preference List of each Individual
-    @Getter
+
     private String fitnessFunction; // Evaluate total Score of each Solution set
     private PreferencesProvider preferencesProvider;
     private boolean f1Status = false;
     private boolean f2Status = false;
     private boolean fnfStatus = false;
-    @Getter
-    @Setter
+
     private String problemName;
 
-    private static final List<String> validEvaluateFunctionKeywords = Arrays.asList("P", "W", "R");
+    private static final List<String> VALID_EVALUATE_FUNCTION_KEYWORDS = Arrays.asList("P", "W", "R");
 
     /**
      * first setter for the class
@@ -103,7 +102,7 @@ public class StableMatchingProblem implements Problem {
     }
 
     private boolean isValidEvaluateFunction(String function) {
-        return StableMatchingProblem.validEvaluateFunctionKeywords
+        return StableMatchingProblem.VALID_EVALUATE_FUNCTION_KEYWORDS
                 .stream()
                 .anyMatch(function::contains);
     }
@@ -344,16 +343,14 @@ public class StableMatchingProblem implements Problem {
                 .sum();
     }
 
-    /*
+    /**
      * Fitness Function Grammar:
      * $: i - index of MatchSet in "matches"
      * $: set - value (1 or 2) represent set 1 (0) or set 2 (1)
      * $: S(set) - Sum of all payoff scores of "set" evaluate by opposite set
      * $: M(i) - Value of specific matchSet's satisfaction eg: M1 (satisfactory of Individual no 1, index 0 in "matches")
-     *
      * Supported functions:
      * #: SIGMA{S1} calculate sum of all MatchSet of a belonging set eg: SIGMA{S1}
-     *
      * Supported mathematical calculations:
      *     Name             :    Usage
      * 1. absolute       : abs(expression)
@@ -362,9 +359,9 @@ public class StableMatchingProblem implements Problem {
      * 4. cos                 : cos(expression)
      * 5. tan                : tan(expression)
      * 6. logarithm     : log(expression)(expression) Logarithm calculation requires 2 parameters in two separate curly braces
-     * 								   Default log calculation (with Math.E constant) can be achieved like this: log(e)(expression)
-     * 								   Make sure expression is not negative or the final outcome might be
-     * 								   resulted in: NaN / Infinity / - Infinity
+     * 							   Default log calculation (with Math.E constant) could be achieved like this: log(e)(expression)
+     * 							   Make sure expression is not negative or the final outcome might be
+     * 							   resulted in: NaN / Infinity / - Infinity
      * 7. square root : sqrt(expression)
      */
     private double withFitnessFunctionEvaluation(double[] satisfactions, String fitnessFunction) {

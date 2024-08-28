@@ -34,32 +34,12 @@ public class StableMatchingProblemDTO {
         this.Individuals = individuals;
     }
 
-    public void setPopulationSize(int populationSize) {
-        this.populationSize = populationSize;
-    }
-
-    public void setMaxTime(int maxTime) {
-        this.maxTime = maxTime;
-    }
-
     public Individual getIndividual(int index) {
         return Individuals.get(index);
     }
 
     public int getNumberOfIndividuals(){
         return Individuals.size();
-    }
-
-    public void setGeneration(int generation) {
-        this.generation = generation;
-    }
-
-    public void setAlgorithm(String algorithm) {
-        this.algorithm = algorithm;
-    }
-
-    public void setDistributedCores(String distributedCores) {
-        this.distributedCores = distributedCores;
     }
 
     public String toString() {

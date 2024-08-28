@@ -1,17 +1,10 @@
 package com.example.SS2_Backend.model.StableMatching.Matches;
 
-import com.example.SS2_Backend.dto.request.IndividualDeserializer;
 import com.example.SS2_Backend.dto.response.ComputerSpecs;
-import com.example.SS2_Backend.model.StableMatching.Individual;
-import com.example.SS2_Backend.model.StableMatching.PreferenceList;
-import com.example.SS2_Backend.util.ComputerSpecsUtil;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor

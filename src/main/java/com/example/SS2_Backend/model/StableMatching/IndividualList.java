@@ -34,10 +34,7 @@ public class IndividualList {
             throw new IllegalArgumentException(
                     "Invalid number of individuals, number must be greater or equal to 3 (int) as matching makes no sense");
         }
-        this.numberOfProperties = individuals
-                .get(0)
-                .getProperties()
-                .size();
+        this.numberOfProperties = individuals.get(0).getProperties().size();
         if (numberOfProperties == 0) {
             throw new IllegalArgumentException(
                     "Invalid number of properties, number must be greater than 0 (int) as matching makes no sense");
@@ -51,14 +48,10 @@ public class IndividualList {
         int count = 0;
         int tmpCapacity;
         for (int i = 0; i < this.numberOfIndividual; i++) {
-            tmpCapacity = individuals
-                    .get(i)
-                    .getCapacity();
+            tmpCapacity = individuals.get(i).getCapacity();
             this.capacities[i] = tmpCapacity;
             this.capacities[count] = tmpCapacity;
-            if (individuals
-                    .get(i)
-                    .getIndividualSet() == 0) {
+            if (individuals.get(i).getIndividualSet() == 0) {
                 count++;
             }
         }
@@ -69,9 +62,7 @@ public class IndividualList {
     //}
 
     public int getSetOf(int index) {
-        return this.individuals
-                .get(index)
-                .getIndividualSet();
+        return this.individuals.get(index).getIndividualSet();
     }
 
     /**
@@ -87,15 +78,11 @@ public class IndividualList {
     }
 
     public double getPropertyValueOf(int index, int indexOfProperty) {
-        return individuals
-                .get(index)
-                .getPropertyValue(indexOfProperty);
+        return individuals.get(index).getPropertyValue(indexOfProperty);
     }
 
     public double getPropertyWeightOf(int indexOfObject, int indexOfProperty) {
-        return individuals
-                .get(indexOfObject)
-                .getPropertyWeight(indexOfProperty);
+        return individuals.get(indexOfObject).getPropertyWeight(indexOfProperty);
     }
 
     public void print() {
@@ -109,53 +96,34 @@ public class IndividualList {
         System.out.println("No | Set | Name                | " + propName);
         int width = this.numberOfProperties * 18 + 32;
         String filledString = fillWithChar('-', width);
-        sb
-                .append(filledString)
-                .append("\n");
+        sb.append(filledString).append("\n");
         //content
         for (int i = 0; i < this.numberOfIndividual; i++) {
             //name / set
             sb.append(String.format("%-3d| ", i));
-            sb.append(String.format("%-4d| ",
-                    individuals
-                            .get(i)
-                            .getIndividualSet()));
-            sb.append(String.format("%-20s| ",
-                    individuals
-                            .get(i)
-                            .getIndividualName()));
+            sb.append(String.format("%-4d| ", individuals.get(i).getIndividualSet()));
+            sb.append(String.format("%-20s| ", individuals.get(i).getIndividualName()));
             // prop value
             StringBuilder ss = new StringBuilder();
             for (int j = 0; j < this.numberOfProperties; j++) {
                 ss.append(String.format("%-16s| ", formatDouble(this.getPropertyValueOf(i, j))));
             }
-            sb
-                    .append(ss)
-                    .append("\n");
+            sb.append(ss).append("\n");
             ss.delete(0, sb.length());
             ss.append(String.format("%33s", "Requirement: | "));
             for (int j = 0; j < this.numberOfProperties; j++) {
                 ss.append(String.format("%-16s| ",
-                        this.individuals
-                                .get(i)
-                                .getRequirement(j)
-                                .toString()));
+                        this.individuals.get(i).getRequirement(j).toString()));
             }
-            sb
-                    .append(ss)
-                    .append("\n");
+            sb.append(ss).append("\n");
             ss.delete(0, sb.length());
             ss.append(String.format("%33s", "Weight: | "));
             for (int j = 0; j < this.numberOfProperties; j++) {
                 ss.append(String.format("%-16s| ", this.getPropertyWeightOf(i, j)));
             }
-            sb
-                    .append(ss)
-                    .append("\n");
+            sb.append(ss).append("\n");
         }
-        sb
-                .append(filledString)
-                .append("\n");
+        sb.append(filledString).append("\n");
         System.out.print(sb);
     }
 
@@ -168,9 +136,7 @@ public class IndividualList {
     }
 
     public Requirement getRequirementOf(int idx1, int i) {
-        return this.individuals
-                .get(idx1)
-                .getRequirement(i);
+        return this.individuals.get(idx1).getRequirement(i);
     }
 
 }

@@ -217,14 +217,8 @@ public class StableMatchingSolver {
                 runCount++;
 
                 // add the fitness value and runtime to the insights
-                matchingSolutionInsights
-                        .getFitnessValues()
-                        .get(algorithm)
-                        .add(-fitnessValue);
-                matchingSolutionInsights
-                        .getRuntimes()
-                        .get(algorithm)
-                        .add(runtime);
+                matchingSolutionInsights.getFitnessValues().get(algorithm).add(-fitnessValue);
+                matchingSolutionInsights.getRuntimes().get(algorithm).add(runtime);
             }
 
         }
