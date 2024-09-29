@@ -4,18 +4,18 @@ import java.util.*;
 
 public class TripletStableMatching {
 
-    // Number of elements in each set
+    // Số lượng các cá thể trong mỗi set
     int n;
 
-    // Preference lists for each set
+    // Danh sách ưu tiên cho mỗi set
     Map<Integer, List<int[]>> prefA;
     Map<Integer, List<int[]>> prefB;
     Map<Integer, List<int[]>> prefC;
 
-    // Matching results
-    Map<Integer, int[]> matches; // Maps element in A -> [B, C]
+    // Kết quả ghép nối
+    Map<Integer, int[]> matches; // Mỗi phần tử trong A -> [B, C]
 
-    // Constructor to initialize preference lists and other structures
+    // Constructor để khởi tạo các danh sách ưu tiên và các cấu trúc khác
     public TripletStableMatching(int n, Map<Integer, List<int[]>> prefA, Map<Integer, List<int[]>> prefB, Map<Integer, List<int[]>> prefC) {
         this.n = n;
         this.prefA = prefA;
@@ -42,7 +42,6 @@ public class TripletStableMatching {
         }
         return false; // Nếu không tìm thấy cả B và currentB, mặc định là không đổi
     }
-
 
     // Kiểm tra xem B có thích A hơn ghép nối hiện tại không
     private boolean preferBOverCurrent(int b, int a) {
@@ -78,12 +77,11 @@ public class TripletStableMatching {
         return false;
     }
 
-
-    // Function to check if a triplet (A, B, C) is stable
+    // Hàm để kiểm tra nếu bộ ba (A, B, C) có ổn định không
     private boolean isStable(int a, int b, int c) {
-        // Check if A prefers another pair (B', C') more than (B, C)
+        // Kiểm tra xem A có thích cặp khác (B', C') hơn cặp (B, C) hiện tại hay không
         for (int[] pair : prefA.get(a)) {
-            if (pair[0] == b && pair[1] == c) break; // Current match is acceptable for A
+            if (pair[0] == b && pair[1] == c) break; // Cặp hiện tại phù hợp với A
             int bPrime = pair[0];
             int cPrime = pair[1];
 
@@ -94,21 +92,74 @@ public class TripletStableMatching {
             }
         }
 
-        // Check if B prefers another pair (A', C') more than (A, C)
+        // Kiểm tra xem B có thích cặp khác (A', C') hơn cặp (A, C) không
         for (int[] pair : prefB.get(b)) {
-            if (pair[0] == a && pair[1] == c) break; // Current match is acceptable for B
+            if (pair[0] == a && pair[1] == c) break; // Cặp hiện tại phù hợp với B
             int aPrime = pair[0];
             int cPrime = pair[1];
 
-            // Kiểm tra xem A' hoặc C' có thích B hơn ghép nối hiện tại không
+            // Kiểm tra xem A' có thích B hơn ghép nối hiện tại không
             if (matches.containsKey(aPrime) && preferAOverCurrent(aPrime, b)) {
                 return false; // Không ổn định, vì A' đồng ý thay đổi
             }
         }
 
-        // Trường hợp không có bất ổn, trả về true
+        // Nếu không tìm thấy bất ổn nào, cặp này là ổn định
         return true;
     }
 
+    // Hàm ghép cặp bộ ba
+    public void matchTriplets() {
+        // Tạo danh sách các cá thể chưa ghép cặp từ tập A
+        Queue<Integer> freeA = new LinkedList<>();
+        for (int a = 0; a < n; a++) {
+            freeA.add(a);
+        }
 
+        // Tiến hành ghép nối cho đến khi không còn cá thể tự do trong A
+        while (!freeA.isEmpty()) {
+            int a = freeA.poll(); // Lấy cá thể A đang tự do
+            List<int[]> preferences = prefA.get(a); // Lấy danh sách ưu tiên của A
+
+            // Duyệt qua danh sách ưu tiên của A để tìm cặp (B, C)
+            for (int[] pair : preferences) {
+                int b = pair[0];
+                int c = pair[1];
+
+                // Kiểm tra nếu (a, b, c) là một bộ ba ổn định
+                if (!matches.containsKey(a)) { // Nếu A chưa ghép cặp
+                    if (isStable(a, b, c)) { // Kiểm tra tính ổn định
+                        matches.put(a, new int[]{b, c}); // Lưu cặp ghép
+                        matches.put(b, new int[]{a, c}); // Ghép B với A và C
+                        matches.put(c, new int[]{a, b}); // Ghép C với A và B
+                        break; // Kết thúc vòng lặp nếu tìm được bộ ba
+                    }
+                } else {
+                    // Nếu A đã có ghép cặp, kiểm tra xem có thể thay thế với cặp mới không
+                    int[] currentPair = matches.get(a);
+                    int currentB = currentPair[0];
+                    int currentC = currentPair[1];
+
+                    // Nếu cặp mới (b, c) tốt hơn cặp hiện tại, thay thế
+                    if (preferAOverCurrent(a, b)) {
+                        freeA.add(currentB); // Đưa B hiện tại trở lại danh sách tự do
+                        matches.put(a, new int[]{b, c});
+                        matches.put(b, new int[]{a, c});
+                        matches.put(c, new int[]{a, b});
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // Hàm hiển thị kết quả ghép cặp
+    public void printMatches() {
+        for (Map.Entry<Integer, int[]> entry : matches.entrySet()) {
+            int a = entry.getKey();
+            int b = entry.getValue()[0];
+            int c = entry.getValue()[1];
+            System.out.println("A: " + a + ", B: " + b + ", C: " + c);
+        }
+    }
 }
