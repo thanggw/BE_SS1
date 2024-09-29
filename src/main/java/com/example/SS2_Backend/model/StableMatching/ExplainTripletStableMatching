@@ -1,0 +1,41 @@
+ class TripletStableMatching:
+
+Class TripletStableMatching được xây dựng để giải bài toán Stable Matching cho ba tập hợp (A, B, và C). Nó mở rộng khái niệm ghép nối ổn định từ hai tập hợp sang ba tập hợp, với mục tiêu ghép nối ba cá thể (từ A, B, và C) thành một bộ ba sao cho không có bất kỳ cá thể nào trong A, B, hoặc C muốn thay đổi đối tác hiện tại của mình sang một cá thể khác, dựa trên sở thích của họ.
+
+Các thành phần chính trong class:
+Biến n:
+
+Biến n biểu diễn số lượng cá thể trong mỗi tập hợp A, B, và C. Mỗi tập hợp có n cá thể.
+Danh sách ưu tiên prefA, prefB, và prefC:
+
+prefA, prefB, và prefC là các danh sách ưu tiên cho các cá thể thuộc tập hợp A, B, và C.
+Mỗi cá thể trong A sẽ có một danh sách các cặp (B, C) mà họ thích theo thứ tự ưu tiên, tương tự cho B và C.
+Kết quả ghép nối matches:
+
+matches là một Map dùng để lưu trữ kết quả ghép nối.
+Ví dụ: matches.get(a) sẽ trả về một cặp [b, c], đại diện cho cặp (B, C) mà cá thể A đã được ghép nối.
+Các hàm kiểm tra ưu tiên:
+Hàm preferAOverCurrent(int a, int b):
+
+Kiểm tra xem cá thể A có thích đối tác mới B hơn đối tác hiện tại hay không.
+Nếu cá thể B mới xuất hiện trước đối tác hiện tại trong danh sách ưu tiên của A, hàm sẽ trả về true, ngược lại là false.
+Hàm preferBOverCurrent(int b, int a):
+
+Tương tự, kiểm tra xem cá thể B có thích cá thể A mới hơn đối tác hiện tại không.
+Hàm preferCOverCurrent(int c, int a):
+
+Tương tự như trên, kiểm tra xem cá thể C có thích cá thể A mới hơn đối tác hiện tại không.
+Hàm isStable(int a, int b, int c) - Kiểm tra ghép nối có ổn định hay không:
+Hàm này kiểm tra xem một ghép nối (A, B, C) có thỏa mãn điều kiện ổn định hay không. Để xác định tính ổn định của ghép nối này, ta phải kiểm tra từ cả ba phía: A, B, và C.
+
+Kiểm tra từ phía A:
+
+Duyệt qua danh sách ưu tiên của cá thể A.
+Nếu A thích một cặp khác (B', C') hơn cặp hiện tại (B, C), và cả B' và C' đều đồng ý ghép nối với A (nghĩa là B' và C' cũng thích A hơn đối tác hiện tại của họ), thì ghép nối hiện tại không ổn định.
+Kiểm tra từ phía B:
+
+Tương tự, duyệt qua danh sách ưu tiên của cá thể B.
+Nếu B thích một cặp khác (A', C') hơn cặp hiện tại (A, C), và A' hoặc C' đồng ý ghép nối với B, thì ghép nối không ổn định.
+Trả về kết quả:
+
+Nếu không tìm thấy bất kỳ cặp nào vi phạm điều kiện ổn định từ cả ba phía, hàm trả về true, nghĩa là ghép nối (A, B, C) là ổn định.

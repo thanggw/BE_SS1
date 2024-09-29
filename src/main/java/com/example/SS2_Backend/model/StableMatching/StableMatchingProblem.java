@@ -228,6 +228,58 @@ public class StableMatchingProblem implements Problem {
     }
 
 
+    /**
+     * private Matches StableMatchingExtra(Variable var) {
+     *     Matches matches = new Matches(individuals.getNumberOfIndividual());
+     *     Set<Integer> MatchedNode = new HashSet<>();
+     *     Permutation castVar = (Permutation) var;
+     *     int[] decodeVar = castVar.toArray();
+     *     Queue<Integer> UnMatchedNode = new LinkedList<>();
+     *     for (int val : decodeVar) {
+     *         UnMatchedNode.add(val);
+     *     }
+     *
+     *     while (!UnMatchedNode.isEmpty()) {
+     *         int newNode = UnMatchedNode.poll();
+     *
+     *         if (MatchedNode.contains(newNode)) {
+     *             continue;
+     *         }
+     *
+     *         // Lấy danh sách ưu tiên của newNode
+     *         PreferenceList nodePreference = preferenceLists.get(newNode);
+     *
+     *         for (int i = 0; i < nodePreference.size(); i++) {
+     *             int preferNode1 = nodePreference.getIndexByPosition(i); // Cá thể từ set khác
+     *             for (int j = 0; j < nodePreference.size(); j++) {
+     *                 int preferNode2 = nodePreference.getIndexByPosition(j); // Cá thể từ set còn lại
+     *
+     *                 if (matches.isAlreadyMatch(preferNode1, newNode) || matches.isAlreadyMatch(preferNode2, newNode)) {
+     *                     continue;
+     *                 }
+     *
+     *                 if (!matches.isFull(preferNode1, individuals.getCapacityOf(preferNode1))
+     *                         && !matches.isFull(preferNode2, individuals.getCapacityOf(preferNode2))) {
+     *                     matches.addTripletMatch(preferNode1, preferNode2, newNode);
+     *                     MatchedNode.add(preferNode1);
+     *                     MatchedNode.add(preferNode2);
+     *                     MatchedNode.add(newNode);
+     *                     break;
+     *                 }
+     *             }
+     *         }
+     *     }
+     *     return matches;
+     * }
+     *
+     *
+     *
+     *
+     * @param var
+     * @return
+     */
+
+
     private Matches StableMatchingExtra(Variable var) {
         //Parse Variable
         //System.out.println("parsing");
